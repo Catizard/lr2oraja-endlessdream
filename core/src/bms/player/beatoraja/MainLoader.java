@@ -129,6 +129,13 @@ public class MainLoader extends Application {
 			MainController main = new MainController(bmsPath, config, player, playerMode, songUpdated);
 
 			Lwjgl3ApplicationConfiguration gdxConfig = new Lwjgl3ApplicationConfiguration();
+			// This line is provided for macos-fix, the original issue is mac dropped the OpenGL full support,
+			// according to the document from libgdx, mac machine now only supports OpenGL 3.2 and needs to emulate GL30
+			// to make libgdx work
+			// However, this line may break some old machine which has no OpenGL 3.2 support. It seems that libgdx defaults
+			// to emulate GL20, this version gap might be danger. Should we wrapped this line as an OS related patch?
+			// if (OS is mac) {} or if (support GL3.2) {}?
+			gdxConfig.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2);
 
 			final int w = config.getResolution().width;
 			final int h = config.getResolution().height;
