@@ -52,6 +52,7 @@ public class StreamController {
                         execute(line);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        break;
                     }
                 }
             } catch (Exception e) {
