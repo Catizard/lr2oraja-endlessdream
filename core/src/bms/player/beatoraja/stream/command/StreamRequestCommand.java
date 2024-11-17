@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.logging.Logger;
+
 import bms.player.beatoraja.MessageRenderer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.HashBar;
@@ -139,6 +141,7 @@ public class StreamRequestCommand extends StreamCommand {
                     if (stack.size() != 0) {
                         update();
                     }
+                    Thread.sleep(50);
                 } catch (Exception e) {
                     break;
                 }

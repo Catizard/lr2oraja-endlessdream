@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.MessageRenderer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.stream.command.StreamCommand;
+import bms.player.beatoraja.stream.command.StreamForceRequestCommand;
 import bms.player.beatoraja.stream.command.StreamRequestCommand;
 
 /**
@@ -24,7 +25,10 @@ public class StreamController {
     public StreamController(MusicSelector selector, MessageRenderer notifier) {
         this.selector = selector;
         this.notifier = notifier;
-        commands = new StreamCommand[] { new StreamRequestCommand(this.selector, this.notifier) };
+        commands = new StreamCommand[]{
+                new StreamRequestCommand(this.selector, this.notifier),
+                new StreamForceRequestCommand(this.selector)
+        };
         try {
             pipeBuffer = new BufferedReader(new FileReader("\\\\.\\pipe\\beatoraja"));
             isActive = true;

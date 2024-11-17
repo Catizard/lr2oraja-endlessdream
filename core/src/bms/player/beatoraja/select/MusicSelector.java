@@ -4,6 +4,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
 
 import java.nio.file.*;
+import java.util.ArrayDeque;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -104,6 +105,8 @@ public class MusicSelector extends MainState {
 
 	private PixmapResourcePool stagefiles;
 
+	private java.util.Queue<SongBar> playingList = new ArrayDeque<>();
+
 	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main);
 		this.config = main.getPlayerResource().getPlayerConfig();
@@ -202,7 +205,9 @@ public class MusicSelector extends MainState {
 	}
 
 	public void render() {
-		final Bar current = manager.getSelected();
+		final Bar waiting = this.playingList.poll();
+		final Bar current = waiting != null ? waiting : manager.getSelected();
+
         if(timer.getNowTime() > getSkin().getInput()){
         	timer.switchTimer(TIMER_STARTINPUT, true);
         }
@@ -682,5 +687,9 @@ public class MusicSelector extends MainState {
 			final int rankingMax = currentir != null ? Math.max(1, currentir.getTotalPlayer()) : 1;
 			rankingOffset = (int) (rankingMax * value);
 		}
+	}
+
+	public void pushPlayingList(SongBar wait) {
+		this.playingList.add(wait);
 	}
 }
