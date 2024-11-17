@@ -45,7 +45,8 @@ public class StreamController {
                     try {
                         line = pipeBuffer.readLine();
                         if (line == null) {
-                            break;
+                            Thread.sleep(1000);
+                            continue;
                         }
                         Logger.getGlobal().info("受信:" + line);
                         execute(line);
