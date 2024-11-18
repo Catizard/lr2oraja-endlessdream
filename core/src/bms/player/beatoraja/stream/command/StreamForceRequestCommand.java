@@ -92,9 +92,12 @@ public class StreamForceRequestCommand extends StreamCommand {
         public void run() {
             while (true) {
                 try {
-                    if (!queue.isEmpty()) {
-                        update();
+                    synchronized (LOCK) {
+                        if (!queue.isEmpty()) {
+                            update();
+                        }
                     }
+                    Thread.sleep(50);
                 } catch (Exception e) {
                     e.printStackTrace();
                     break;
