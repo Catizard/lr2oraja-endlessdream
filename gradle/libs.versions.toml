@@ -17,6 +17,7 @@ jackson = "2.13.4"
 twitter4j = "4.0.4"
 java-discord = "2.0.1-all"
 
+
 [libraries]
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }

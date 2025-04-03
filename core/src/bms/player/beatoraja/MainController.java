@@ -42,6 +42,7 @@ import bms.tool.mdprocessor.MusicDownloadProcessor;
 import de.damios.guacamole.gdx.graphics.ShaderCompatibilityHelper;
 import de.damios.guacamole.gdx.graphics.ShaderProgramFactory;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /**
  * アプリケーションのルートクラス

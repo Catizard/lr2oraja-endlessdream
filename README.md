@@ -32,8 +32,6 @@ There is a way to play the old version of `vanilla oraja`. You need an old versi
 
 ## Known Issues
 
-`Keymap Configuration` screen would crash the game directly, see https://github.com/exch-bms2/beatoraja/issues/851 here for more details and temporary solution.
-
 ## Special Thanks
 
 Thanks for Seraxis, the original `Endless Dream` author.

@@ -89,4 +89,5 @@ dependencies {
     implementation(":jportaudio")
     implementation(":luaj-jse:3.0.2-custom")
     implementation("com.github.crykn.guacamole:gdx:v0.3.5")
+    implementation("space.earlygrey:shapedrawer:2.5.0")
 }
