@@ -46,20 +46,13 @@ public class MainLoader extends Application {
     private static VersionChecker version;
 
     public static void main(String[] args) {
-
         if (!ALLOWS_32BIT_JAVA && !System.getProperty("os.arch").contains("64")) {
             JOptionPane.showMessageDialog(null, "This Application needs 64bit-Java.", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
 
-        Logger logger = Logger.getGlobal();
-        try {
-            logger.addHandler(new FileHandler("beatoraja_log.xml"));
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-
         BMSPlayerMode auto = null;
+        boolean quite = false;
         for (String s : args) {
             if (s.startsWith("-")) {
                 if (s.equals("-a")) {
@@ -83,6 +76,9 @@ public class MainLoader extends Application {
                 if (s.equals("-s")) {
                     auto = BMSPlayerMode.PLAY;
                 }
+                if (s.equals("--quite")) {
+                    quite = true;
+                }
             } else {
                 bmsPath = Paths.get(s);
                 if (auto == null) {
@@ -91,6 +87,14 @@ public class MainLoader extends Application {
             }
         }
 
+        if (!quite) {
+            Logger logger = Logger.getGlobal();
+            try {
+                logger.addHandler(new FileHandler("beatoraja_log.xml"));
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
 
         if (Files.exists(Config.configpath) && (bmsPath != null || auto != null)) {
             IRConnectionManager.getAllAvailableIRConnectionName();
@@ -113,7 +117,7 @@ public class MainLoader extends Application {
         for (SongData song : getScoreDatabaseAccessor().getSongDatas(SongUtils.illegalsongs)) {
             MainLoader.putIllegalSong(song.getSha256());
         }
-        if (illegalSongs.size() > 0) {
+        if (!illegalSongs.isEmpty()) {
             JOptionPane.showMessageDialog(null, "This Application detects " + illegalSongs.size() + " illegal BMS songs. \n Remove them, update song database and restart.", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
