@@ -510,7 +510,7 @@ public class JudgeManager {
                         }
                     }
                 }
-                main.getKeyinput().inputKeyOn(lane);
+                main.getKeyInput().inputKeyOn(lane);
             } else {
                 // キーが離されたときの処理
                 if (state.processing != null) {

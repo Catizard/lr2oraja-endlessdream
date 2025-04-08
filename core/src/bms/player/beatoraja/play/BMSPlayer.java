@@ -46,10 +46,7 @@ public class BMSPlayer extends MainState {
     private BGAProcessor bga;
     private GrooveGauge gauge;
     private int playtime;
-    /**
-     * キー入力用スレッド
-     */
-    private KeyInputProccessor keyinput;
+    private KeyInputProcessor keyInput;
     private ControlInputProcessor control;
     private KeySoundProcessor keysound;
     private int assist = 0;
@@ -428,7 +425,7 @@ public class BMSPlayer extends MainState {
         keysound = new KeySoundProcessor(this);
         judge = new JudgeManager(this);
         control = new ControlInputProcessor(this, autoplay);
-        keyinput = new KeyInputProccessor(this, laneProperty);
+        keyInput = new KeyInputProcessor(this, laneProperty);
         PlayerConfig config = resource.getPlayerConfig();
 
         loadSkin(getSkinType());
@@ -552,7 +549,7 @@ public class BMSPlayer extends MainState {
                     model = resource.getBMSModel();
                     resource.getSongdata().setBMSModel(model);
                     lanerender.init(model);
-                    keyinput.setKeyBeamStop(false);
+                    keyInput.setKeyBeamStop(false);
                     timer.setTimerOff(TIMER_PLAY);
                     timer.setTimerOff(TIMER_RHYTHM);
                     timer.setTimerOff(TIMER_FAILED);
@@ -630,7 +627,7 @@ public class BMSPlayer extends MainState {
 
                     input.setStartTime(micronow + timer.getStartMicroTime() - starttimeoffset * 1000);
                     input.setKeyLogMarginTime(resource.getMarginTime());
-                    keyinput.startJudge(model, replay != null ? replay.keylog : null, resource.getMarginTime());
+                    keyInput.startJudge(model, replay != null ? replay.keylog : null, resource.getMarginTime());
                     keysound.startBGPlay(model, starttimeoffset * 1000);
                     Logger.getGlobal().info("STATE_PLAYに移行");
                 }
@@ -706,7 +703,7 @@ public class BMSPlayer extends MainState {
                 break;
             // 閉店処理
             case STATE_FAILED:
-                keyinput.stopJudge();
+                keyInput.stopJudge();
                 keysound.stopBGPlay();
                 if ((input.startPressed() ^ input.isSelectPressed()) && resource.getCourseBMSModels() == null
                         && autoplay.mode == BMSPlayerMode.Mode.PLAY) {
@@ -758,7 +755,7 @@ public class BMSPlayer extends MainState {
                 break;
             // 完奏処理
             case STATE_FINISHED:
-                keyinput.stopJudge();
+                keyInput.stopJudge();
                 keysound.stopBGPlay();
                 if (timer.getNowTime(TIMER_MUSIC_END) > skin.getFinishMargin()) {
                     timer.switchTimer(TIMER_FADEOUT, true);
@@ -839,11 +836,11 @@ public class BMSPlayer extends MainState {
 
     public void input() {
         control.input();
-        keyinput.input();
+        keyInput.input();
     }
 
-    public KeyInputProccessor getKeyinput() {
-        return keyinput;
+    public KeyInputProcessor getKeyInput() {
+        return keyInput;
     }
 
     public int getState() {
@@ -983,7 +980,7 @@ public class BMSPlayer extends MainState {
         }
         if (state != STATE_FINISHED && resource.getCourseBMSModels() == null &&
                 judge.getJudgeCount(0) + judge.getJudgeCount(1) + judge.getJudgeCount(2) + judge.getJudgeCount(3) == 0) {
-            keyinput.stopJudge();
+            keyInput.stopJudge();
             keysound.stopBGPlay();
             if (resource.mediaLoadFinished()) {
                 main.getAudioProcessor().stop((Note) null);

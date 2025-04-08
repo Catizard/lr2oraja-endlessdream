@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * アプリケーションのルートクラス
+ * Beatoraja game controller
  *
  * @author exch
  */

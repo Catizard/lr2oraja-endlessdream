@@ -18,7 +18,7 @@ import static bms.player.beatoraja.skin.SkinProperty.TIMER_PLAY;
  *
  * @author exch
  */
-class KeyInputProccessor {
+class KeyInputProcessor {
 
     private final BMSPlayer player;
     private final LaneProperty laneProperty;
@@ -32,7 +32,7 @@ class KeyInputProccessor {
     //キービーム停止用
     private boolean keyBeamStop = false;
 
-    public KeyInputProccessor(BMSPlayer player, LaneProperty laneProperty) {
+    public KeyInputProcessor(BMSPlayer player, LaneProperty laneProperty) {
         this.player = player;
         this.laneProperty = laneProperty;
         this.scratch = new int[laneProperty.getScratchKeyAssign().length];
