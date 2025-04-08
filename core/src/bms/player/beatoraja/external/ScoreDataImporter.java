@@ -23,7 +23,7 @@ public class ScoreDataImporter {
     }
 
     public void importFromLR2ScoreDatabase(String path, SongDatabaseAccessor songdb) {
-        final int[] clears = { 0, 1, 4, 5, 6, 8, 9 };
+        final int[] clears = {0, 1, 4, 5, 6, 8, 9};
         scoredb.createTable();
 
         try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + path)) {
@@ -34,7 +34,7 @@ public class ScoreDataImporter {
             List<ScoreData> result = new ArrayList<ScoreData>();
             for (Map<String, Object> score : scores) {
                 final String md5 = (String) score.get("hash");
-                SongData[] song = songdb.getSongDatas(new String[] { md5 });
+                SongData[] song = songdb.getSongDatas(new String[]{md5});
                 if (song.length > 0) {
                     ScoreData sd = new ScoreData();
                     sd.setEpg((int) score.get("perfect"));
@@ -51,7 +51,7 @@ public class ScoreDataImporter {
                     result.add(sd);
                 }
             }
-            
+
             this.importScores(result.toArray(new ScoreData[result.size()]), "LR2");
         } catch (Exception e) {
             Logger.getGlobal().severe("スコア移行時の例外:" + e.getMessage());
@@ -61,9 +61,9 @@ public class ScoreDataImporter {
     public void importScores(ScoreData[] scores, String scorehash) {
         List<ScoreData> result = new ArrayList<ScoreData>();
 
-        for(ScoreData score : scores) {
+        for (ScoreData score : scores) {
             ScoreData oldsd = scoredb.getScoreData(score.getSha256(), score.getMode());
-            if(oldsd == null) {
+            if (oldsd == null) {
                 oldsd = new ScoreData();
                 oldsd.setPlaycount(score.getPlaycount());
                 oldsd.setClearcount(score.getClearcount());
@@ -76,8 +76,8 @@ public class ScoreDataImporter {
                 result.add(oldsd);
             }
         }
-        
+
         scoredb.setScoreData(result.toArray(new ScoreData[result.size()]));
-		Logger.getGlobal().info("スコアインポート完了 - インポート数 : " + result.size());
+        Logger.getGlobal().info("スコアインポート完了 - インポート数 : " + result.size());
     }
 }

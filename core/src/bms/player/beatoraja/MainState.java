@@ -1,17 +1,19 @@
 package bms.player.beatoraja;
 
 import bms.player.beatoraja.SkinConfig.Offset;
-import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.SkinPropertyMapper;
+import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
-
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.IntMap;
 
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
 import java.util.Optional;
+
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * プレイヤー内の各状態の抽象クラス
@@ -20,171 +22,166 @@ import java.util.Optional;
  */
 public abstract class MainState {
 
-	public final MainController main;
+    public final MainController main;
+    public final TimerManager timer;
+    public final PlayerResource resource;
+    private final ScoreDataProperty score = new ScoreDataProperty();
+    /**
+     * スキン
+     */
+    private Skin skin;
+    private Stage stage;
 
-	/**
-	 * スキン
-	 */
-	private Skin skin;
+    public MainState(MainController main) {
+        this.main = main;
+        timer = main.getTimer();
+        resource = main.getPlayerResource();
+    }
 
-	private Stage stage;
-	
-	public final TimerManager timer;
-	
-	public final PlayerResource resource;
+    public abstract void create();
 
-	private final ScoreDataProperty score = new ScoreDataProperty();
+    public void prepare() {
 
-	public MainState(MainController main) {
-		this.main = main;
-		timer = main.getTimer();
-		resource = main.getPlayerResource();
-	}
+    }
 
-	public abstract void create();
+    public void shutdown() {
 
-	public void prepare() {
+    }
 
-	}
+    public abstract void render();
 
-	public void shutdown() {
+    public void input() {
 
-	}
+    }
 
-	public abstract void render();
+    public void pause() {
 
-	public void input() {
+    }
 
-	}
+    public void resume() {
 
-	public void pause() {
+    }
 
-	}
+    public void resize(int width, int height) {
 
-	public void resume() {
+    }
 
-	}
+    public void dispose() {
+        Optional.ofNullable(skin).ifPresent(skin -> skin.dispose());
+        skin = null;
+        Optional.ofNullable(stage).ifPresent(skin -> skin.dispose());
+        stage = null;
+    }
 
-	public void resize(int width, int height) {
+    public void executeEvent(int id) {
+        executeEvent(id, 0, 0);
+    }
 
-	}
+    public void executeEvent(int id, int arg) {
+        executeEvent(id, arg, 0);
+    }
 
-	public void dispose() {
-		Optional.ofNullable(skin).ifPresent(skin -> skin.dispose());
-		skin = null;
-		Optional.ofNullable(stage).ifPresent(skin -> skin.dispose());
-		stage = null;
-	}
+    public void executeEvent(int id, int arg1, int arg2) {
+        if (SkinPropertyMapper.isCustomEventId(id)) {
+            skin.executeCustomEvent(this, id, arg1, arg2);
+        }
+    }
 
-	public void executeEvent(int id) {
-		executeEvent(id, 0, 0);
-	}
+    public void executeEvent(EventType e) {
+        executeEvent(e, 0, 0);
+    }
 
-	public void executeEvent(int id, int arg) {
-		executeEvent(id, arg, 0);
-	}
+    public void executeEvent(EventType e, int arg) {
+        executeEvent(e, arg, 0);
+    }
 
-	public void executeEvent(int id, int arg1, int arg2) {
-		if (SkinPropertyMapper.isCustomEventId(id)) {
-			skin.executeCustomEvent(this, id, arg1, arg2);
-		}
-	}
+    public void executeEvent(EventType e, int arg1, int arg2) {
+        e.event.exec(this, arg1, arg2);
+    }
 
-	public void executeEvent(EventType e) {
-		executeEvent(e, 0, 0);
-	}
+    public ScoreDataProperty getScoreDataProperty() {
+        return score;
+    }
 
-	public void executeEvent(EventType e, int arg) {
-		executeEvent(e, arg, 0);
-	}
+    public Skin getSkin() {
+        return skin;
+    }
 
-	public void executeEvent(EventType e, int arg1, int arg2) {
-		e.event.exec(this, arg1, arg2);
-	}
-	
-	public ScoreDataProperty getScoreDataProperty() {
-		return score;
-	}
+    public void setSkin(Skin skin) {
+        if (this.skin != null) {
+            this.skin.dispose();
+        }
+        this.skin = skin;
+        if (skin != null) {
+            for (IntMap.Entry<Offset> e : skin.getOffset().entries()) {
+                SkinOffset offset = main.getOffset(e.key);
+                if (offset == null || e.value == null) {
+                    continue;
+                }
+                offset.x = e.value.x;
+                offset.y = e.value.y;
+                offset.w = e.value.w;
+                offset.h = e.value.h;
+                offset.r = e.value.r;
+                offset.a = e.value.a;
+            }
+        }
+    }
 
-	public Skin getSkin() {
-		return skin;
-	}
+    public void loadSkin(SkinType skinType) {
+        setSkin(SkinLoader.load(this, skinType));
+    }
 
-	public void setSkin(Skin skin) {
-		if (this.skin != null) {
-			this.skin.dispose();
-		}
-		this.skin = skin;
-		if (skin != null) {
-			for (IntMap.Entry<Offset> e : skin.getOffset().entries()) {
-				SkinOffset offset = main.getOffset(e.key);
-				if(offset == null || e.value == null) {
-					continue;
-				}
-				offset.x = e.value.x;
-				offset.y = e.value.y;
-				offset.w = e.value.w;
-				offset.h = e.value.h;
-				offset.r = e.value.r;
-				offset.a = e.value.a;
-			}
-		}
-	}
+    public int getJudgeCount(int judge, boolean fast) {
+        ScoreData sd = score.getScoreData();
+        return sd != null ? sd.getJudgeCount(judge, fast) : 0;
+    }
 
-	public void loadSkin(SkinType skinType) {
-		setSkin(SkinLoader.load(this, skinType));
-	}
+    public SkinOffset getOffsetValue(int id) {
+        return main.getOffset(id);
+    }
 
-	public int getJudgeCount(int judge, boolean fast) {
-		ScoreData sd = score.getScoreData();
-		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
-	}
+    public TextureRegion getImage(int imageid) {
+        switch (imageid) {
+            case IMAGE_BACKBMP:
+                return resource.getBMSResource().getBackbmp();
+            case IMAGE_STAGEFILE:
+                return resource.getBMSResource().getStagefile();
+            case IMAGE_BANNER:
+                return resource.getBMSResource().getBanner();
+            case IMAGE_BLACK:
+                return main.black;
+            case IMAGE_WHITE:
+                return main.white;
+        }
+        return null;
+    }
 
-	public SkinOffset getOffsetValue(int id) {
-		return main.getOffset(id);
-	}
+    public Stage getStage() {
+        return stage;
+    }
 
-	public TextureRegion getImage(int imageid) {
-		switch (imageid) {
-		case IMAGE_BACKBMP:
-			return resource.getBMSResource().getBackbmp();
-		case IMAGE_STAGEFILE:
-			return resource.getBMSResource().getStagefile();
-		case IMAGE_BANNER:
-			return resource.getBMSResource().getBanner();
-		case IMAGE_BLACK:
-			return main.black;
-		case IMAGE_WHITE:
-			return main.white;
-		}
-		return null;
-	}
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
-	public Stage getStage() {
-		return stage;
-	}
+    public String getSound(SystemSoundManager.SoundType sound) {
+        return main.getSoundManager().getSound(sound);
+    }
 
-	public void setStage(Stage stage) {
-		this.stage = stage;
-	}
+    public void play(SystemSoundManager.SoundType sound) {
+        play(sound, false);
+    }
 
-	public String getSound(SystemSoundManager.SoundType sound) {
-		return main.getSoundManager().getSound(sound);
-	}
-	
-	public void play(SystemSoundManager.SoundType sound) {
-		play(sound, false);
-	}
-	
-	public void play(SystemSoundManager.SoundType sound, boolean loop) {
-		main.getSoundManager().play(sound, loop);
-	}
-	
-	public void stop(SystemSoundManager.SoundType sound) {
-		main.getSoundManager().stop(sound);
-	}
-	
-	public enum MainStateType {
-		MUSICSELECT,DECIDE,PLAY,RESULT,COURSERESULT,CONFIG,SKINCONFIG;
-	}
+    public void play(SystemSoundManager.SoundType sound, boolean loop) {
+        main.getSoundManager().play(sound, loop);
+    }
+
+    public void stop(SystemSoundManager.SoundType sound) {
+        main.getSoundManager().stop(sound);
+    }
+
+    public enum MainStateType {
+        MUSICSELECT, DECIDE, PLAY, RESULT, COURSERESULT, CONFIG, SKINCONFIG;
+    }
 }

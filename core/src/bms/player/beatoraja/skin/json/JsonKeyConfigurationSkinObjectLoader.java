@@ -5,13 +5,13 @@ import bms.player.beatoraja.skin.SkinHeader;
 
 public class JsonKeyConfigurationSkinObjectLoader extends JsonSkinObjectLoader<KeyConfigurationSkin> {
 
-	public JsonKeyConfigurationSkinObjectLoader(JSONSkinLoader loader) {
-		super(loader);
-	}
+    public JsonKeyConfigurationSkinObjectLoader(JSONSkinLoader loader) {
+        super(loader);
+    }
 
-	@Override
-	public KeyConfigurationSkin getSkin(SkinHeader header) {
-		return new KeyConfigurationSkin(header);
-	}
+    @Override
+    public KeyConfigurationSkin getSkin(SkinHeader header) {
+        return new KeyConfigurationSkin(header);
+    }
 
 }

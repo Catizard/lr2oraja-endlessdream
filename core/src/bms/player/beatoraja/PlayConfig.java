@@ -10,237 +10,230 @@ import com.badlogic.gdx.math.MathUtils;
  */
 public class PlayConfig implements Cloneable {
 
-	/**
-	 * ハイスピード。1.0で等速
-	 */
-	private float hispeed = 1.0f;
-	
-	public static final float HISPEED_MAX = 20f;
-	public static final float HISPEED_MIN = 0.01f;
+    public static final float HISPEED_MAX = 20f;
+    public static final float HISPEED_MIN = 0.01f;
+    public static final int DURATION_MAX = 10000;
+    public static final int DURATION_MIN = 1;
+    public static final int FIX_HISPEED_OFF = 0;
+    public static final int FIX_HISPEED_STARTBPM = 1;
+    public static final int FIX_HISPEED_MAXBPM = 2;
+    public static final int FIX_HISPEED_MAINBPM = 3;
+    public static final int FIX_HISPEED_MINBPM = 4;
+    public static final float HISPEEDMARGIN_MAX = 10f;
+    public static final float HISPEEDMARGIN_MIN = 0f;
+    /**
+     * ハイスピード変化間隔
+     */
+    public float hispeedmargin = 0.25f;
+    /**
+     * ハイスピード。1.0で等速
+     */
+    private float hispeed = 1.0f;
+    /**
+     * デュレーション(ノーツ表示時間)
+     */
+    private int duration = 500;
+    /**
+     * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
+     */
+    private int fixhispeed = FIX_HISPEED_MAINBPM;
+    /**
+     * レーンカバー表示量(0-1)
+     */
+    private float lanecover = 0.2f;
+    /**
+     * レーンカバー使用
+     */
+    private boolean enablelanecover = true;
+    /**
+     * リフト表示量(0-1)
+     */
+    private float lift = 0.1f;
+    /**
+     * リフト使用
+     */
+    private boolean enablelift = false;
+    /**
+     * HIDDEN表示量(0-1)
+     */
+    private float hidden = 0.1f;
+    /**
+     * HIDDEN使用
+     */
+    private boolean enablehidden = false;
 
-	/**
-	 * デュレーション(ノーツ表示時間)
-	 */
-	private int duration = 500;
-	
-	public static final int DURATION_MAX = 10000;
-	public static final int DURATION_MIN = 1;
-	/**
-	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
-	 */
-	private int fixhispeed = FIX_HISPEED_MAINBPM;
+    /**
+     * レーンカバー変化間隔(低速)
+     */
+    private float lanecovermarginlow = 0.001f;
+    /**
+     * レーンカバー変化間隔(高速)
+     */
+    private float lanecovermarginhigh = 0.01f;
+    /**
+     * レーンカバー変化速度切り替え時間
+     */
+    private int lanecoverswitchduration = 500;
+    /**
+     * HI-SPEED固定自動調整：レーンカバーを変化するとHI-SPEED固定を現在のBPMに自動的に調整する（皿チョン）
+     */
+    private boolean hispeedautoadjust = false;
+    /**
+     * 判定アルゴリズム
+     */
+    private String judgetype = JudgeAlgorithm.Combo.name();
 
-	public static final int FIX_HISPEED_OFF = 0;
-	public static final int FIX_HISPEED_STARTBPM = 1;
-	public static final int FIX_HISPEED_MAXBPM = 2;
-	public static final int FIX_HISPEED_MAINBPM = 3;
-	public static final int FIX_HISPEED_MINBPM = 4;
+    public PlayConfig() {
+    }
 
-	/**
-	 * ハイスピード変化間隔
-	 */
-	public float hispeedmargin = 0.25f;
+    public float getHispeed() {
+        return hispeed;
+    }
 
-	public static final float HISPEEDMARGIN_MAX = 10f;
-	public static final float HISPEEDMARGIN_MIN = 0f;
+    public void setHispeed(float hispeed) {
+        this.hispeed = hispeed;
+    }
 
-	/**
-	 * レーンカバー表示量(0-1)
-	 */
-	private float lanecover = 0.2f;
-	/**
-	 * レーンカバー使用
-	 */
-	private boolean enablelanecover = true;
-	/**
-	 * リフト表示量(0-1)
-	 */
-	private float lift = 0.1f;
-	/**
-	 * リフト使用
-	 */
-	private boolean enablelift = false;
-	/**
-	 * HIDDEN表示量(0-1)
-	 */
-	private float hidden = 0.1f;
-	/**
-	 * HIDDEN使用
-	 */
-	private boolean enablehidden = false;
+    public int getDuration() {
+        return duration;
+    }
 
-	/**
-	 * レーンカバー変化間隔(低速)
-	 */
-	private float lanecovermarginlow = 0.001f;
-	/**
-	 * レーンカバー変化間隔(高速)
-	 */
-	private float lanecovermarginhigh = 0.01f;
-	/**
-	 * レーンカバー変化速度切り替え時間
-	 */
-	private int lanecoverswitchduration = 500;
-	/**
-	 * HI-SPEED固定自動調整：レーンカバーを変化するとHI-SPEED固定を現在のBPMに自動的に調整する（皿チョン）
-	 */
-	private boolean hispeedautoadjust = false;
-	/**
-	 * 判定アルゴリズム
-	 */
-	private String judgetype = JudgeAlgorithm.Combo.name();
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
-	public PlayConfig() {
-	}
+    public float getHispeedMargin() {
+        return hispeedmargin;
+    }
 
-	public float getHispeed() {
-		return hispeed;
-	}
+    public void setHispeedMargin(float hispeedmargin) {
+        this.hispeedmargin = hispeedmargin;
+    }
 
-	public void setHispeed(float hispeed) {
-		this.hispeed = hispeed;
-	}
+    public int getFixhispeed() {
+        return fixhispeed;
+    }
 
-	public int getDuration() {
-		return duration;
-	}
+    public void setFixhispeed(int fixhispeed) {
+        this.fixhispeed = fixhispeed;
+    }
 
-	public void setDuration(int duration) {
-		this.duration = duration;
-	}
+    public float getLanecover() {
+        return lanecover;
+    }
 
-	public float getHispeedMargin() {
-		return hispeedmargin;
-	}
+    public void setLanecover(float lanecover) {
+        this.lanecover = lanecover;
+    }
 
-	public void setHispeedMargin(float hispeedmargin) {
-		this.hispeedmargin = hispeedmargin;
-	}
+    public boolean isEnablelanecover() {
+        return enablelanecover;
+    }
 
-	public int getFixhispeed() {
-		return fixhispeed;
-	}
+    public void setEnablelanecover(boolean enablelanecover) {
+        this.enablelanecover = enablelanecover;
+    }
 
-	public void setFixhispeed(int fixhispeed) {
-		this.fixhispeed = fixhispeed;
-	}
+    public float getLift() {
+        return lift;
+    }
 
-	public float getLanecover() {
-		return lanecover;
-	}
+    public void setLift(float lift) {
+        this.lift = lift;
+    }
 
-	public void setLanecover(float lanecover) {
-		this.lanecover = lanecover;
-	}
+    public boolean isEnablelift() {
+        return enablelift;
+    }
 
-	public boolean isEnablelanecover() {
-		return enablelanecover;
-	}
+    public void setEnablelift(boolean enablelift) {
+        this.enablelift = enablelift;
+    }
 
-	public void setEnablelanecover(boolean enablelanecover) {
-		this.enablelanecover = enablelanecover;
-	}
+    public float getHidden() {
+        return hidden;
+    }
 
-	public float getLift() {
-		return lift;
-	}
+    public void setHidden(float hidden) {
+        this.hidden = hidden;
+    }
 
-	public void setLift(float lift) {
-		this.lift = lift;
-	}
+    public boolean isEnablehidden() {
+        return enablehidden;
+    }
 
-	public boolean isEnablelift() {
-		return enablelift;
-	}
+    public void setEnablehidden(boolean enablehidden) {
+        this.enablehidden = enablehidden;
+    }
 
-	public void setEnablelift(boolean enablelift) {
-		this.enablelift = enablelift;
-	}
+    public float getLanecovermarginlow() {
+        return lanecovermarginlow;
+    }
 
-	public float getHidden() {
-		return hidden;
-	}
+    public void setLanecovermarginlow(float lanecovermarginlow) {
+        this.lanecovermarginlow = lanecovermarginlow;
+    }
 
-	public void setHidden(float hidden) {
-		this.hidden = hidden;
-	}
+    public float getLanecovermarginhigh() {
+        return lanecovermarginhigh;
+    }
 
-	public boolean isEnablehidden() {
-		return enablehidden;
-	}
+    public void setLanecovermarginhigh(float lanecovermarginhigh) {
+        this.lanecovermarginhigh = lanecovermarginhigh;
+    }
 
-	public void setEnablehidden(boolean enablehidden) {
-		this.enablehidden = enablehidden;
-	}
+    public int getLanecoverswitchduration() {
+        return lanecoverswitchduration;
+    }
 
-	public float getLanecovermarginlow() {
-		return lanecovermarginlow;
-	}
+    public void setLanecoverswitchduration(int lanecoverswitchduration) {
+        this.lanecoverswitchduration = lanecoverswitchduration;
+    }
 
-	public void setLanecovermarginlow(float lanecovermarginlow) {
-		this.lanecovermarginlow = lanecovermarginlow;
-	}
+    public boolean isEnableHispeedAutoAdjust() {
+        return hispeedautoadjust;
+    }
 
-	public float getLanecovermarginhigh() {
-		return lanecovermarginhigh;
-	}
+    public void setHispeedAutoAdjust(boolean hispeedautoadjust) {
+        this.hispeedautoadjust = hispeedautoadjust;
+    }
 
-	public void setLanecovermarginhigh(float lanecovermarginhigh) {
-		this.lanecovermarginhigh = lanecovermarginhigh;
-	}
+    public String getJudgetype() {
+        for (JudgeAlgorithm type : JudgeAlgorithm.values()) {
+            if (type.name().equals(judgetype)) {
+                return judgetype;
+            }
+        }
+        judgetype = JudgeAlgorithm.Combo.name();
+        return judgetype;
+    }
 
-	public int getLanecoverswitchduration() {
-		return lanecoverswitchduration;
-	}
+    public void setJudgetype(String judgetype) {
+        this.judgetype = judgetype;
+    }
 
-	public void setLanecoverswitchduration(int lanecoverswitchduration) {
-		this.lanecoverswitchduration = lanecoverswitchduration;
-	}
+    public void validate() {
+        hispeed = MathUtils.clamp(hispeed, HISPEED_MIN, HISPEED_MAX);
+        duration = MathUtils.clamp(duration, DURATION_MIN, DURATION_MAX);
+        hispeedmargin = MathUtils.clamp(hispeedmargin, HISPEEDMARGIN_MIN, HISPEEDMARGIN_MAX);
+        fixhispeed = MathUtils.clamp(fixhispeed, 0, FIX_HISPEED_MINBPM);
+        lanecover = MathUtils.clamp(lanecover, 0f, 1f);
+        lift = MathUtils.clamp(lift, 0f, 1f);
+        hidden = MathUtils.clamp(hidden, 0f, 1f);
+        lanecovermarginlow = MathUtils.clamp(lanecovermarginlow, 0f, 1f);
+        lanecovermarginhigh = MathUtils.clamp(lanecovermarginhigh, 0f, 1f);
+        lanecoverswitchduration = MathUtils.clamp(lanecoverswitchduration, 0, 1000000);
+        if (JudgeAlgorithm.getIndex(judgetype) == -1) {
+            judgetype = JudgeAlgorithm.Combo.name();
+        }
+    }
 
-	public boolean isEnableHispeedAutoAdjust() {
-		return hispeedautoadjust;
-	}
-
-	public void setHispeedAutoAdjust(boolean hispeedautoadjust) {
-		this.hispeedautoadjust = hispeedautoadjust;
-	}
-
-	public String getJudgetype() {
-		for(JudgeAlgorithm type : JudgeAlgorithm.values()) {
-			if(type.name().equals(judgetype)) {
-				return judgetype;
-			}
-		}
-		judgetype = JudgeAlgorithm.Combo.name();
-		return judgetype;
-	}
-
-	public void setJudgetype(String judgetype) {
-		this.judgetype = judgetype;
-	}
-
-	public void validate() {
-		hispeed = MathUtils.clamp(hispeed, HISPEED_MIN, HISPEED_MAX);
-		duration = MathUtils.clamp(duration, DURATION_MIN, DURATION_MAX);
-		hispeedmargin = MathUtils.clamp(hispeedmargin, HISPEEDMARGIN_MIN, HISPEEDMARGIN_MAX);
-		fixhispeed = MathUtils.clamp(fixhispeed, 0, FIX_HISPEED_MINBPM);
-		lanecover = MathUtils.clamp(lanecover, 0f, 1f);
-		lift = MathUtils.clamp(lift, 0f, 1f);
-		hidden = MathUtils.clamp(hidden, 0f, 1f);
-		lanecovermarginlow = MathUtils.clamp(lanecovermarginlow, 0f, 1f);
-		lanecovermarginhigh = MathUtils.clamp(lanecovermarginhigh, 0f, 1f);
-		lanecoverswitchduration = MathUtils.clamp(lanecoverswitchduration, 0, 1000000);
-		if(JudgeAlgorithm.getIndex(judgetype) == -1) {
-			judgetype = JudgeAlgorithm.Combo.name();
-		}
-	}
-
-	public PlayConfig clone() {
-		try {
-			return (PlayConfig) super.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+    public PlayConfig clone() {
+        try {
+            return (PlayConfig) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

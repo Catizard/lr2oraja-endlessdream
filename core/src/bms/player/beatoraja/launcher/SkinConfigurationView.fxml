@@ -9,7 +9,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.SkinConfigurationView">
+<VBox xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65"
+      fx:controller="bms.player.beatoraja.launcher.SkinConfigurationView">
     <HBox prefHeight="23.0" prefWidth="723.0">
         <VBox.margin>
             <Insets bottom="10.0" left="10.0" top="10.0"/>

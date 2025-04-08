@@ -1,20 +1,25 @@
 package bms.player.beatoraja.select;
 
-import bms.player.beatoraja.*;
+import bms.player.beatoraja.BMSPlayerMode;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.SystemSoundManager.SoundType;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
+import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
-import bms.player.beatoraja.select.bar.*;
+import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.DirectoryBar;
+import bms.player.beatoraja.select.bar.SearchWordBar;
+import bms.player.beatoraja.select.bar.SelectableBar;
 import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
 import static bms.player.beatoraja.SystemSoundManager.SoundType.*;
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
 import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
+import static bms.player.beatoraja.skin.SkinProperty.TIMER_SONGBAR_CHANGE;
 
 /**
  * 選曲の入力処理用クラス
@@ -23,6 +28,12 @@ import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.
  */
 public class MusicSelectInputProcessor {
 
+    private final int durationlow;
+    private final int durationhigh;
+    private final int analogTicksPerScroll;
+    private final MusicSelector select;
+    boolean isOptionKeyPressed = false;
+    boolean isOptionKeyReleased = false;
     /**
      * バー移動中のカウンタ
      */
@@ -31,25 +42,13 @@ public class MusicSelectInputProcessor {
      * バーの移動方向
      */
     private int angle;
-
-    private final int durationlow;
-    private final int durationhigh;
-
     /**
      * バー移動中のカウンタ（アナログスクロール）
      */
     private int analogScrollBuffer = 0;
-    private final int analogTicksPerScroll;
-
-
-    boolean isOptionKeyPressed = false;
-    boolean isOptionKeyReleased = false;
-
     // ノーツ表示時間変更のカウンタ
     private long timeChangeDuration;
     private int countChangeDuration;
-
-    private final MusicSelector select;
 
     public MusicSelectInputProcessor(MusicSelector select) {
         this.select = select;
@@ -60,7 +59,7 @@ public class MusicSelectInputProcessor {
     }
 
     public void input() {
-    	final MainController main = select.main;
+        final MainController main = select.main;
         final BMSPlayerInputProcessor input = main.getInputProcessor();
         final PlayerResource resource = main.getPlayerResource();
         final PlayerConfig config = resource.getPlayerConfig();
@@ -74,8 +73,8 @@ public class MusicSelectInputProcessor {
                 @Override
                 public void input(String text) {
                     if (text.length() > 1) {
-                    	barManager.addSearch(new SearchWordBar(select, text));
-                    	barManager.updateBar(null);
+                        barManager.addSearch(new SearchWordBar(select, text));
+                        barManager.updateBar(null);
                     }
                 }
 
@@ -100,10 +99,10 @@ public class MusicSelectInputProcessor {
 
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
-        if(!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5)){
+        if (!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5)) {
             //オプションキー入力なし
             isOptionKeyReleased = true;
-            if(isOptionKeyPressed) {
+            if (isOptionKeyPressed) {
                 isOptionKeyPressed = false;
                 select.play(OPTION_CLOSE);
             }
@@ -118,7 +117,7 @@ public class MusicSelectInputProcessor {
             bar.resetInput();
             // show play option
             select.setPanelState(1);
-            if(isOptionKeyReleased) {
+            if (isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
                 select.play(OPTION_OPEN);
@@ -159,7 +158,7 @@ public class MusicSelectInputProcessor {
             input.resetScroll();
 
             analogScrollBuffer += property.getAnalogChange(input, TARGET_UP) - property.getAnalogChange(input, TARGET_DOWN);
-            mov += analogScrollBuffer/analogTicksPerScroll;
+            mov += analogScrollBuffer / analogTicksPerScroll;
             analogScrollBuffer %= analogTicksPerScroll;
 
             // song bar scroll
@@ -175,7 +174,7 @@ public class MusicSelectInputProcessor {
                     mov = 1;
                     angle = durationhigh;
                 }
-            } else if (property.isNonAnalogPressed(input, TARGET_DOWN, false) ||  input.getControlKeyState(ControlKeys.UP)) {
+            } else if (property.isNonAnalogPressed(input, TARGET_DOWN, false) || input.getControlKeyState(ControlKeys.UP)) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = -1;
@@ -194,13 +193,13 @@ public class MusicSelectInputProcessor {
                 }
             }
 
-            while(mov > 0) {
-            	select.executeEvent(EventType.target, -1);
+            while (mov > 0) {
+                select.executeEvent(EventType.target, -1);
                 select.play(SCRATCH);
                 mov--;
             }
-            while(mov < 0) {
-            	select.executeEvent(EventType.target, 1);
+            while (mov < 0) {
+                select.executeEvent(EventType.target, 1);
                 select.play(SCRATCH);
                 mov++;
             }
@@ -208,7 +207,7 @@ public class MusicSelectInputProcessor {
             bar.resetInput();
             // show assist option
             select.setPanelState(2);
-            if(isOptionKeyReleased) {
+            if (isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
                 select.play(OPTION_OPEN);
@@ -245,16 +244,16 @@ public class MusicSelectInputProcessor {
             bar.resetInput();
             // show detail option
             select.setPanelState(3);
-            if(isOptionKeyReleased) {
+            if (isOptionKeyReleased) {
                 isOptionKeyPressed = true;
                 isOptionKeyReleased = false;
                 select.play(OPTION_OPEN);
             }
             if (property.isPressed(input, BGA_DOWN, true)) {
-            	select.executeEvent(EventType.bga);
+                select.executeEvent(EventType.bga);
             }
             if (property.isPressed(input, GAUGEAUTOSHIFT_DOWN, true)) {
-            	select.executeEvent(EventType.gaugeautoshift);
+                select.executeEvent(EventType.gaugeautoshift);
             }
             if (property.isPressed(input, NOTESDISPLAYTIMING_DOWN, true)) {
                 select.executeEvent(EventType.notesdisplaytiming, -1);
@@ -263,21 +262,21 @@ public class MusicSelectInputProcessor {
                 long l = System.currentTimeMillis();
                 if (timeChangeDuration == 0) {
                     timeChangeDuration = l + durationlow;
-                	select.executeEvent(EventType.duration1p, -1);
+                    select.executeEvent(EventType.duration1p, -1);
                 } else if (l > timeChangeDuration) {
                     countChangeDuration++;
                     timeChangeDuration = l + durationhigh;
-                	select.executeEvent(EventType.duration1p, -1, countChangeDuration > 50 ? 10 : 0);
+                    select.executeEvent(EventType.duration1p, -1, countChangeDuration > 50 ? 10 : 0);
                 }
             } else if (property.isPressed(input, DURATION_UP, false)) {
                 long l = System.currentTimeMillis();
                 if (timeChangeDuration == 0) {
                     timeChangeDuration = l + durationlow;
-                	select.executeEvent(EventType.duration1p, 1);
+                    select.executeEvent(EventType.duration1p, 1);
                 } else if (l > timeChangeDuration) {
                     countChangeDuration++;
                     timeChangeDuration = l + durationhigh;
-                	select.executeEvent(EventType.duration1p, 1, countChangeDuration > 50 ? 10 : 0);
+                    select.executeEvent(EventType.duration1p, 1, countChangeDuration > 50 ? 10 : 0);
                 }
             } else {
                 timeChangeDuration = 0;
@@ -331,20 +330,20 @@ public class MusicSelectInputProcessor {
                 select.getBarManager().close();
             }
 
-    		if(input.isActivated(KeyCommand.AUTOPLAY_FOLDER)) {
-    			if(current instanceof DirectoryBar) {
-    				select.selectSong(BMSPlayerMode.AUTOPLAY);
-    			}
-    		}
-    		if(input.isActivated(KeyCommand.OPEN_IR)) {
+            if (input.isActivated(KeyCommand.AUTOPLAY_FOLDER)) {
+                if (current instanceof DirectoryBar) {
+                    select.selectSong(BMSPlayerMode.AUTOPLAY);
+                }
+            }
+            if (input.isActivated(KeyCommand.OPEN_IR)) {
                 select.executeEvent(EventType.open_ir);
             }
-    		if(input.isActivated(KeyCommand.ADD_FAVORITE_SONG)) {
+            if (input.isActivated(KeyCommand.ADD_FAVORITE_SONG)) {
                 select.executeEvent(EventType.favorite_song);
-    		}
-    		if(input.isActivated(KeyCommand.ADD_FAVORITE_CHART)) {
+            }
+            if (input.isActivated(KeyCommand.ADD_FAVORITE_CHART)) {
                 select.executeEvent(EventType.favorite_chart);
-    		}
+            }
 
         }
 
@@ -354,19 +353,19 @@ public class MusicSelectInputProcessor {
         }
         select.timer.switchTimer(TIMER_SONGBAR_CHANGE, true);
         // update folder
-		if(input.isActivated(KeyCommand.UPDATE_FOLDER)) {
+        if (input.isActivated(KeyCommand.UPDATE_FOLDER)) {
             select.execute(MusicSelectCommand.UPDATE_FOLDER);
         }
         // open explorer with selected song
-		if(input.isActivated(KeyCommand.OPEN_EXPLORER)) {
+        if (input.isActivated(KeyCommand.OPEN_EXPLORER)) {
             select.execute(MusicSelectCommand.OPEN_WITH_EXPLORER);
         }
         // copy song MD5 hash
-        if(input.isActivated(KeyCommand.COPY_SONG_MD5_HASH)) {
+        if (input.isActivated(KeyCommand.COPY_SONG_MD5_HASH)) {
             select.execute(MusicSelectCommand.COPY_MD5_HASH);
         }
         // copy song SHA256 hash
-        if(input.isActivated(KeyCommand.COPY_SONG_SHA256_HASH)) {
+        if (input.isActivated(KeyCommand.COPY_SONG_SHA256_HASH)) {
             select.execute(MusicSelectCommand.COPY_SHA256_HASH);
         }
 

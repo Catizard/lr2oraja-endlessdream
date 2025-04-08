@@ -14,7 +14,7 @@ public class FreqTrainerMenu {
 
     public static ImBoolean FREQ_TRAINER_ENABLED = new ImBoolean(false);
 
-    private static int[] freq = new int[] {100};
+    private static int[] freq = new int[]{100};
 
     private static List<Integer> buttonVals = Arrays.asList(-10, -5, -1, 100, 1, 5, 10);
 
@@ -23,17 +23,17 @@ public class FreqTrainerMenu {
         float relativeY = windowHeight * 0.06f;
         ImGui.setNextWindowPos(relativeX, relativeY, ImGuiCond.FirstUseEver);
 
-        if(ImGui.begin("Rate Modifier", showFreqTrainer, ImGuiWindowFlags.AlwaysAutoResize)) {
+        if (ImGui.begin("Rate Modifier", showFreqTrainer, ImGuiWindowFlags.AlwaysAutoResize)) {
             ImGui.text("Modifies the chart playback rate to be faster or");
             ImGui.text("slower by a given percent.");
 
             buttonVals.forEach(value -> {
                 if (value == 100) {
-                    if(ImGui.button("Reset")) {
+                    if (ImGui.button("Reset")) {
                         freq[0] = 100;
                     }
                 } else {
-                    if(ImGui.button((value > 0 ? "+" : "") + value + "%")) {
+                    if (ImGui.button((value > 0 ? "+" : "") + value + "%")) {
                         freq[0] = clamp(freq[0] + value);
                     }
                 }

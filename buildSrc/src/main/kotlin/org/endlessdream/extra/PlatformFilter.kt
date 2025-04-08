@@ -2,11 +2,10 @@ package org.endlessdream.extra
 
 import org.gradle.api.artifacts.transform.*
 import org.gradle.api.file.FileSystemLocation
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.*
-import javax.inject.Inject
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 
 /*
  * Platform specific Artifact Transform

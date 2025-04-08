@@ -4,27 +4,22 @@ import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
 import bms.player.beatoraja.PlayModeConfig.MouseScratchConfig;
 import com.badlogic.gdx.Gdx;
 
-import java.util.Arrays;
-
 public class MouseScratchInput {
-    private final BMSPlayerInputProcessor bmsPlayerInputProcessor;
-    private final KeyBoardInputProcesseor keyboardInputProcessor;
-    
-    private int[] keys;
-    private int[] control;
-
-    private boolean[] mouseScratchState = new boolean[4];
-    private boolean[] mouseScratchChanged = new boolean[4];
     private static final int MOUSESCRATCH_RIGHT = 0;
     private static final int MOUSESCRATCH_LEFT = 1;
     private static final int MOUSESCRATCH_UP = 2;
     private static final int MOUSESCRATCH_DOWN = 3;
-
-    private MouseToAnalog mouseToAnalog = null;
+    private final BMSPlayerInputProcessor bmsPlayerInputProcessor;
+    private final KeyBoardInputProcesseor keyboardInputProcessor;
     /**
      * マウス皿のアルゴリズム (null=アナログ皿を通用しない)
      */
     private final MouseScratchAlgorithm[] mouseScratchAlgorithm = new MouseScratchAlgorithm[2];
+    private int[] keys;
+    private int[] control;
+    private boolean[] mouseScratchState = new boolean[4];
+    private boolean[] mouseScratchChanged = new boolean[4];
+    private MouseToAnalog mouseToAnalog = null;
     /**
      * 最後に押されたマウス皿
      */
@@ -53,24 +48,24 @@ public class MouseScratchInput {
     }
 
     public void poll(final long microtime) {
-		final long presstime = microtime / 1000;
+        final long presstime = microtime / 1000;
         // MOUSEの更新
         if (mouseScratchEnabled) {
             mouseToAnalog.update();
-            for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+            for (int i = 0; i < mouseScratchAlgorithm.length; i++) {
                 mouseScratchAlgorithm[i].update(presstime);
             }
 
-            for (int mouseInput=0; mouseInput<mouseScratchState.length; mouseInput++) {
+            for (int mouseInput = 0; mouseInput < mouseScratchState.length; mouseInput++) {
                 final boolean prev = mouseScratchState[mouseInput];
-                mouseScratchState[mouseInput] = mouseScratchAlgorithm[mouseInput/2].isScratchActive(mouseInput%2 == 0);
+                mouseScratchState[mouseInput] = mouseScratchAlgorithm[mouseInput / 2].isScratchActive(mouseInput % 2 == 0);
                 if (prev != mouseScratchState[mouseInput]) {
                     mouseScratchChanged[mouseInput] = true;
                     if (!prev) this.lastMouseScratch = mouseInput;
                 }
             }
 
-            for (int i=0; i<keys.length; i++) {
+            for (int i = 0; i < keys.length; i++) {
                 final int axis = keys[i];
                 if (axis >= 0 && mouseScratchChanged[axis]) {
                     this.bmsPlayerInputProcessor.keyChanged(keyboardInputProcessor, microtime, i, mouseScratchState[axis]);
@@ -88,7 +83,7 @@ public class MouseScratchInput {
                 mouseScratchChanged[control[1]] = false;
             }
 
-            for (int i=0; i<keys.length; i++) {
+            for (int i = 0; i < keys.length; i++) {
                 if (keys[i] >= 0) {
                     this.bmsPlayerInputProcessor.setAnalogState(i, true, getMouseAnalogValue(keys[i]));
                 }
@@ -100,14 +95,14 @@ public class MouseScratchInput {
         MouseScratchConfig msconfig = config.getMouseScratchConfig();
         this.keys = msconfig.getKeyAssign().clone();
         this.duration = config.getDuration();
-        this.control = new int[] { msconfig.getStart(), msconfig.getSelect() };
+        this.control = new int[]{msconfig.getStart(), msconfig.getSelect()};
 
         this.mouseScratchEnabled = msconfig.isMouseScratchEnabled();
         this.mouseScratchTimeThreshold = msconfig.getMouseScratchTimeThreshold();
         this.mouseScratchDistance = msconfig.getMouseScratchDistance();
         if (mouseScratchEnabled) {
             this.mouseToAnalog = new MouseToAnalog(mouseScratchDistance);
-            for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+            for (int i = 0; i < mouseScratchAlgorithm.length; i++) {
                 boolean xAxis = (i == 0);
                 switch (msconfig.getMouseScratchMode()) {
                     case MouseScratchConfig.MOUSE_SCRATCH_VER_1:
@@ -120,7 +115,7 @@ public class MouseScratchInput {
             }
         } else {
             this.mouseToAnalog = null;
-            for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+            for (int i = 0; i < mouseScratchAlgorithm.length; i++) {
                 this.mouseScratchAlgorithm[i] = null;
             }
         }
@@ -128,7 +123,7 @@ public class MouseScratchInput {
 
     public void clear() {
         //Arrays.fill(keytime, -duration);
-        for (int i=0; i<mouseScratchAlgorithm.length; i++) {
+        for (int i = 0; i < mouseScratchAlgorithm.length; i++) {
             if (mouseScratchAlgorithm[i] != null) {
                 mouseScratchAlgorithm[i].reset();
             }
@@ -137,7 +132,7 @@ public class MouseScratchInput {
     }
 
     private float getMouseAnalogValue(int mouseInput) {
-        final boolean plus = mouseInput%2 == 0;
+        final boolean plus = mouseInput % 2 == 0;
         final boolean xAxis = mouseInput < 2;
         final float value = mouseToAnalog.getAnalogValue(xAxis);
         return plus ? value : -value;
@@ -152,19 +147,17 @@ public class MouseScratchInput {
     }
 
     public static final class MouseToAnalog {
+        public static final int TICKS_FOR_SCRATCH = 2;
         private final int scratchDistance;
         private final int tickLength;
         private final int domain;
-
         private int totalXDistanceMoved;
         private int totalYDistanceMoved;
 
-        public static final int TICKS_FOR_SCRATCH = 2;
-
         public MouseToAnalog(int scratchDistance) {
-            this.tickLength = Math.max(1, scratchDistance/TICKS_FOR_SCRATCH);
+            this.tickLength = Math.max(1, scratchDistance / TICKS_FOR_SCRATCH);
             this.scratchDistance = scratchDistance;
-            this.domain = 256*tickLength;
+            this.domain = 256 * tickLength;
         }
 
         public void update() {
@@ -172,8 +165,8 @@ public class MouseScratchInput {
             int yDistanceMoved = Gdx.input.getY() - Gdx.graphics.getHeight() / 2;
             Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 
-            totalXDistanceMoved = ((totalXDistanceMoved+xDistanceMoved)%domain + domain)%domain;
-            totalYDistanceMoved = ((totalYDistanceMoved+yDistanceMoved)%domain + domain)%domain;
+            totalXDistanceMoved = ((totalXDistanceMoved + xDistanceMoved) % domain + domain) % domain;
+            totalYDistanceMoved = ((totalYDistanceMoved + yDistanceMoved) % domain + domain) % domain;
         }
 
         public int getScratchDistance() {
@@ -182,8 +175,8 @@ public class MouseScratchInput {
 
         public int computeDistanceDiff(int v1, int v2) {
             int v = v2 - v1;
-            if (v >= domain/2) return v-domain;
-            if (v < -domain/2) return v+domain;
+            if (v >= domain / 2) return v - domain;
+            if (v < -domain / 2) return v + domain;
             return v;
         }
 
@@ -192,7 +185,7 @@ public class MouseScratchInput {
         }
 
         public float getAnalogValue(boolean xAxis) {
-            return (float)(getDistanceMoved(xAxis)%256)/128 - 1;
+            return (float) (getDistanceMoved(xAxis) % 256) / 128 - 1;
         }
     }
 
@@ -200,6 +193,7 @@ public class MouseScratchInput {
         protected long lastpresstime;
 
         public abstract boolean isScratchActive(boolean positive);
+
         public abstract void update(final long presstime);
 
         public void reset() {
@@ -227,16 +221,16 @@ public class MouseScratchInput {
 
         private int currentScratch;
 
-        public boolean isScratchActive(boolean positive) {
-            return positive ? currentScratch > 0 : currentScratch < 0;
-        }
-
         public MouseScratchAlgorithmVersion1(int scratchDuration, MouseToAnalog mouseToAnalog, boolean xAxis) {
             this.xAxis = xAxis;
             this.scratchDuration = scratchDuration;
             this.mouseToAnalog = mouseToAnalog;
             this.prevPosition = mouseToAnalog.getDistanceMoved(xAxis);
             reset();
+        }
+
+        public boolean isScratchActive(boolean positive) {
+            return positive ? currentScratch > 0 : currentScratch < 0;
         }
 
         public void update(final long presstime) {
@@ -278,18 +272,18 @@ public class MouseScratchInput {
         private int positiveDistance = 0;
         private int negativeDistance = 0;
 
-        public boolean isScratchActive(boolean positive) {
-            return positive ? currentScratch > 0 : currentScratch < 0;
-        }
-
         public MouseScratchAlgorithmVersion2(int scratchDuration, MouseToAnalog mouseToAnalog, boolean xAxis) {
             this.xAxis = xAxis;
             this.scratchDuration = scratchDuration;
             this.mouseToAnalog = mouseToAnalog;
             this.scratchDistance = mouseToAnalog.getScratchDistance();
-            this.scratchReverseDistance = this.scratchDistance/3;
+            this.scratchReverseDistance = this.scratchDistance / 3;
             this.prevPosition = mouseToAnalog.getDistanceMoved(xAxis);
             reset();
+        }
+
+        public boolean isScratchActive(boolean positive) {
+            return positive ? currentScratch > 0 : currentScratch < 0;
         }
 
         public void update(final long presstime) {
@@ -321,7 +315,7 @@ public class MouseScratchInput {
                     positiveNoMovementTime = 0;
                     positiveDistance = scratchDistance;
                 }
-            } 
+            }
             if (negativeDistance > 0) {
                 if (currentScratch == 1) {
                     if (negativeDistance >= scratchReverseDistance) {
@@ -341,7 +335,7 @@ public class MouseScratchInput {
                 if (currentScratch == 1) {
                     currentScratch = 0;
                 }
-            }   
+            }
             if (negativeNoMovementTime >= scratchDuration) {
                 negativeDistance = 0;
                 if (currentScratch == -1) {

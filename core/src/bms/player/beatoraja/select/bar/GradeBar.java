@@ -6,24 +6,24 @@ import bms.player.beatoraja.song.SongData;
 
 /**
  * コース選択用バー
- * 
+ *
  * @author exch
  */
 public class GradeBar extends SelectableBar {
 
-	/**
-	 * コースデータ
-	 */
+    /**
+     * コースデータ
+     */
     private final CourseData course;
-	/**
-	 * ミラー使用時のスコア
-	 * TODO 不要かも
-	 */
+    /**
+     * ミラー使用時のスコア
+     * TODO 不要かも
+     */
     private ScoreData mscore;
-	/**
-	 * ランダム使用時のスコア
-	 * TODO 不要かも
-	 */
+    /**
+     * ランダム使用時のスコア
+     * TODO 不要かも
+     */
     private ScoreData rscore;
 
     public GradeBar(CourseData course) {
@@ -35,7 +35,7 @@ public class GradeBar extends SelectableBar {
     }
 
     public final SongData[] getSongDatas() {
-    	return course.getSong();
+        return course.getSong();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class GradeBar extends SelectableBar {
     }
 
     public final CourseData.TrophyData getTrophy() {
-    	ScoreData[] scores = {this.getScore(), mscore, rscore};
+        ScoreData[] scores = {this.getScore(), mscore, rscore};
 
         CourseData.TrophyData[] trophies = course.getTrophy();
         for (int i = trophies.length - 1; i >= 0; i--) {
@@ -89,7 +89,7 @@ public class GradeBar extends SelectableBar {
     }
 
     public final int getLamp(boolean isPlayer) {
-    	// TODO ライバルスコア
+        // TODO ライバルスコア
         int result = 0;
         if (getScore() != null && getScore().getClear() > result) {
             result = getScore().getClear();

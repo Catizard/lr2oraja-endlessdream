@@ -7,7 +7,7 @@ plugins {
 // use `-Dplatform=[platform]` or change this value to set the target platform for the jar
 // Available platforms:
 //    "windows", "linux", "macos"
-var platform = when(System.getProperty("platform") != null)  {
+var platform = when (System.getProperty("platform") != null) {
     true -> System.getProperty("platform")
     false -> "windows"
 }!!
@@ -63,36 +63,36 @@ dependencies {
                 withDependencies {
                     removeAll {
                         it.module.name in listOf(
-                                "artoolkitplus",
-                                "ffmpeg",
-                                "flandmark",
-                                "flycapture",
-                                "ibfreenect2",
-                                "leptonica",
-                                "libdc1394",
-                                "libfreenect",
-                                "libfreenect2",
-                                "librealsense",
-                                "librealsense2",
-                                "openblas",
-                                "opencv",
-                                "tesseract",
-                                "videoinput",
-                                "artoolkitplus-platform",
-                                "ffmpeg-platform",
-                                "flandmark-platform",
-                                "flycapture-platform",
-                                "ibfreenect2-platform",
-                                "leptonica-platform",
-                                "libdc1394-platform",
-                                "libfreenect-platform",
-                                "libfreenect2-platform",
-                                "librealsense-platform",
-                                "librealsense2-platform",
-                                "openblas-platform",
-                                "opencv-platform",
-                                "tesseract-platform",
-                                "videoinput-platform"
+                            "artoolkitplus",
+                            "ffmpeg",
+                            "flandmark",
+                            "flycapture",
+                            "ibfreenect2",
+                            "leptonica",
+                            "libdc1394",
+                            "libfreenect",
+                            "libfreenect2",
+                            "librealsense",
+                            "librealsense2",
+                            "openblas",
+                            "opencv",
+                            "tesseract",
+                            "videoinput",
+                            "artoolkitplus-platform",
+                            "ffmpeg-platform",
+                            "flandmark-platform",
+                            "flycapture-platform",
+                            "ibfreenect2-platform",
+                            "leptonica-platform",
+                            "libdc1394-platform",
+                            "libfreenect-platform",
+                            "libfreenect2-platform",
+                            "librealsense-platform",
+                            "librealsense2-platform",
+                            "openblas-platform",
+                            "opencv-platform",
+                            "tesseract-platform",
+                            "videoinput-platform"
                         )
                     }
                 }

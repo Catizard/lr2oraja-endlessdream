@@ -1,8 +1,8 @@
 package bms.player.beatoraja.launcher;
 
+import javafx.beans.value.WritableValue;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableCell;
-import javafx.beans.value.WritableValue;
 
 /**
  * TableCell用 NumericSpinner
@@ -15,7 +15,7 @@ public final class SpinnerCell extends TableCell<ControllerConfigViewModel, Inte
         spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, initial, step));
         spinner.setEditable(true);
         spinner.valueProperty().addListener((o, oldValue, newValue) -> {
-            WritableValue<Integer> cellProperty = (WritableValue<Integer>)getTableColumn().getCellObservableValue((ControllerConfigViewModel)getTableRow().getItem());
+            WritableValue<Integer> cellProperty = (WritableValue<Integer>) getTableColumn().getCellObservableValue((ControllerConfigViewModel) getTableRow().getItem());
             cellProperty.setValue(newValue);
         });
     }

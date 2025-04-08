@@ -6,18 +6,12 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class RandomTrainer {
+    private static final ArrayList<Boolean> laneMask = new ArrayList<>(Arrays.asList(false, false, false, false, false, false, false));
+    private static final ArrayDeque<RandomHistoryEntry> laneOrderHistory = new ArrayDeque<RandomHistoryEntry>();
     private static String laneOrder = "1234567";
-
-
-
     private static boolean blackWhitePermute;
     private static boolean active;
-
-    private static final ArrayList<Boolean> laneMask = new ArrayList<>(Arrays.asList(false, false, false, false, false, false, false));
-
     private static HashMap<Integer, Long> randomSeedMap;
-
-    private static final ArrayDeque<RandomHistoryEntry> laneOrderHistory = new ArrayDeque<RandomHistoryEntry>();
 
     public RandomTrainer() {
         if (randomSeedMap == null) {
@@ -65,6 +59,10 @@ public class RandomTrainer {
         return laneOrder;
     }
 
+    public static void setLaneOrder(String number) {
+        laneOrder = number;
+    }
+
     public static boolean isActive() {
         return active;
     }
@@ -79,11 +77,6 @@ public class RandomTrainer {
 
     public static void setBlackWhitePermute(boolean blackWhitePermute) {
         RandomTrainer.blackWhitePermute = blackWhitePermute;
-    }
-
-
-    public static void setLaneOrder(String number) {
-        laneOrder = number;
     }
 
     public static ArrayDeque<RandomHistoryEntry> getRandomHistory() {

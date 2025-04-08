@@ -15,13 +15,13 @@ data class JvmNativeVariant(val targetName: String, val os: String, val arch: St
 @CacheableRule
 abstract class FFmpegRule : ComponentMetadataRule {
     val jvmNativeVariants: List<JvmNativeVariant> = listOf(
-            JvmNativeVariant("linux-arm64", OperatingSystemFamily.LINUX, "aarch64"),
-            JvmNativeVariant("linux-arm64", OperatingSystemFamily.LINUX, "arm64-v8"),
-            JvmNativeVariant("linux-x86_64", OperatingSystemFamily.LINUX, "x86-64"),
-            JvmNativeVariant("macosx-arm64", OperatingSystemFamily.MACOS, "aarch64"),
-            JvmNativeVariant("macosx-arm64", OperatingSystemFamily.MACOS, "arm64-v8"),
-            JvmNativeVariant("macosx-x86_64", OperatingSystemFamily.MACOS, "x86-64"),
-            JvmNativeVariant("windows-x86_64", OperatingSystemFamily.WINDOWS, "x86-64")
+        JvmNativeVariant("linux-arm64", OperatingSystemFamily.LINUX, "aarch64"),
+        JvmNativeVariant("linux-arm64", OperatingSystemFamily.LINUX, "arm64-v8"),
+        JvmNativeVariant("linux-x86_64", OperatingSystemFamily.LINUX, "x86-64"),
+        JvmNativeVariant("macosx-arm64", OperatingSystemFamily.MACOS, "aarch64"),
+        JvmNativeVariant("macosx-arm64", OperatingSystemFamily.MACOS, "arm64-v8"),
+        JvmNativeVariant("macosx-x86_64", OperatingSystemFamily.MACOS, "x86-64"),
+        JvmNativeVariant("windows-x86_64", OperatingSystemFamily.WINDOWS, "x86-64")
     )
 
     @get:Inject

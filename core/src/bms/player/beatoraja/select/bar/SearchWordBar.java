@@ -1,7 +1,6 @@
 package bms.player.beatoraja.select.bar;
 
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.song.SongData;
 
 /**
  * 検索用バー

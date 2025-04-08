@@ -15,80 +15,80 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class VideoConfigurationView implements Initializable {
-	@FXML
-	private ComboBox<Resolution> resolution;
-	@FXML
-	private ComboBox<Config.DisplayMode> displayMode;
-	@FXML
-	private ComboBox<String> bgaOp;
-	@FXML
-	private ComboBox<String> bgaExpand;
+    @FXML
+    private ComboBox<Resolution> resolution;
+    @FXML
+    private ComboBox<Config.DisplayMode> displayMode;
+    @FXML
+    private ComboBox<String> bgaOp;
+    @FXML
+    private ComboBox<String> bgaExpand;
 
-	@FXML
-	private CheckBox vSync;
+    @FXML
+    private CheckBox vSync;
 
-	@FXML
-	private Spinner<Integer> maxFps;
-	@FXML
-	private Spinner<Integer> missLayerTime;
+    @FXML
+    private Spinner<Integer> maxFps;
+    @FXML
+    private Spinner<Integer> missLayerTime;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-		updateResolutions();
+        updateResolutions();
 
-		displayMode.getItems().setAll(Config.DisplayMode.values());
+        displayMode.getItems().setAll(Config.DisplayMode.values());
     }
 
     public void update(Config config) {
-		displayMode.setValue(config.getDisplaymode());
-		resolution.setValue(config.getResolution());
-		vSync.setSelected(config.isVsync());
-		bgaOp.getSelectionModel().select(config.getBga());
-		bgaExpand.getSelectionModel().select(config.getBgaExpand());
-		maxFps.getValueFactory().setValue(config.getMaxFramePerSecond());
-	}
+        displayMode.setValue(config.getDisplaymode());
+        resolution.setValue(config.getResolution());
+        vSync.setSelected(config.isVsync());
+        bgaOp.getSelectionModel().select(config.getBga());
+        bgaExpand.getSelectionModel().select(config.getBgaExpand());
+        maxFps.getValueFactory().setValue(config.getMaxFramePerSecond());
+    }
 
-	public void updatePlayer(PlayerConfig player) {
-		missLayerTime.getValueFactory().setValue(player.getMisslayerDuration());
-	}
+    public void updatePlayer(PlayerConfig player) {
+        missLayerTime.getValueFactory().setValue(player.getMisslayerDuration());
+    }
 
-	public void commit(Config config) {
-		config.setResolution(resolution.getValue());
-		config.setDisplaymode(displayMode.getValue());
-		config.setVsync(vSync.isSelected());
-		config.setBga(bgaOp.getSelectionModel().getSelectedIndex());
-		config.setBgaExpand(bgaExpand.getSelectionModel().getSelectedIndex());
-		config.setMaxFramePerSecond(maxFps.getValue());
-	}
+    public void commit(Config config) {
+        config.setResolution(resolution.getValue());
+        config.setDisplaymode(displayMode.getValue());
+        config.setVsync(vSync.isSelected());
+        config.setBga(bgaOp.getSelectionModel().getSelectedIndex());
+        config.setBgaExpand(bgaExpand.getSelectionModel().getSelectedIndex());
+        config.setMaxFramePerSecond(maxFps.getValue());
+    }
 
-	public void commitPlayer(PlayerConfig player) {
-		player.setMisslayerDuration(missLayerTime.getValue());
-	}
+    public void commitPlayer(PlayerConfig player) {
+        player.setMisslayerDuration(missLayerTime.getValue());
+    }
 
-	@FXML
-	public void updateResolutions() {
-		Resolution oldValue = resolution.getValue();
-		resolution.getItems().clear();
+    @FXML
+    public void updateResolutions() {
+        Resolution oldValue = resolution.getValue();
+        resolution.getItems().clear();
 
-		if (displayMode.getValue() == Config.DisplayMode.FULLSCREEN) {
-			Graphics.DisplayMode[] displays = MainLoader.getAvailableDisplayMode();
-			for(Resolution r : Resolution.values()) {
-				for(Graphics.DisplayMode display : displays) {
-					if(display.width == r.width && display.height == r.height) {
-						resolution.getItems().add(r);
-						break;
-					}
-				}
-			}
-		} else {
-			Graphics.DisplayMode display = MainLoader.getDesktopDisplayMode();
-			for(Resolution r : Resolution.values()) {
-				if (r.width <= display.width && r.height <= display.height) {
-					resolution.getItems().add(r);
-				}
-			}
-		}
-		resolution.setValue(resolution.getItems().contains(oldValue)
-				? oldValue : resolution.getItems().get(resolution.getItems().size() - 1));
-	}
+        if (displayMode.getValue() == Config.DisplayMode.FULLSCREEN) {
+            Graphics.DisplayMode[] displays = MainLoader.getAvailableDisplayMode();
+            for (Resolution r : Resolution.values()) {
+                for (Graphics.DisplayMode display : displays) {
+                    if (display.width == r.width && display.height == r.height) {
+                        resolution.getItems().add(r);
+                        break;
+                    }
+                }
+            }
+        } else {
+            Graphics.DisplayMode display = MainLoader.getDesktopDisplayMode();
+            for (Resolution r : Resolution.values()) {
+                if (r.width <= display.width && r.height <= display.height) {
+                    resolution.getItems().add(r);
+                }
+            }
+        }
+        resolution.setValue(resolution.getItems().contains(oldValue)
+                ? oldValue : resolution.getItems().get(resolution.getItems().size() - 1));
+    }
 }

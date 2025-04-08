@@ -5,13 +5,13 @@ import bms.player.beatoraja.skin.SkinHeader;
 
 public class JsonCourseResultSkinObjectLoader extends JsonSkinObjectLoader<CourseResultSkin> {
 
-	public JsonCourseResultSkinObjectLoader(JSONSkinLoader loader) {
-		super(loader);
-	}
+    public JsonCourseResultSkinObjectLoader(JSONSkinLoader loader) {
+        super(loader);
+    }
 
-	@Override
-	public CourseResultSkin getSkin(SkinHeader header) {
-		return new CourseResultSkin(header);
-	}
+    @Override
+    public CourseResultSkin getSkin(SkinHeader header) {
+        return new CourseResultSkin(header);
+    }
 
 }

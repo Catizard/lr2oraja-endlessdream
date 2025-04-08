@@ -12,21 +12,17 @@ import java.util.Collections;
 import static bms.player.beatoraja.modmenu.ImGuiRenderer.*;
 
 public class RandomTrainerMenu {
-    private static ImBoolean RANDOM_TRAINER_ENABLED = new ImBoolean(false);
-
-    private static ImBoolean BLACK_WHITE_RANDOM_PERMUTATION = new ImBoolean(false);
-
-    private static ArrayList<String> LANE_ORDER = new ArrayList<>(Arrays.asList("1","2","3","4","5","6","7"));
-
     private static final ImBoolean TRACK_RAN_WHEN_DISABLED = new ImBoolean(false);
-
+    private static ImBoolean RANDOM_TRAINER_ENABLED = new ImBoolean(false);
+    private static ImBoolean BLACK_WHITE_RANDOM_PERMUTATION = new ImBoolean(false);
+    private static ArrayList<String> LANE_ORDER = new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5", "6", "7"));
 
     public static void show(ImBoolean showRandomTrainer) {
         float relativeX = windowWidth * 0.455f;
         float relativeY = windowHeight * 0.04f;
         ImGui.setNextWindowPos(relativeX, relativeY, ImGuiCond.FirstUseEver);
 
-        if(ImGui.begin("Random Trainer", showRandomTrainer, ImGuiWindowFlags.AlwaysAutoResize)) {
+        if (ImGui.begin("Random Trainer", showRandomTrainer, ImGuiWindowFlags.AlwaysAutoResize)) {
             // Update key display when tracking random
             if (TRACK_RAN_WHEN_DISABLED.get() && !RandomTrainer.getRandomHistory().isEmpty()) {
                 String lastRan = RandomTrainer.getRandomHistory().getFirst().getRandom();
@@ -94,7 +90,7 @@ public class RandomTrainerMenu {
                         } else {
                             ImGui.text(entry.getRandom());
                         }
-                        if(ImGui.isItemHovered()) {
+                        if (ImGui.isItemHovered()) {
                             ImGui.tableSetBgColor(ImGuiTableBgTarget.CellBg, ImColor.rgb(110, 90, 20));
                             if (ImGui.isMouseDoubleClicked(0)) {
                                 changeLaneOrder(entry.getRandom());
@@ -112,19 +108,19 @@ public class RandomTrainerMenu {
     private static void dragAndDropKeyDisplay() {
         ImGui.text("Random Select");
         ImGui.sameLine();
-        ImGui.pushStyleColor(ImGuiCol.Text, ImColor.rgb(196,196,196));
+        ImGui.pushStyleColor(ImGuiCol.Text, ImColor.rgb(196, 196, 196));
         ImGui.text("(drag and drop to reorder lanes)");
         ImGui.popStyleColor();
         ImGui.newLine();
-        for(int i = 0; i < LANE_ORDER.size(); i++) {
+        for (int i = 0; i < LANE_ORDER.size(); i++) {
             ImGui.pushID(i);
             ImGui.sameLine();
             if (Integer.parseInt(LANE_ORDER.get(i)) % 2 == 0) {
-                ImGui.pushStyleColor(ImGuiCol.Button, ImColor.rgb(0,0,139));
-                ImGui.pushStyleColor(ImGuiCol.Text, ImColor.rgb(230,230,230));
+                ImGui.pushStyleColor(ImGuiCol.Button, ImColor.rgb(0, 0, 139));
+                ImGui.pushStyleColor(ImGuiCol.Text, ImColor.rgb(230, 230, 230));
             } else {
-                ImGui.pushStyleColor(ImGuiCol.Button, ImColor.rgb(230,230,230));
-                ImGui.pushStyleColor(ImGuiCol.Text, ImColor.rgb(49,49,49));
+                ImGui.pushStyleColor(ImGuiCol.Button, ImColor.rgb(230, 230, 230));
+                ImGui.pushStyleColor(ImGuiCol.Text, ImColor.rgb(49, 49, 49));
             }
             if (BLACK_WHITE_RANDOM_PERMUTATION.get()) {
                 ImGui.button("", 50, 80);
@@ -155,6 +151,7 @@ public class RandomTrainerMenu {
     private static void changeLaneOrder(String random) {
         for (int i = 0; i < LANE_ORDER.size(); i++) {
             LANE_ORDER.set(i, String.valueOf(random.charAt(i)));
-        };
+        }
+        ;
     }
 }

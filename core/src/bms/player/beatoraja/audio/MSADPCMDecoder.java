@@ -4,44 +4,39 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 
-/* 
+/*
  * This class decodes Microsoft's WAV ADPCM codec into 16-bit PCM.
- * This is specifically MS-ADPCM, or RIFF Audio ID 0x0002 
- * 
+ * This is specifically MS-ADPCM, or RIFF Audio ID 0x0002
+ *
  * @author Sarah A.
  */
 public class MSADPCMDecoder {
 
     private static final int[] AdaptionTable = {
-        230, 230, 230, 230, 307, 409, 521, 614,
-        768, 614, 512, 409, 307, 230, 230, 230
+            230, 230, 230, 230, 307, 409, 521, 614,
+            768, 614, 512, 409, 307, 230, 230, 230
     };
 
     private static final int[] InitializationCoeff1 = {
-        256, 512, 0, 192, 240, 460, 392
+            256, 512, 0, 192, 240, 460, 392
     };
     private static final int[] InitializationCoeff2 = {
-        0, -256, 0, 64, 0, -208, -232
+            0, -256, 0, 64, 0, -208, -232
     };
-
-    private int[] AdaptCoeff1;
-    private int[] AdaptCoeff2;
-
-    private short[] InitialDelta = new short[2];
-    private short[] Sample1 = new short[2];
-    private short[] Sample2 = new short[2];
-
-    private short[] pcmBlock;
-    private final byte[]  adpcmBlock;
-
+    private final byte[] adpcmBlock;
     private final int samplesPerBlock;
     private final int channels;
     private final int blocksize;
     private final int sampleRate;
+    private int[] AdaptCoeff1;
+    private int[] AdaptCoeff2;
+    private short[] InitialDelta = new short[2];
+    private short[] Sample1 = new short[2];
+    private short[] Sample2 = new short[2];
+    private short[] pcmBlock;
 
     public MSADPCMDecoder(int channels, int sampleRate, int blockAlign) {
         this.channels = channels;
@@ -49,23 +44,23 @@ public class MSADPCMDecoder {
         this.blocksize = blockAlign;
         this.samplesPerBlock = (blocksize - channels * 4) * (channels ^ 3) + 1;
 
-        pcmBlock        = new short[samplesPerBlock * channels];
-        adpcmBlock      = new byte[blocksize];
+        pcmBlock = new short[samplesPerBlock * channels];
+        adpcmBlock = new byte[blocksize];
     }
 
     public ByteArrayOutputStream decode(ByteBuffer in, ByteArrayOutputStream out) throws IOException {
         while (in.hasRemaining()) {
             int samplesPerBlock = (blocksize - channels * 4) * (channels ^ 3) + 1;
             int blockAdpcmSamples = samplesPerBlock;
-            int blockPcmSamples   = samplesPerBlock;
-            int currentBlockSize  = blocksize;
+            int blockPcmSamples = samplesPerBlock;
+            int currentBlockSize = blocksize;
 
             int numSamples = (in.remaining() - 6 * channels) * 2 / channels;
             if (currentBlockSize > in.remaining()) {
                 samplesPerBlock = (in.remaining() - channels * 4) * (channels ^ 3) + 1;
             }
 
-            pcmBlock = new short[samplesPerBlock*channels];
+            pcmBlock = new short[samplesPerBlock * channels];
 /*             if (currentBlockSize > in.remaining()) {
                 int numSamples = (in.remaining() - 6 * channels) * 2 / channels;
                 if (blockAdpcmSamples > numSamples) {
@@ -102,35 +97,35 @@ public class MSADPCMDecoder {
         Logger.getGlobal().info("Return hit");
         return out;
     }
-    
+
     private void decode_block(short[] out, byte[] block_data, int inSize) throws IOException {
         //Logger.getGlobal().info("decoding block");
-        
+
         AdaptCoeff1 = new int[channels];
         AdaptCoeff2 = new int[channels];
-        
+
         int outPtr = 0;
         int inPtr = 0;
-        
+
         /*
          * Obtain ADPCM block preamble for all channels.
          * Channels are interleaved for the block predictor.
          * iDelta, Sample's 1 and 2 are all signed 16 bit Shorts in little endian
-         * 
+         *
          * Here is an example block preamble layout for stereo
          *    Byte          Description
          *   ----------------------------------
          *      0       left  channel block predictor
-         *      1       right channel block predictor 
-         *      2       left  channel idelta LOW     
+         *      1       right channel block predictor
+         *      2       left  channel idelta LOW
          *      3       left  channel idelta HIGH
          *      4       right channel idelta LOW
          *      5       right channel idelta HIGH
-         *      6       left  channel sample1 LOW    
+         *      6       left  channel sample1 LOW
          *      7       left  channel sample1 HIGH
          *      8       right channel sample1 LOW
          *      9       right channel sample1 HIGH
-         *     10       left  channel sample2 LOW    
+         *     10       left  channel sample2 LOW
          *     11       left  channel sample2 HIGH
          *     12       right channel sample2 LOW
          *     13       right channel sample2 HIGH
@@ -139,10 +134,10 @@ public class MSADPCMDecoder {
             int predictor = Byte.toUnsignedInt(block_data[inPtr]);
             if (predictor > 6) {
                 Logger.getGlobal().warning("Malformed block header");
-                throw new IOException("Malformed block header. Expected range for predictor 0..6, found "+ predictor);
+                throw new IOException("Malformed block header. Expected range for predictor 0..6, found " + predictor);
             }
             inPtr += 1;
-            
+
             // Initialize the Adaption coefficients for each channel by indexing
             // into the coeff. table with the predictor value (range 0..6)
             AdaptCoeff1[ch] = InitializationCoeff1[predictor];
@@ -154,7 +149,7 @@ public class MSADPCMDecoder {
             ByteBuffer iDeltaBuf = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
             iDeltaBuf.put(block_data[inPtr]);
             iDeltaBuf.put(block_data[inPtr + 1]);
-            InitialDelta[ch] = iDeltaBuf.getShort(0); 
+            InitialDelta[ch] = iDeltaBuf.getShort(0);
             inPtr += 2;
         }
 
@@ -174,16 +169,16 @@ public class MSADPCMDecoder {
             Sample2[ch] = Sample2Buf.getShort(0);
             inPtr += 2;
 
-        } 
+        }
 
 
-        for (int ch = 0; ch < channels; ch++) { 
+        for (int ch = 0; ch < channels; ch++) {
             out[outPtr++] = Sample2[ch];
-            out[outPtr++] = Sample1[ch]; 
+            out[outPtr++] = Sample1[ch];
         }
 
         int ch = 0;
-        
+
         // for (n = (nb_samples - 2) >> (1 - stereo); n > 0; n--)
         while (inPtr < inSize) {
             // need larger type than byte to avoid signed byte being used
@@ -191,7 +186,7 @@ public class MSADPCMDecoder {
 
             //Logger.getGlobal().info(String.format("0x%02X", currentByte));
 
-            
+
             out[outPtr++] = expandNibble((currentByte & 0xFF) >> 4, ch);
             ch = (ch + 1) % channels;
 
@@ -200,7 +195,7 @@ public class MSADPCMDecoder {
         }
         //Logger.getGlobal().info("===== BLOCK FINISH =====");
     }
-    
+
 
     private short expandNibble(int nibble, int channel) {
         int signed = 0;
@@ -209,7 +204,7 @@ public class MSADPCMDecoder {
         } else {
             signed = nibble;
         }
-        
+
 
         short predictor = 0;
         //Logger.getGlobal().info("Preditor reassign, channels: " + channel);
@@ -242,7 +237,7 @@ public class MSADPCMDecoder {
         return predictor;
     }
 
-    private short clamp (int value) {
+    private short clamp(int value) {
         return (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, value));
     }
 }

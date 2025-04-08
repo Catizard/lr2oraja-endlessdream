@@ -4,7 +4,6 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
-
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
@@ -16,19 +15,15 @@ import com.badlogic.gdx.utils.Align;
  */
 public abstract class SkinText extends SkinObject {
 
-    private int align = ALIGN_LEFT;
-	public static final int ALIGN_LEFT = 0;
+    public static final int ALIGN_LEFT = 0;
     public static final int ALIGN_CENTER = 1;
     public static final int ALIGN_RIGHT = 2;
-
     public static final int OVERFLOW_OVERFLOW = 0;
     public static final int OVERFLOW_SHRINK = 1;
     public static final int OVERFLOW_TRUNCATE = 2;
-    
     public static final int[] ALIGN = {Align.left, Align.center, Align.right};
-
     private final StringProperty ref;
-    
+    private int align = ALIGN_LEFT;
     private String text = "";
     private String constantText;
 
@@ -41,11 +36,11 @@ public abstract class SkinText extends SkinObject {
     private Color shadowColor;
     private Vector2 shadowOffset;
     private float shadowSmoothness;
-    
+
     private String currentText;
 
     public SkinText(int id) {
-    	ref = StringPropertyFactory.getStringProperty(id);
+        ref = StringPropertyFactory.getStringProperty(id);
     }
 
     public SkinText(StringProperty property) {
@@ -53,22 +48,22 @@ public abstract class SkinText extends SkinObject {
     }
 
     public int getAlign() {
-		return align;
-	}
+        return align;
+    }
 
     public void setAlign(int align) {
         this.align = align;
     }
-    
+
     public String getText() {
-    	return text;
+        return text;
     }
 
     public void setText(String text) {
-        if(text == null) {
+        if (text == null) {
             text = " ";
         }
-    	this.text = text;
+        this.text = text;
         prepareText(text);
     }
 
@@ -79,25 +74,25 @@ public abstract class SkinText extends SkinObject {
     public abstract void prepareFont(String text);
 
     protected abstract void prepareText(String text);
-    
+
     public void prepare(long time, MainState state) {
-    	super.prepare(time, state);
+        super.prepare(time, state);
         currentText = ref != null ? ref.get(state) : (constantText != null ? constantText : null);
-        if(currentText == null || currentText.length() == 0) {
-        	draw = false;
+        if (currentText == null || currentText.length() == 0) {
+            draw = false;
             return;
         }
     }
 
     public void draw(SkinObjectRenderer sprite) {
-        if(!currentText.equals(text)) {
+        if (!currentText.equals(text)) {
             setText(currentText);
         }
-        draw(sprite, 0,0);
+        draw(sprite, 0, 0);
     }
 
     public abstract void draw(SkinObjectRenderer sprite, float offsetX, float offsetY);
-    
+
     public boolean isEditable() {
         return editable;
     }

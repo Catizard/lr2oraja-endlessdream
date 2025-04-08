@@ -1,107 +1,107 @@
 package bms.player.beatoraja.select.bar;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
-
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 /**
- * Bar to resolve when selecting a song. 
+ * Bar to resolve when selecting a song.
  * TODO: ExecutableBar extends to make things happen
  */
 public class ExecutableBar extends SelectableBar {
 
-	/**
-	 * index table size
-	 */
-	private final static int QueueLength = 1000;
+    /**
+     * index table size
+     */
+    private final static int QueueLength = 1000;
 
-	
-	/**
-	 * bar title
-	 */
-	private final String title;
-	
-	/**
-	 * source songs
-	 */
-	private final SongData[] songs;
 
-	/**
-	 * current state pointer
-	 */
-	private final MainState state;
+    /**
+     * bar title
+     */
+    private final String title;
 
-	/**
-	 * Queue for get index to SongData array.
-	 */
-	private Queue<Integer> queue;
+    /**
+     * source songs
+     */
+    private final SongData[] songs;
 
-	/**
-	 * currentSong
-	 */
-	private SongData currentSong = null;
+    /**
+     * current state pointer
+     */
+    private final MainState state;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param songs SongData array that is the source of SongData returned according to the conditions.
-	 * @param state MainState pointer.
-	 */
-	public ExecutableBar(SongData[] songs, MainState state, String title) {
-		super();
-		this.title = title;
-		this.songs = songs;
-		this.state = state;
-		createIndexQueue();
-	}
+    /**
+     * Queue for get index to SongData array.
+     */
+    private Queue<Integer> queue;
 
-	/**
-	 * @return SongData
-	 */
-	public SongData getSongData() {
-		return _getSongData();
-	}
+    /**
+     * currentSong
+     */
+    private SongData currentSong = null;
 
-	/**
-	 * Return random SongData
-	 * 
-	 * @return SongData extracted from this.songs
-	 */
-	private synchronized SongData _getSongData() {
-		if (queue.size() == 0) {
-			createIndexQueue();
-		}
+    /**
+     * Constructor
+     *
+     * @param songs SongData array that is the source of SongData returned according to the conditions.
+     * @param state MainState pointer.
+     */
+    public ExecutableBar(SongData[] songs, MainState state, String title) {
+        super();
+        this.title = title;
+        this.songs = songs;
+        this.state = state;
+        createIndexQueue();
+    }
 
-		if (state instanceof MusicSelector || currentSong == null) {
-			int index = queue.remove();
-			currentSong = songs[index];
-		}
+    /**
+     * @return SongData
+     */
+    public SongData getSongData() {
+        return _getSongData();
+    }
 
-		return currentSong;
-	}
+    /**
+     * Return random SongData
+     *
+     * @return SongData extracted from this.songs
+     */
+    private synchronized SongData _getSongData() {
+        if (queue.size() == 0) {
+            createIndexQueue();
+        }
 
-	/**
-	 * Create random index Queue
-	 */
-	private void createIndexQueue() {
-		queue = new ArrayDeque<>();
-		for (int i = 0; i < QueueLength - 1; i++) {
-			int index = ((int) (Math.random() * (songs.length)));
-			queue.add(index);
-		}
-	}
+        if (state instanceof MusicSelector || currentSong == null) {
+            int index = queue.remove();
+            currentSong = songs[index];
+        }
 
-	@Override
-	public String getTitle() {
-		return this.title;
-	}
+        return currentSong;
+    }
 
-	@Override
-	public int getLamp(boolean isPlayer) {
-		return 0;
-	}
+    /**
+     * Create random index Queue
+     */
+    private void createIndexQueue() {
+        queue = new ArrayDeque<>();
+        for (int i = 0; i < QueueLength - 1; i++) {
+            int index = ((int) (Math.random() * (songs.length)));
+            queue.add(index);
+        }
+    }
+
+    @Override
+    public String getTitle() {
+        return this.title;
+    }
+
+    @Override
+    public int getLamp(boolean isPlayer) {
+        return 0;
+    }
 
 }

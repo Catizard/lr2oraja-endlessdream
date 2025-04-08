@@ -7,11 +7,11 @@ package bms.player.beatoraja.select.bar;
  */
 public class ContainerBar extends DirectoryBar {
 
-	private final String title;
+    private final String title;
     private final Bar[] childbar;
 
     public ContainerBar(String title, Bar[] bar) {
-    	super(null);
+        super(null);
         this.title = title;
         childbar = bar;
     }

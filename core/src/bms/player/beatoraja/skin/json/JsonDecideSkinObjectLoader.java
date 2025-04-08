@@ -5,13 +5,13 @@ import bms.player.beatoraja.skin.SkinHeader;
 
 public class JsonDecideSkinObjectLoader extends JsonSkinObjectLoader<MusicDecideSkin> {
 
-	public JsonDecideSkinObjectLoader(JSONSkinLoader loader) {
-		super(loader);
-	}
+    public JsonDecideSkinObjectLoader(JSONSkinLoader loader) {
+        super(loader);
+    }
 
-	@Override
-	public MusicDecideSkin getSkin(SkinHeader header) {
-		return new MusicDecideSkin(header);
-	}
+    @Override
+    public MusicDecideSkin getSkin(SkinHeader header) {
+        return new MusicDecideSkin(header);
+    }
 
 }

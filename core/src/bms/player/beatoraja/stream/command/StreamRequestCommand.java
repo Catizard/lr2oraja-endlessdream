@@ -1,14 +1,14 @@
 package bms.player.beatoraja.stream.command;
 
+import bms.player.beatoraja.MessageRenderer;
+import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.select.bar.HashBar;
+import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.graphics.Color;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import bms.player.beatoraja.MessageRenderer;
-import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.select.bar.HashBar;
-import bms.player.beatoraja.song.SongData;
 
 /**
  * reqコマンドの処理
@@ -48,15 +48,13 @@ public class StreamRequestCommand extends StreamCommand {
     }
 
     class UpdateBar implements Runnable {
-		final int MESSAGE_TIME = 3000;
-
-        HashBar bar;
-        List<SongData> songDatas = new ArrayList<SongData>();
-
-        // sha256 stack
-        Stack<String> stack = new Stack<>();
+        final int MESSAGE_TIME = 3000;
         // lock obj
         private final Object lock = new Object();
+        HashBar bar;
+        List<SongData> songDatas = new ArrayList<SongData>();
+        // sha256 stack
+        Stack<String> stack = new Stack<>();
 
         UpdateBar() {
             this.bar = new HashBar(selector, "Stream Request", new SongData[0]);
@@ -69,23 +67,23 @@ public class StreamRequestCommand extends StreamCommand {
                 addMessage(sha256);
             }
         }
-		
+
         void addMessage(String sha256) {
             if (notifier != null) {
-                SongData[] _songDatas = selector.getSongDatabase().getSongDatas(new String[] { escape(sha256) });
+                SongData[] _songDatas = selector.getSongDatabase().getSongDatas(new String[]{escape(sha256)});
                 if (_songDatas.length > 0) {
                     SongData data = _songDatas[0];
                     if (songDatas.stream().filter(song -> song.getSha256().equals(sha256)).count() > 0 ||
-                        stack.stream().filter(hash -> hash.equals(sha256)).count() > 1) { // stackの中身には自身を含めるため、1個の場合は通す
+                            stack.stream().filter(hash -> hash.equals(sha256)).count() > 1) { // stackの中身には自身を含めるため、1個の場合は通す
                         // すでに追加済みならスキップ
-                        notifier.addMessage(data.getFullTitle() + " はリクエスト済です" , MESSAGE_TIME, Color.ORANGE, 0);
+                        notifier.addMessage(data.getFullTitle() + " はリクエスト済です", MESSAGE_TIME, Color.ORANGE, 0);
                     }
-                    notifier.addMessage("リクエスト追加: " + data.getFullTitle() , MESSAGE_TIME, Color.LIME, 0);
+                    notifier.addMessage("リクエスト追加: " + data.getFullTitle(), MESSAGE_TIME, Color.LIME, 0);
                 } else {
-                    notifier.addMessage("リクエストされた譜面を所持していません" , MESSAGE_TIME, Color.ORANGE, 0);
+                    notifier.addMessage("リクエストされた譜面を所持していません", MESSAGE_TIME, Color.ORANGE, 0);
                 }
             }
-		}
+        }
 
         void update() {
             synchronized (lock) {
@@ -98,7 +96,7 @@ public class StreamRequestCommand extends StreamCommand {
                             // すでに追加済みならスキップ
                             continue;
                         }
-                        SongData[] _songDatas = selector.getSongDatabase().getSongDatas(new String[] { escape(sha256) });
+                        SongData[] _songDatas = selector.getSongDatabase().getSongDatas(new String[]{escape(sha256)});
                         if (_songDatas.length > 0) {
                             songDatas.add(_songDatas[0]);
                         }

@@ -1,17 +1,25 @@
 package bms.player.beatoraja.skin;
 
-import bms.player.beatoraja.*;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PixmapResourcePool;
+import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 
 import java.io.File;
-import java.nio.file.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * スキンローダー
@@ -25,12 +33,12 @@ public abstract class SkinLoader {
     private static PixmapResourcePool resource;
 
     public static void initPixmapResourcePool(int gen) {
-    	if(resource != null) {
-    		resource.dispose();
-    	}
-    	resource = new PixmapResourcePool(gen);
+        if (resource != null) {
+            resource.dispose();
+        }
+        resource = new PixmapResourcePool(gen);
     }
-    
+
     /**
      * スキンデータを読み込む
      *
@@ -40,7 +48,7 @@ public abstract class SkinLoader {
      */
     public static Skin load(MainState state, SkinType skinType) {
         Skin skin = load(state, skinType, state.resource.getPlayerConfig().getSkin()[skinType.getId()]);
-        if(skin == null) {
+        if (skin == null) {
             SkinConfig skinConfig = new SkinConfig();
             skinConfig.setPath(SkinConfig.Default.get(skinType).path);
             skinConfig.validate();
@@ -65,7 +73,7 @@ public abstract class SkinLoader {
             } else {
                 LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader(resource.getConfig());
                 SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), state, sc.getProperties());
-                LR2SkinCSVLoader dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
+                LR2SkinCSVLoader dloader = LR2SkinCSVLoader.getSkinLoader(skinType, header.getResolution(), resource.getConfig());
                 header.setSourceResolution(dloader.src);
                 header.setDestinationResolution(dloader.dst);
                 Skin skin = dloader.loadSkin(state, header, loader.getOption());
@@ -79,9 +87,9 @@ public abstract class SkinLoader {
     }
 
     public static PixmapResourcePool getResource() {
-    	if(resource == null) {
-    		initPixmapResourcePool(1);
-    	}
+        if (resource == null) {
+            initPixmapResourcePool(1);
+        }
         return resource;
     }
 
@@ -99,8 +107,8 @@ public abstract class SkinLoader {
         }
         if (imagepath.contains("*")) {
             String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
-            if(imagepath.contains("|")) {
-                if(imagepath.length() > imagepath.lastIndexOf('|') + 1) {
+            if (imagepath.contains("|")) {
+                if (imagepath.length() > imagepath.lastIndexOf('|') + 1) {
                     ext = imagepath.substring(imagepath.lastIndexOf("*") + 1, imagepath.indexOf('|')) + imagepath.substring(imagepath.lastIndexOf('|') + 1);
                 } else {
                     ext = imagepath.substring(imagepath.lastIndexOf("*") + 1, imagepath.indexOf('|'));
@@ -127,32 +135,32 @@ public abstract class SkinLoader {
     }
 
     public static Texture getTexture(String path, boolean usecim, boolean useMipMaps) {
-    	final PixmapResourcePool resource = SkinLoader.getResource();
-        if(resource.exists(path)) {
+        final PixmapResourcePool resource = SkinLoader.getResource();
+        if (resource.exists(path)) {
             return new Texture(resource.get(path), useMipMaps);
         }
         try {
             long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
             String cim = path.substring(0, path.lastIndexOf('.')) + "__" + modifiedtime + ".cim";
-            if(resource.exists(cim)) {
+            if (resource.exists(cim)) {
                 return new Texture(resource.get(cim), useMipMaps);
             }
 
             if (Files.exists(Paths.get(cim))) {
                 Pixmap pixmap = resource.get(cim);
                 return new Texture(pixmap, useMipMaps);
-            } else if(usecim){
+            } else if (usecim) {
                 Pixmap pixmap = resource.get(path);
 
                 try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(path).getParent())) {
                     for (Path p : paths) {
                         final String filename = p.toString();
-                        if(filename.startsWith(path.substring(0, path.lastIndexOf('.')) + "__") && filename.endsWith(".cim")) {
+                        if (filename.startsWith(path.substring(0, path.lastIndexOf('.')) + "__") && filename.endsWith(".cim")) {
                             Files.deleteIfExists(p);
                             break;
                         }
                     }
-                } catch(Throwable e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
                 PixmapIO.writeCIM(Gdx.files.local(cim), pixmap);

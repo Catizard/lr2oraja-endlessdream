@@ -12,9 +12,11 @@
 <?import javafx.collections.FXCollections?>
 <?import java.net.URL?>
 <?import javafx.scene.control.ScrollPane?>
-<ScrollPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.VideoConfigurationView">
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65"
+            fx:controller="bms.player.beatoraja.launcher.VideoConfigurationView">
     <GridPane styleClass="optionGrid">
-        <Label text="%DISPLAY" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
+        <Label text="%DISPLAY" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2"
+               styleClass="optionHeader"/>
 
         <Label text="%DISPLAYMODE" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="optionLabel"/>
         <ComboBox fx:id="displayMode" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
@@ -28,11 +30,13 @@
         <Label text="%MAXFPS" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="optionLabel"/>
         <NumericSpinner fx:id="maxFps" editable="true" GridPane.rowIndex="4" GridPane.columnIndex="1">
             <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60" max="1000" min="0"/>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60" max="1000"
+                                                                min="0"/>
             </valueFactory>
         </NumericSpinner>
 
-        <Label text="%BGA" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
+        <Label text="%BGA" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2"
+               styleClass="optionHeader"/>
 
         <Label text="%BGA" GridPane.rowIndex="6" GridPane.columnIndex="0" styleClass="optionLabel"/>
         <ComboBox fx:id="bgaOp" GridPane.rowIndex="6" GridPane.columnIndex="1">
@@ -52,7 +56,8 @@
         </Label>
         <NumericSpinner fx:id="missLayerTime" editable="true" GridPane.rowIndex="7" GridPane.columnIndex="1">
             <valueFactory>
-                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="10000" min="0"/>
+                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="10000"
+                                                                min="0"/>
             </valueFactory>
         </NumericSpinner>
 

@@ -9,6 +9,6 @@ import bms.player.beatoraja.MainState;
  */
 public interface FloatWriter {
 
-	public void set(MainState state, float value);
+    public void set(MainState state, float value);
 
 }

@@ -2,601 +2,634 @@ package bms.player.beatoraja.audio;
 
 import bms.model.*;
 import bms.player.beatoraja.ResourcePool;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.ObjectMap;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.utils.*;
-
 /**
  * 抽象オーディオドライバー
- * 
- * @author exch
  *
- * @param <T>
- *            音源データ
+ * @param <T> 音源データ
+ * @author exch
  */
 public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
-	/**
-	 * 効果音マップ
-	 */
-	private ObjectMap<String, AudioElement<T>> soundmap = new ObjectMap<String, AudioElement<T>>();
-	/**
-	 * キー音マップ(音切りなし)
-	 */
-	private T[] wavmap = (T[]) new Object[0];
-	/**
-	 * キー音マップ(音切りあり)
-	 */
-	private SliceWav<T>[][] slicesound = new SliceWav[0][0];
-	
-	private T[][] additionalKeySounds = (T[][]) new Object[6][2];
-	/**
-	 * キー音読み込み進捗状況
-	 */
-	private AtomicInteger progress = new AtomicInteger();
-	/**
-	 * NoteMap Size
-	 */
-	private int noteMapSize = 0;
-	/**
-	 * キー音ボリューム
-	 */
-	private float volume = 1.0f;
-	/**
-	 * 音源全体のピッチ
-	 */
-	private float globalPitch = 1.0f;
-	/**
-	 * オーディオキャッシュデータ
-	 */
-	private final AudioCache cache;
-	
-	private int sampleRate;
-	int channels;
+    /**
+     * オーディオキャッシュデータ
+     */
+    private final AudioCache cache;
+    int channels;
+    /**
+     * 効果音マップ
+     */
+    private ObjectMap<String, AudioElement<T>> soundmap = new ObjectMap<String, AudioElement<T>>();
+    /**
+     * キー音マップ(音切りなし)
+     */
+    private T[] wavmap = (T[]) new Object[0];
+    /**
+     * キー音マップ(音切りあり)
+     */
+    private SliceWav<T>[][] slicesound = new SliceWav[0][0];
+    private T[][] additionalKeySounds = (T[][]) new Object[6][2];
+    /**
+     * キー音読み込み進捗状況
+     */
+    private AtomicInteger progress = new AtomicInteger();
+    /**
+     * NoteMap Size
+     */
+    private int noteMapSize = 0;
+    /**
+     * キー音ボリューム
+     */
+    private float volume = 1.0f;
+    /**
+     * 音源全体のピッチ
+     */
+    private float globalPitch = 1.0f;
+    private int sampleRate;
 
-	public AbstractAudioDriver(int maxgen) {
-		cache = new AudioCache(Math.max(maxgen, 1));
-	}
-	/**
-	 * パスで指定された効果音ファイルの音源データを取得する
-	 * 
-	 * @param p
-	 *            音源データのパス
-	 * @return 音源データ
-	 */
-	protected abstract T getKeySound(Path p);
+    public AbstractAudioDriver(int maxgen) {
+        cache = new AudioCache(Math.max(maxgen, 1));
+    }
 
-	/**
-	 * PCMオブジェクトで指定されたキー音の音源データを取得する
-	 * 
-	 * @param pcm
-	 * @return
-	 */
-	protected abstract T getKeySound(PCM pcm);
+    /**
+     * パスで指定された効果音ファイルの音源データを取得する
+     *
+     * @param p 音源データのパス
+     * @return 音源データ
+     */
+    protected abstract T getKeySound(Path p);
 
-	/**
-	 * 音源データを開放する
-	 * 
-	 * @param pcm
-	 *            開放する音源データ
-	 */
-	protected abstract void disposeKeySound(T pcm);
+    /**
+     * PCMオブジェクトで指定されたキー音の音源データを取得する
+     *
+     * @param pcm
+     * @return
+     */
+    protected abstract T getKeySound(PCM pcm);
 
-	/**
-	 * キー音を再生する
-	 * 
-	 * @param wav
-	 *            音源データ
-	 * @param channel
-	 *            チャンネル番号(0-)
-	 * @param volume
-	 *            ボリューム(0.0-1.0)
-	 * @param pitch
-	 *            ピッチ(0.5 - 2.0)
-	 */
-	protected abstract void play(T wav, int channel, float volume, float pitch);
+    /**
+     * 音源データを開放する
+     *
+     * @param pcm 開放する音源データ
+     */
+    protected abstract void disposeKeySound(T pcm);
 
-	/**
-	 * 効果音を再生する
-	 * 
-	 * @param id
-	 *            音源データ
-	 * @param volume
-	 *            ボリューム(0.0-1.0)
-	 * @param loop
-	 *            ループ再生するかどうか
-	 */
-	protected abstract void play(AudioElement<T> id, float volume, boolean loop);
-	
-	/**
-	 * 効果音のボリュームを設定する。再生中も可能
-	 * 
-	 * @param id
-	 *            音源データ
-	 * @param volume
-	 *            ボリューム(0.0-1.0)
-	 */
-	protected abstract void setVolume(AudioElement<T> id, float volume);
+    /**
+     * キー音を再生する
+     *
+     * @param wav     音源データ
+     * @param channel チャンネル番号(0-)
+     * @param volume  ボリューム(0.0-1.0)
+     * @param pitch   ピッチ(0.5 - 2.0)
+     */
+    protected abstract void play(T wav, int channel, float volume, float pitch);
 
-	/**
-	 * 音源データが再生されていれば停止する
-	 * 
-	 * @param id
-	 *            音源データ
-	 */
-	protected abstract boolean isPlaying(T id);
+    /**
+     * 効果音を再生する
+     *
+     * @param id     音源データ
+     * @param volume ボリューム(0.0-1.0)
+     * @param loop   ループ再生するかどうか
+     */
+    protected abstract void play(AudioElement<T> id, float volume, boolean loop);
 
-	/**
-	 * 音源データが再生されていれば停止する
-	 * 
-	 * @param id
-	 *            音源データ
-	 */
-	protected abstract void stop(T id);
+    /**
+     * 効果音のボリュームを設定する。再生中も可能
+     *
+     * @param id     音源データ
+     * @param volume ボリューム(0.0-1.0)
+     */
+    protected abstract void setVolume(AudioElement<T> id, float volume);
 
-	/**
-	 * 音源データが再生されていれば停止する
-	 *
-	 * @param id
-	 *            音源データ
-	 * @param channel
-	 *            チャンネル番号(0-)
-	 */
-	protected abstract void stop(T id, int channel);
+    /**
+     * 音源データが再生されていれば停止する
+     *
+     * @param id 音源データ
+     */
+    protected abstract boolean isPlaying(T id);
 
-	/**
-	 * 音源データが再生されていればボリュームを設定する。
-	 *
-	 * @param id
-	 *            音源データ
-	 * @param channel
-	 *            チャンネル番号(0-)
-	 * @param volume
-	 *            ボリューム(0.0-1.0)
-	 */
-	protected abstract void setVolume(T id, int channel, float volume);
+    /**
+     * 音源データが再生されていれば停止する
+     *
+     * @param id 音源データ
+     */
+    protected abstract void stop(T id);
 
-	public void play(String p, float volume, boolean loop) {
-		final AudioElement<T> sound = getSound(p);
-		if (sound != null) {
-			play(sound, volume, loop);
-		}
-	}
-	
-	private AudioElement<T> getSound(String p) {
-		if (p == null || p.length() == 0) {
-			return null;
-		}
-		AudioElement<T> sound = soundmap.get(p);
-		if (!soundmap.containsKey(p)) {
-			try {
-				sound = new AudioElement(getKeySound(Paths.get(p)));
-				sound = sound.audio != null ? sound : null;
-				soundmap.put(p, sound);
-			} catch (Exception e) {
-				Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
-			}
-		}		
-		return sound;
-	}
+    /**
+     * 音源データが再生されていれば停止する
+     *
+     * @param id      音源データ
+     * @param channel チャンネル番号(0-)
+     */
+    protected abstract void stop(T id, int channel);
 
-	public void setVolume(String p, float volume) {
-		if (p == null || p.length() == 0) {
-			return;
-		}
-		AudioElement<T> sound = soundmap.get(p);
-		if (sound != null) {
-			setVolume(sound, volume);
-		}
-	}
+    /**
+     * 音源データが再生されていればボリュームを設定する。
+     *
+     * @param id      音源データ
+     * @param channel チャンネル番号(0-)
+     * @param volume  ボリューム(0.0-1.0)
+     */
+    protected abstract void setVolume(T id, int channel, float volume);
 
-	public boolean isPlaying(String p) {
-		if (p == null || p.length() == 0) {
-			return false;
-		}
-		AudioElement<T> sound = soundmap.get(p);
-		if (sound != null) {
-			return isPlaying(sound.audio);
-		}
-		return false;
-	}
+    public void play(String p, float volume, boolean loop) {
+        final AudioElement<T> sound = getSound(p);
+        if (sound != null) {
+            play(sound, volume, loop);
+        }
+    }
 
-	public int getSampleRate() {
-		return sampleRate;
-	}
-	
-	protected void setSampleRate(int sampleRate) {
-		this.sampleRate = sampleRate;
-	}
-	
-	public void stop(String p) {
-		if (p == null || p.length() == 0) {
-			return;
-		}
-		AudioElement<T> sound = soundmap.get(p);
-		if (sound != null) {
-			stop(sound.audio);
-		}
-	}
+    private AudioElement<T> getSound(String p) {
+        if (p == null || p.length() == 0) {
+            return null;
+        }
+        AudioElement<T> sound = soundmap.get(p);
+        if (!soundmap.containsKey(p)) {
+            try {
+                sound = new AudioElement(getKeySound(Paths.get(p)));
+                sound = sound.audio != null ? sound : null;
+                soundmap.put(p, sound);
+            } catch (Exception e) {
+                Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
+            }
+        }
+        return sound;
+    }
 
-	public void dispose(String p) {
-		if (p == null || p.length() == 0) {
-			return;
-		}
-		AudioElement<T> sound = soundmap.get(p);
-		if (sound != null) {
-			soundmap.remove(p);
-			disposeKeySound(sound.audio);
-		}
-	}
+    public void setVolume(String p, float volume) {
+        if (p == null || p.length() == 0) {
+            return;
+        }
+        AudioElement<T> sound = soundmap.get(p);
+        if (sound != null) {
+            setVolume(sound, volume);
+        }
+    }
 
-	/**
-	 * BMSの音源データを読み込む
-	 *
-	 * @param model
-	 */
-	public synchronized void setModel(BMSModel model) {
-		Logger.getGlobal().info("音源ファイル読み込み開始。");
-		String[] wavlist = model.getWavList();
-		final int wavcount = wavlist.length;
-		boolean use_defaultsound = false;
-		Array<SliceWav<T>>[] slicesound;
+    public boolean isPlaying(String p) {
+        if (p == null || p.length() == 0) {
+            return false;
+        }
+        AudioElement<T> sound = soundmap.get(p);
+        if (sound != null) {
+            return isPlaying(sound.audio);
+        }
+        return false;
+    }
 
-		progress = new AtomicInteger();
-		noteMapSize = 0;
-		// BMS格納ディレクトリ
-		Path dpath = Paths.get(model.getPath()).getParent();
+    public int getSampleRate() {
+        return sampleRate;
+    }
 
-		if (model.getVolwav() > 0 && model.getVolwav() < 100) {
-			volume = model.getVolwav() / 100f;
-		} else {
-			volume = 1.0f;
-		}
+    protected void setSampleRate(int sampleRate) {
+        this.sampleRate = sampleRate;
+    }
 
-		IntMap<List<Note>> notemap = new IntMap<List<Note>>();
-		final int lanes = model.getMode().key;
-		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < lanes; i++) {
-				final Note n = tl.getNote(i);
-				if (n != null) {
-					// 地雷ノートに音が定義されていない場合のみ、本体側で音の定義を追加
-					if (!use_defaultsound && n instanceof MineNote && n.getWav() == wavcount) {
-						use_defaultsound = true;
-					}
-					addNoteList(notemap, n);
-					for (Note ln : n.getLayeredNotes()) {
-						addNoteList(notemap, ln);
-					}
-				}
-				if (tl.getHiddenNote(i) != null) {
-					addNoteList(notemap, tl.getHiddenNote(i));
-				}
-			}
-			for (Note n : tl.getBackGroundNotes()) {
-				addNoteList(notemap, n);
-			}
-		}
-		if (use_defaultsound) {
-			wavmap = (T[]) new Object[wavcount+1];
-			this.slicesound = new SliceWav[wavcount+1][];
-			slicesound = new Array[wavcount+1];
-		} else {
-			wavmap = (T[]) new Object[wavcount];
-			this.slicesound = new SliceWav[wavcount][];
-			slicesound = new Array[wavcount];
-		}
-		noteMapSize = notemap.size;
-		Map<Integer, List<Note>> map = new HashMap<>();
-		notemap.iterator().forEachRemaining(m -> map.put(m.key, m.value));
-		map.entrySet().parallelStream().forEach(waventry -> {
-			final int wavid = waventry.getKey();
-			if (progress.get() >= noteMapSize) {
-				return;
-			}
-			if (wavid < 0) {
-				return;
-			}
-			try {
-				Path p;
-				if (wavid < wavcount) {
-					p = dpath.resolve(wavlist[wavid]).toAbsolutePath();
-				} else {
-					p = Paths.get("defaultsound/landmine.wav").toAbsolutePath();
-				}
-				for (Note note : waventry.getValue()) {
-					// 音切りあり・なし両方のデータが必要になるケースがある
-					if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
-						// 音切りなしのケース
-						wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
-						if (wavmap[wavid] == null) {
-							break;
-						}
-					} else {
-						// 音切りありのケース
-						boolean b = true;
-						if (slicesound[note.getWav()] == null) {
-							slicesound[note.getWav()] = new Array<SliceWav<T>>();
-						}
-						for (SliceWav<T> slice : slicesound[note.getWav()]) {
-							if (slice.starttime == note.getMicroStarttime() && slice.duration == note.getMicroDuration()) {
-								b = false;
-								break;
-							}
-						}
-						if (b) {
-							T sliceaudio = cache.get(new AudioKey(p.toString(), note));
-							if (sliceaudio != null) {
-								slicesound[note.getWav()].add(new SliceWav<T>(note, sliceaudio));
-							} else {
-								return;
-							}
-						}
-					}
-				}
-			} catch (InvalidPathException e) {
-				Logger.getGlobal().warning(e.getMessage());
-			}
-			progress.incrementAndGet();
-		});
+    public void stop(String p) {
+        if (p == null || p.length() == 0) {
+            return;
+        }
+        AudioElement<T> sound = soundmap.get(p);
+        if (sound != null) {
+            stop(sound.audio);
+        }
+    }
 
-		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + wavmap.length);
-		for (int i = 0; i < wavmap.length; i++) {
-			if (slicesound[i] != null) {
-				this.slicesound[i] = slicesound[i].toArray(SliceWav.class);
-			} else {
-				this.slicesound[i] = new SliceWav[0];
-			}
-		}
+    public void dispose(String p) {
+        if (p == null || p.length() == 0) {
+            return;
+        }
+        AudioElement<T> sound = soundmap.get(p);
+        if (sound != null) {
+            soundmap.remove(p);
+            disposeKeySound(sound.audio);
+        }
+    }
 
-		final int prevsize = cache.size();
-		cache.disposeOld();
-		Logger.getGlobal().info("AudioCache容量 : " + cache.size() + " 開放 : " + (prevsize - cache.size()));
+    /**
+     * BMSの音源データを読み込む
+     *
+     * @param model
+     */
+    public synchronized void setModel(BMSModel model) {
+        Logger.getGlobal().info("音源ファイル読み込み開始。");
+        String[] wavlist = model.getWavList();
+        final int wavcount = wavlist.length;
+        boolean use_defaultsound = false;
+        Array<SliceWav<T>>[] slicesound;
 
-		progress.set(noteMapSize);
-	}
-	
-	public void setAdditionalKeySound(int judge, boolean fast, String p) {
-		if(judge < 0 || judge >= additionalKeySounds.length) {
-			return;
-		}
-		
-		final AudioElement<T> sound = getSound(p);
-		additionalKeySounds[judge][fast ? 0 : 1] = sound != null ? sound.audio : null;		
-	}
+        progress = new AtomicInteger();
+        noteMapSize = 0;
+        // BMS格納ディレクトリ
+        Path dpath = Paths.get(model.getPath()).getParent();
 
-	private void addNoteList(IntMap<List<Note>> notemap, Note n) {
-		if (n.getWav() < 0) {
-			return;
-		}
-		List<Note> notes = notemap.get(n.getWav());
-		if (notes == null) {
-			notes = new ArrayList<Note>();
-			notemap.put(n.getWav(), notes);
-		}
+        if (model.getVolwav() > 0 && model.getVolwav() < 100) {
+            volume = model.getVolwav() / 100f;
+        } else {
+            volume = 1.0f;
+        }
 
-		for (Note note : notes) {
-			if (n.getMicroStarttime() == note.getMicroStarttime() && n.getMicroDuration() == note.getMicroDuration()) {
-				return;
-			}
-		}
-		notes.add(n);
-	}
+        IntMap<List<Note>> notemap = new IntMap<List<Note>>();
+        final int lanes = model.getMode().key;
+        for (TimeLine tl : model.getAllTimeLines()) {
+            for (int i = 0; i < lanes; i++) {
+                final Note n = tl.getNote(i);
+                if (n != null) {
+                    // 地雷ノートに音が定義されていない場合のみ、本体側で音の定義を追加
+                    if (!use_defaultsound && n instanceof MineNote && n.getWav() == wavcount) {
+                        use_defaultsound = true;
+                    }
+                    addNoteList(notemap, n);
+                    for (Note ln : n.getLayeredNotes()) {
+                        addNoteList(notemap, ln);
+                    }
+                }
+                if (tl.getHiddenNote(i) != null) {
+                    addNoteList(notemap, tl.getHiddenNote(i));
+                }
+            }
+            for (Note n : tl.getBackGroundNotes()) {
+                addNoteList(notemap, n);
+            }
+        }
+        if (use_defaultsound) {
+            wavmap = (T[]) new Object[wavcount + 1];
+            this.slicesound = new SliceWav[wavcount + 1][];
+            slicesound = new Array[wavcount + 1];
+        } else {
+            wavmap = (T[]) new Object[wavcount];
+            this.slicesound = new SliceWav[wavcount][];
+            slicesound = new Array[wavcount];
+        }
+        noteMapSize = notemap.size;
+        Map<Integer, List<Note>> map = new HashMap<>();
+        notemap.iterator().forEachRemaining(m -> map.put(m.key, m.value));
+        map.entrySet().parallelStream().forEach(waventry -> {
+            final int wavid = waventry.getKey();
+            if (progress.get() >= noteMapSize) {
+                return;
+            }
+            if (wavid < 0) {
+                return;
+            }
+            try {
+                Path p;
+                if (wavid < wavcount) {
+                    p = dpath.resolve(wavlist[wavid]).toAbsolutePath();
+                } else {
+                    p = Paths.get("defaultsound/landmine.wav").toAbsolutePath();
+                }
+                for (Note note : waventry.getValue()) {
+                    // 音切りあり・なし両方のデータが必要になるケースがある
+                    if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
+                        // 音切りなしのケース
+                        wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
+                        if (wavmap[wavid] == null) {
+                            break;
+                        }
+                    } else {
+                        // 音切りありのケース
+                        boolean b = true;
+                        if (slicesound[note.getWav()] == null) {
+                            slicesound[note.getWav()] = new Array<SliceWav<T>>();
+                        }
+                        for (SliceWav<T> slice : slicesound[note.getWav()]) {
+                            if (slice.starttime == note.getMicroStarttime() && slice.duration == note.getMicroDuration()) {
+                                b = false;
+                                break;
+                            }
+                        }
+                        if (b) {
+                            T sliceaudio = cache.get(new AudioKey(p.toString(), note));
+                            if (sliceaudio != null) {
+                                slicesound[note.getWav()].add(new SliceWav<T>(note, sliceaudio));
+                            } else {
+                                return;
+                            }
+                        }
+                    }
+                }
+            } catch (InvalidPathException e) {
+                Logger.getGlobal().warning(e.getMessage());
+            }
+            progress.incrementAndGet();
+        });
 
-	public void abort() {
-		progress.set(noteMapSize);
-	}
+        Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + wavmap.length);
+        for (int i = 0; i < wavmap.length; i++) {
+            if (slicesound[i] != null) {
+                this.slicesound[i] = slicesound[i].toArray(SliceWav.class);
+            } else {
+                this.slicesound[i] = new SliceWav[0];
+            }
+        }
 
-	public void play(Note n, float volume, int pitch) {
-		play0(n, this.volume * volume, pitch);
-		for (Note ln : n.getLayeredNotes()) {
-			play0(ln, this.volume * volume, pitch);
-		}
-	}
+        final int prevsize = cache.size();
+        cache.disposeOld();
+        Logger.getGlobal().info("AudioCache容量 : " + cache.size() + " 開放 : " + (prevsize - cache.size()));
 
-	public void play(int judge, boolean fast) {
-		if(judge < 0 || judge >= additionalKeySounds.length) {
-			return;
-		}
+        progress.set(noteMapSize);
+    }
 
-		final T sound = additionalKeySounds[judge][fast ? 0 : 1];
-		if (sound != null) {
-			final int channel = (65536 + judge) * 256;
-			stop(sound, channel);
-			play(sound, channel, volume, 1.0f);
-		}
+    public void setAdditionalKeySound(int judge, boolean fast, String p) {
+        if (judge < 0 || judge >= additionalKeySounds.length) {
+            return;
+        }
 
-	}
-	
-	private int channel(int id, int pitch) {
-		return id * 256 + pitch + 128;
-	}
+        final AudioElement<T> sound = getSound(p);
+        additionalKeySounds[judge][fast ? 0 : 1] = sound != null ? sound.audio : null;
+    }
 
-	private final void play0(Note n, float volume, int pitchShift) {
-		try {
-			final int id = n.getWav();
-			if (id < 0) {
-				return;
-			}
-			final int channel = channel(id, pitchShift);
-			final float pitch = pitchShift != 0 ? (float)Math.pow(2.0, pitchShift / 12.0) : 1.0f;
-			final long starttime = n.getMicroStarttime();
-			final long duration = n.getMicroDuration();
-			if (starttime == 0 && duration == 0) {
-				final T wav = (T) wavmap[id];
-				if (wav != null) {
-					stop(wav, channel);
-					play(wav, channel, volume, pitch);
-				}
-			} else {
-				for (SliceWav<T> slice : slicesound[id]) {
-					if (slice.starttime == starttime && slice.duration == duration) {
-						stop(slice.wav, channel);
-						play(slice.wav, channel, volume, pitch);
-						// System.out.println("slice WAV play - ID:" + id +
-						// " start:" + starttime + " duration:" + duration);
-						break;
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    private void addNoteList(IntMap<List<Note>> notemap, Note n) {
+        if (n.getWav() < 0) {
+            return;
+        }
+        List<Note> notes = notemap.get(n.getWav());
+        if (notes == null) {
+            notes = new ArrayList<Note>();
+            notemap.put(n.getWav(), notes);
+        }
 
-	public void stop(Note n) {
-		try {
-			if (n == null) {
-				for (T s : wavmap) {
-					if (s != null) {
-						stop(s);
-					}
-				}
-				for (SliceWav<T>[] slices : slicesound) {
-					for (SliceWav<T> slice : slices) {
-						stop(slice.wav);
-					}
-				}
-			} else {
-				stop0(n);
-				for (Note ln : n.getLayeredNotes()) {
-					stop0(ln);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+        for (Note note : notes) {
+            if (n.getMicroStarttime() == note.getMicroStarttime() && n.getMicroDuration() == note.getMicroDuration()) {
+                return;
+            }
+        }
+        notes.add(n);
+    }
 
-	private final void stop0(Note n) {
-		final int id = n.getWav();
-		final int channel = channel(id, 0);
-		if (id < 0) {
-			return;
-		}
-		final long starttime = n.getMicroStarttime();
-		final long duration = n.getMicroDuration();
-		if (starttime == 0 && duration == 0) {
-			final T sound = (T) wavmap[id];
-			if (sound != null) {
-				stop(sound, channel);
-			}
-		} else {
-			for (SliceWav<T> slice : slicesound[id]) {
-				if (slice.starttime == starttime && slice.duration == duration) {
-					stop((T) slice.wav, channel);
-					break;
-				}
-			}
-		}
-	}
+    public void abort() {
+        progress.set(noteMapSize);
+    }
 
-	public void setVolume(Note n, float volume) {
-		try {
-			if (n == null) {
-				return;
-			} else {
-				setVolume0(n, volume);
-				for (Note ln : n.getLayeredNotes()) {
-					setVolume0(ln, volume);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public void play(Note n, float volume, int pitch) {
+        play0(n, this.volume * volume, pitch);
+        for (Note ln : n.getLayeredNotes()) {
+            play0(ln, this.volume * volume, pitch);
+        }
+    }
 
-	private final void setVolume0(Note n, float volume) {
-		final int id = n.getWav();
-		final int channel = channel(id, 0);
-		if (id < 0) {
-			return;
-		}
-		final long starttime = n.getMicroStarttime();
-		final long duration = n.getMicroDuration();
-		if (starttime == 0 && duration == 0) {
-			final T sound = (T) wavmap[id];
-			if (sound != null) {
-				setVolume(sound, channel, volume);
-			}
-		} else {
-			for (SliceWav<T> slice : slicesound[id]) {
-				if (slice.starttime == starttime && slice.duration == duration) {
-					setVolume((T) slice.wav, channel, volume);
-					break;
-				}
-			}
-		}
-	}
+    public void play(int judge, boolean fast) {
+        if (judge < 0 || judge >= additionalKeySounds.length) {
+            return;
+        }
 
-	public void setGlobalPitch(float pitch) {
-		this.globalPitch = pitch;
-	}
+        final T sound = additionalKeySounds[judge][fast ? 0 : 1];
+        if (sound != null) {
+            final int channel = (65536 + judge) * 256;
+            stop(sound, channel);
+            play(sound, channel, volume, 1.0f);
+        }
 
-	public float getGlobalPitch() {
-		return this.globalPitch;
-	}
+    }
 
-	public float getProgress() {
-		return (float)progress.get() / (float)noteMapSize;
-	}
+    private int channel(int id, int pitch) {
+        return id * 256 + pitch + 128;
+    }
 
-	public void disposeOld() {
-		cache.disposeOld();
-	}
-	/**
-	 * リソースを開放する
-	 */
-	public void dispose() {
-		for (AudioElement<T> sound : soundmap.values()) {
-			if (sound != null) {
-				disposeKeySound(sound.audio);
-			}
-		}
-		soundmap.clear();
-	}
+    private final void play0(Note n, float volume, int pitchShift) {
+        try {
+            final int id = n.getWav();
+            if (id < 0) {
+                return;
+            }
+            final int channel = channel(id, pitchShift);
+            final float pitch = pitchShift != 0 ? (float) Math.pow(2.0, pitchShift / 12.0) : 1.0f;
+            final long starttime = n.getMicroStarttime();
+            final long duration = n.getMicroDuration();
+            if (starttime == 0 && duration == 0) {
+                final T wav = (T) wavmap[id];
+                if (wav != null) {
+                    stop(wav, channel);
+                    play(wav, channel, volume, pitch);
+                }
+            } else {
+                for (SliceWav<T> slice : slicesound[id]) {
+                    if (slice.starttime == starttime && slice.duration == duration) {
+                        stop(slice.wav, channel);
+                        play(slice.wav, channel, volume, pitch);
+                        // System.out.println("slice WAV play - ID:" + id +
+                        // " start:" + starttime + " duration:" + duration);
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * 音切りデータ
-	 * 
-	 * @author exch
-	 *
-	 * @param <T>
-	 */
-	static class SliceWav<T> {
-		public final long starttime;
-		public final long duration;
-		public final T wav;
+    public void stop(Note n) {
+        try {
+            if (n == null) {
+                for (T s : wavmap) {
+                    if (s != null) {
+                        stop(s);
+                    }
+                }
+                for (SliceWav<T>[] slices : slicesound) {
+                    for (SliceWav<T> slice : slices) {
+                        stop(slice.wav);
+                    }
+                }
+            } else {
+                stop0(n);
+                for (Note ln : n.getLayeredNotes()) {
+                    stop0(ln);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-		public long playid = -1;
+    private final void stop0(Note n) {
+        final int id = n.getWav();
+        final int channel = channel(id, 0);
+        if (id < 0) {
+            return;
+        }
+        final long starttime = n.getMicroStarttime();
+        final long duration = n.getMicroDuration();
+        if (starttime == 0 && duration == 0) {
+            final T sound = (T) wavmap[id];
+            if (sound != null) {
+                stop(sound, channel);
+            }
+        } else {
+            for (SliceWav<T> slice : slicesound[id]) {
+                if (slice.starttime == starttime && slice.duration == duration) {
+                    stop((T) slice.wav, channel);
+                    break;
+                }
+            }
+        }
+    }
 
-		public SliceWav(Note note, T wav) {
-			this.starttime = note.getMicroStarttime();
-			this.duration = note.getMicroDuration();
-			this.wav = wav;
-		}
-	}
+    public void setVolume(Note n, float volume) {
+        try {
+            if (n == null) {
+                return;
+            } else {
+                setVolume0(n, volume);
+                for (Note ln : n.getLayeredNotes()) {
+                    setVolume0(ln, volume);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	class AudioCache extends ResourcePool<AudioKey, T> {
+    private final void setVolume0(Note n, float volume) {
+        final int id = n.getWav();
+        final int channel = channel(id, 0);
+        if (id < 0) {
+            return;
+        }
+        final long starttime = n.getMicroStarttime();
+        final long duration = n.getMicroDuration();
+        if (starttime == 0 && duration == 0) {
+            final T sound = (T) wavmap[id];
+            if (sound != null) {
+                setVolume(sound, channel, volume);
+            }
+        } else {
+            for (SliceWav<T> slice : slicesound[id]) {
+                if (slice.starttime == starttime && slice.duration == duration) {
+                    setVolume((T) slice.wav, channel, volume);
+                    break;
+                }
+            }
+        }
+    }
 
-		public AudioCache(int maxgen) {
-			super(maxgen);
-		}
+    public float getGlobalPitch() {
+        return this.globalPitch;
+    }
 
-		private ObjectMap<String, PCM> pcmMap = new ObjectMap<String, PCM>();
+    public void setGlobalPitch(float pitch) {
+        this.globalPitch = pitch;
+    }
 
-		private T loadSlice(AudioKey key) {
+    public float getProgress() {
+        return (float) progress.get() / (float) noteMapSize;
+    }
+
+    public void disposeOld() {
+        cache.disposeOld();
+    }
+
+    /**
+     * リソースを開放する
+     */
+    public void dispose() {
+        for (AudioElement<T> sound : soundmap.values()) {
+            if (sound != null) {
+                disposeKeySound(sound.audio);
+            }
+        }
+        soundmap.clear();
+    }
+
+    /**
+     * 音切りデータ
+     *
+     * @param <T>
+     * @author exch
+     */
+    static class SliceWav<T> {
+        public final long starttime;
+        public final long duration;
+        public final T wav;
+
+        public long playid = -1;
+
+        public SliceWav(Note note, T wav) {
+            this.starttime = note.getMicroStarttime();
+            this.duration = note.getMicroDuration();
+            this.wav = wav;
+        }
+    }
+
+    static class AudioElement<T> {
+        /**
+         * 音源データ
+         */
+        public final T audio;
+        public long id;
+
+        public AudioElement(T audio) {
+            this.audio = audio;
+        }
+    }
+
+    /**
+     * AudioCache Key
+     *
+     * @author exch
+     */
+    private static class AudioKey {
+        /**
+         * Audio File path
+         */
+        public final String path;
+        /**
+         * Audio start time(us)
+         */
+        public final long start;
+        /**
+         * Audio duration(us)
+         */
+        public final long duration;
+
+        public AudioKey(String path, Note n) {
+            this.path = path;
+            this.start = n.getMicroStarttime();
+            this.duration = n.getMicroDuration();
+        }
+
+        public boolean equals(Object o) {
+            if (o instanceof AudioKey) {
+                final AudioKey key = (AudioKey) o;
+                return path.equals(key.path) && start == key.start && duration == key.duration;
+            }
+            return false;
+        }
+
+        public int hashCode() {
+            return java.util.Objects.hash(path, start, duration);
+        }
+    }
+
+    class AudioCache extends ResourcePool<AudioKey, T> {
+
+        private ObjectMap<String, PCM> pcmMap = new ObjectMap<String, PCM>();
+
+        public AudioCache(int maxgen) {
+            super(maxgen);
+        }
+
+        private T loadSlice(AudioKey key) {
             PCM wav = null;
-            synchronized(pcmMap) {
+            synchronized (pcmMap) {
                 wav = pcmMap.get(key.path);
                 if (wav == null) {
                     wav = PCM.load(key.path, AbstractAudioDriver.this);
-                    if(wav != null) {
+                    if (wav != null) {
                         pcmMap.put(key.path, wav);
                     }
                 }
@@ -619,81 +652,31 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
             return null;
         }
 
-		@Override
-		protected T load(AudioKey key) {
-		    Logger.getGlobal().fine("音源ファイルを読み込む中：" + key.path);
+        @Override
+        protected T load(AudioKey key) {
+            Logger.getGlobal().fine("音源ファイルを読み込む中：" + key.path);
 
-		    T sound = key.start == 0 && key.duration == 0
+            T sound = key.start == 0 && key.duration == 0
                     ? getKeySound(Paths.get(key.path)) // 音切りなしのケース
                     : loadSlice(key);
 
-		    if (sound == null) {
+            if (sound == null) {
                 Logger.getGlobal().warning("音源ファイル読み込み失敗：" + key.path);
             }
-			return sound;
-		}
-
-		
-		@Override
-		public synchronized void disposeOld() {
-			pcmMap.clear();
-			super.disposeOld();
-		}
+            return sound;
+        }
 
 
-		@Override
-		protected void dispose(T resource) {
-			disposeKeySound(resource);
-		}
-	}
-	
-	static class AudioElement<T> {
-		public long id;
-		/**
-		 * 音源データ
-		 */
-		public final T audio;
-		
-		public AudioElement(T audio) {
-			this.audio = audio;
-		}		
-	}
-	
-	/**
-	 * AudioCache Key
-	 * 
-	 * @author exch
-	 */
-	private static class AudioKey {
-		/**
-		 * Audio File path
-		 */
-		public final String path;
-		/**
-		 * Audio start time(us)
-		 */
-		public final long start;
-		/**
-		 * Audio duration(us)
-		 */
-		public final long duration;
+        @Override
+        public synchronized void disposeOld() {
+            pcmMap.clear();
+            super.disposeOld();
+        }
 
-		public AudioKey(String path, Note n) {
-			this.path = path;
-			this.start = n.getMicroStarttime();
-			this.duration = n.getMicroDuration();
-		}
 
-		public boolean equals(Object o) {
-			if (o instanceof AudioKey) {
-				final AudioKey key = (AudioKey) o;
-				return path.equals(key.path) && start == key.start && duration == key.duration;
-			}
-			return false;
-		}
-		
-		public int hashCode() {
-			return java.util.Objects.hash(path, start, duration);
-		}
-	}
+        @Override
+        protected void dispose(T resource) {
+            disposeKeySound(resource);
+        }
+    }
 }

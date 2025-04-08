@@ -12,14 +12,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 public class SkinSourceImageSet implements SkinSourceSet {
 
+    private final TimerProperty timer;
+    private final int cycle;
     /**
      * イメージ
      */
     private TextureRegion[][] image;
-
-    private final TimerProperty timer;
-
-    private final int cycle;
 
     public SkinSourceImageSet(TextureRegion[][] image, int timer, int cycle) {
         this(image, timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null, cycle);
@@ -32,22 +30,22 @@ public class SkinSourceImageSet implements SkinSourceSet {
     }
 
     public boolean validate() {
-        if(image == null || image.length == 0) {
+        if (image == null || image.length == 0) {
             return false;
         }
 
         boolean exist = false;
-        for(TextureRegion[] trs : image) {
-            if(trs != null) {
-                for(TextureRegion tr : trs) {
-                    if(tr != null) {
+        for (TextureRegion[] trs : image) {
+            if (trs != null) {
+                for (TextureRegion tr : trs) {
+                    if (tr != null) {
                         exist = true;
                     }
                 }
             }
         }
 
-        if(!exist) {
+        if (!exist) {
             return false;
         }
         return true;

@@ -3,7 +3,6 @@ package bms.player.beatoraja.select.bar;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
-import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -19,7 +18,8 @@ public class HashBar extends DirectoryBar {
     public HashBar(MusicSelector selector, String title, SongData[] elements) {
         super(selector);
         this.title = title;
-        setElements(elements);;
+        setElements(elements);
+        ;
     }
 
     @Override

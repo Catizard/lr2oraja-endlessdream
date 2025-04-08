@@ -1,9 +1,9 @@
 package bms.player.beatoraja.select.bar;
 
-import java.io.File;
-
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.select.MusicSelector;
+
+import java.io.File;
 
 /**
  * SQLで問い合わせた楽曲を表示するためのバー
@@ -12,9 +12,9 @@ import bms.player.beatoraja.select.MusicSelector;
  */
 public class CommandBar extends DirectoryBar {
 
-	/**
-	 * バータイトル
-	 */
+    /**
+     * バータイトル
+     */
     private final String title;
     /**
      * DBに対するSQL
@@ -22,11 +22,11 @@ public class CommandBar extends DirectoryBar {
     private final String sql;
 
     public CommandBar(MusicSelector selector, String title, String sql) {
-    	this(selector, title, sql, false);
+        this(selector, title, sql, false);
     }
 
     public CommandBar(MusicSelector selector, String title, String sql, boolean showInvisibleChart) {
-    	super(selector, showInvisibleChart);
+        super(selector, showInvisibleChart);
         this.title = title;
         this.sql = sql;
     }
@@ -38,14 +38,14 @@ public class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-    	final MainController main = selector.main;
-        return SongBar.toSongBarArray(main.getSongDatabase().getSongDatas(sql,main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/score.db"
-        		,main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null));
+        final MainController main = selector.main;
+        return SongBar.toSongBarArray(main.getSongDatabase().getSongDatas(sql, main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/score.db"
+                , main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/scorelog.db", main.getInfoDatabase() != null ? "songinfo.db" : null));
     }
 
     public void updateFolderStatus() {
-    	final MainController main = selector.main;
-        updateFolderStatus(main.getSongDatabase().getSongDatas(sql,main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/score.db"
-        		,main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null));
+        final MainController main = selector.main;
+        updateFolderStatus(main.getSongDatabase().getSongDatas(sql, main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/score.db"
+                , main.getConfig().getPlayerpath() + File.separatorChar + main.getConfig().getPlayername() + "/scorelog.db", main.getInfoDatabase() != null ? "songinfo.db" : null));
     }
 }

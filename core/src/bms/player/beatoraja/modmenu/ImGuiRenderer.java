@@ -1,17 +1,18 @@
 package bms.player.beatoraja.modmenu;
 
 import bms.player.beatoraja.controller.Lwjgl3ControllerManager;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.controllers.Controller;
-
-import imgui.*;
-import imgui.flag.*;
+import imgui.ImFontConfig;
+import imgui.ImFontGlyphRangesBuilder;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-
 import imgui.type.ImBoolean;
 import org.lwjgl.glfw.GLFW;
 
@@ -21,11 +22,9 @@ import java.nio.file.Files;
 
 public class ImGuiRenderer {
 
-    private static long windowHandle;
-
     public static int windowWidth;
     public static int windowHeight;
-
+    private static long windowHandle;
     private static ImGuiImplGlfw imGuiGlfw;
     private static ImGuiImplGl3 imGuiGl3;
 
@@ -76,7 +75,7 @@ public class ImGuiRenderer {
 
     public static void start() {
         if (tmpProcessor != null) {
-           Gdx.input.setInputProcessor(tmpProcessor);
+            Gdx.input.setInputProcessor(tmpProcessor);
             tmpProcessor = null;
         }
         imGuiGlfw.newFrame();

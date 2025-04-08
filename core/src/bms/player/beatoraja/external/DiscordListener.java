@@ -14,73 +14,72 @@ import club.minnced.discord.rpc.DiscordRichPresence;
 
 public class DiscordListener implements MainStateListener {
 
-	private Discord discord;
-	
-	public DiscordListener() {
-		discord = new Discord();
-		discord.startup();
-	}
-	
-	@Override
-	public void update(MainState state, int status) {
-		if(state instanceof MusicSelector) {
-			discord.update("In Music Select Menu", "");
-		}
-		if(state instanceof MusicDecide) {
-			discord.update("Decide Screen", "");
-		}
-		if(state instanceof BMSPlayer) {
-			final PlayerResource resource = state.main.getPlayerResource();
-			discord.update(resource.getSongdata().getFullTitle(), resource.getSongdata().getArtist(), resource.getSongdata().getMode());
-		}
-		if(state instanceof MusicResult) {
-			discord.update("Result Screen", "");
-		}
-		if(state instanceof CourseResult) {
-			discord.update("Course Result Screen", "");
-		}
-	}
+    private Discord discord;
 
-	public static class Discord {
-	    public final DiscordRichPresence presence = new DiscordRichPresence();
+    public DiscordListener() {
+        discord = new Discord();
+        discord.startup();
+    }
 
-	    private final DiscordRPC lib = DiscordRPC.INSTANCE;
-	    /*
-	    private final String APPLICATIONID = "876968973126746182"; // DISCORD APPLICATION ID   (https://discord.com/developers/applications)
-	    */
-	    private static final String APPLICATIONID = "1054234988167561277"; // LR2ORAJA DISCORD APPLICATION ID
+    @Override
+    public void update(MainState state, int status) {
+        if (state instanceof MusicSelector) {
+            discord.update("In Music Select Menu", "");
+        }
+        if (state instanceof MusicDecide) {
+            discord.update("Decide Screen", "");
+        }
+        if (state instanceof BMSPlayer) {
+            final PlayerResource resource = state.main.getPlayerResource();
+            discord.update(resource.getSongdata().getFullTitle(), resource.getSongdata().getArtist(), resource.getSongdata().getMode());
+        }
+        if (state instanceof MusicResult) {
+            discord.update("Result Screen", "");
+        }
+        if (state instanceof CourseResult) {
+            discord.update("Course Result Screen", "");
+        }
+    }
 
-	    public void startup() {
-	        String steamId = "";
-	        DiscordEventHandlers handlers = new DiscordEventHandlers();
-	        handlers.ready = (user) -> System.out.println("Discord RPC Ready!");
-	        lib.Discord_Initialize(APPLICATIONID, handlers, true, steamId);
-	        DiscordRichPresence presence = new DiscordRichPresence();
-	        lib.Discord_UpdatePresence(presence);
-	        // in a worker thread
-	        new Thread(() -> {
-	            while (!Thread.currentThread().isInterrupted()) {
-	                lib.Discord_RunCallbacks();
-	                try {
-	                    Thread.sleep(2000);
-	                } catch (InterruptedException ignored) {
-	                }
-	            }
-	        }, "RPC-Callback-Handler").start();
+    public static class Discord {
+        /*
+        private final String APPLICATIONID = "876968973126746182"; // DISCORD APPLICATION ID   (https://discord.com/developers/applications)
+        */
+        private static final String APPLICATIONID = "1054234988167561277"; // LR2ORAJA DISCORD APPLICATION ID
+        public final DiscordRichPresence presence = new DiscordRichPresence();
+        private final DiscordRPC lib = DiscordRPC.INSTANCE;
 
-	    }
+        public void startup() {
+            String steamId = "";
+            DiscordEventHandlers handlers = new DiscordEventHandlers();
+            handlers.ready = (user) -> System.out.println("Discord RPC Ready!");
+            lib.Discord_Initialize(APPLICATIONID, handlers, true, steamId);
+            DiscordRichPresence presence = new DiscordRichPresence();
+            lib.Discord_UpdatePresence(presence);
+            // in a worker thread
+            new Thread(() -> {
+                while (!Thread.currentThread().isInterrupted()) {
+                    lib.Discord_RunCallbacks();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }, "RPC-Callback-Handler").start();
 
-	    public void update(String fulltitle, String artist, int mode) {
-	        update("Playing: " + mode + "Keys", fulltitle + " / " + artist);	    	
-	    }
+        }
 
-	    public void update(String state, String details) {
-	        presence.details = details;
-	        presence.state = state;
-	        presence.startTimestamp = System.currentTimeMillis() / 1000;
-	        presence.largeImageKey = "bms";
-	        lib.Discord_UpdatePresence(presence);
-	    }
+        public void update(String fulltitle, String artist, int mode) {
+            update("Playing: " + mode + "Keys", fulltitle + " / " + artist);
+        }
 
-	}
+        public void update(String state, String details) {
+            presence.details = details;
+            presence.state = state;
+            presence.startTimestamp = System.currentTimeMillis() / 1000;
+            presence.largeImageKey = "bms";
+            lib.Discord_UpdatePresence(presence);
+        }
+
+    }
 }

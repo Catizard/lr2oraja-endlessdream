@@ -1,14 +1,14 @@
 package bms.player.beatoraja.stream;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import bms.player.beatoraja.MessageRenderer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.stream.command.StreamCommand;
 import bms.player.beatoraja.stream.command.StreamRequestCommand;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * beatoraja パイプで受け取った文字列処理
@@ -24,7 +24,7 @@ public class StreamController {
     public StreamController(MusicSelector selector, MessageRenderer notifier) {
         this.selector = selector;
         this.notifier = notifier;
-        commands = new StreamCommand[] { new StreamRequestCommand(this.selector, this.notifier) };
+        commands = new StreamCommand[]{new StreamRequestCommand(this.selector, this.notifier)};
         try {
             pipeBuffer = new BufferedReader(new FileReader("\\\\.\\pipe\\beatoraja"));
             isActive = true;
@@ -59,7 +59,7 @@ public class StreamController {
         });
 
         try {
-            while (!pipeBuffer.ready());
+            while (!pipeBuffer.ready()) ;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -82,14 +82,14 @@ public class StreamController {
                 e.printStackTrace();
             }
         }
-        for(int i = 0; i < commands.length; i++) {
+        for (int i = 0; i < commands.length; i++) {
             commands[i].dispose();
         }
         Logger.getGlobal().info("パイプリソース破棄完了");
     }
 
     private void execute(String line) {
-        for(int i = 0; i < commands.length; i++) {
+        for (int i = 0; i < commands.length; i++) {
             String cmd = commands[i].COMMAND_STRING + " ";
             String[] splitLine = line.split(cmd);
             String data = splitLine.length == 2 ? splitLine[1] : "";

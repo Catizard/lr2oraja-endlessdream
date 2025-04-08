@@ -28,10 +28,12 @@ public enum StretchType {
     NO_RESIZE(9),
     NO_RESIZE_TRIMMED(10),
     ;
+
+    public final int id;
+
     StretchType(int id) {
         this.id = id;
     }
-    public final int id;
 
     public void stretchRect(Rectangle rectangle, TextureRegion trimmedImage, TextureRegion image) {
         trimmedImage.setRegion(image);
@@ -108,8 +110,8 @@ public enum StretchType {
         if (rectangle.width < width) {
             float cx = image.getRegionX() + image.getRegionWidth() * 0.5f;
             float w = rectangle.width / scale;
-            image.setRegionX((int)(cx - w * 0.5f));
-            image.setRegionWidth((int)w);
+            image.setRegionX((int) (cx - w * 0.5f));
+            image.setRegionWidth((int) w);
         } else {
             fitWidth(rectangle, width);
         }
@@ -120,8 +122,8 @@ public enum StretchType {
         if (rectangle.height < height) {
             float cy = image.getRegionY() + image.getRegionHeight() * 0.5f;
             float h = rectangle.height / scale;
-            image.setRegionY((int)(cy - h * 0.5f));
-            image.setRegionHeight((int)h);
+            image.setRegionY((int) (cy - h * 0.5f));
+            image.setRegionHeight((int) h);
         } else {
             fitHeight(rectangle, height);
         }

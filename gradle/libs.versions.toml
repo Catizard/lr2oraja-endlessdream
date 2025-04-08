@@ -59,11 +59,11 @@ jackson-core = { group = "com.fasterxml.jackson.core", name = "jackson-core", ve
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
 
-twitter4j = { group = "org.twitter4j" , name = "twitter4j-core", version.ref = "twitter4j" }
+twitter4j = { group = "org.twitter4j", name = "twitter4j-core", version.ref = "twitter4j" }
 javadiscord = { group = "club.minnced", name = "java-discord-rpc", version.ref = "java-discord" }
 
 [bundles]
-libgdx = ["gdx-core", "gdx-backend", "gdx-freetype",  "gdx-controllers-core", "gdx-controllers-desktop"]
+libgdx = ["gdx-core", "gdx-backend", "gdx-freetype", "gdx-controllers-core", "gdx-controllers-desktop"]
 lwjgl3 = ["lwjgl", "lwjgl-jemalloc", "lwjgl-glfw", "lwjgl-openal", "lwjgl-opengl", "lwjgl-stb"]
 imgui = ["imgui", "imgui-lwjgl3", "imgui-linux", "imgui-windows", "imgui-macos"]
 ffmpeg = ["javacv", "javacpp", "ffmpeg"]

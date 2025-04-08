@@ -33,45 +33,9 @@ public class SongBar extends SelectableBar {
         this.song = song;
     }
 
-    public final SongData getSongData() {
-        return song;
-    }
-
-    public final boolean existsSong() {
-    	return song.getPath() != null;
-    }
-
-    public Pixmap getBanner() {
-        return banner;
-    }
-
-    public void setBanner(Pixmap banner) {
-    	this.banner = banner;
-    }
-
-    public Pixmap getStagefile() {
-        return stagefile;
-    }
-
-    public void setStagefile(Pixmap stagefile) {
-    	this.stagefile = stagefile;
-    }
-
-    @Override
-    public final String getTitle() {
-        return song.getFullTitle();
-    }
-
-    public int getLamp(boolean isPlayer) {
-    	final ScoreData score = isPlayer ? getScore() : getRivalScore();
-        if (score != null) {
-            return score.getClear();
-        }
-        return 0;
-    }
-
     /**
      * SongData配列をSongBar配列に変換する
+     *
      * @param songs SongData配列
      * @return SongBar配列
      */
@@ -85,8 +49,8 @@ public class SongBar extends SelectableBar {
 
         int count = filteredSongs.size();
         SongBar[] result = new SongBar[count--];
-        for(SongData song : filteredSongs) {
-            if(song != null) {
+        for (SongData song : filteredSongs) {
+            if (song != null) {
                 result[count--] = new SongBar(song);
             }
         }
@@ -97,23 +61,23 @@ public class SongBar extends SelectableBar {
         // 重複除外
         int count = songs.length;
         int noexistscount = elements.length;
-        for(SongData element : elements) {
+        for (SongData element : elements) {
             element.setPath(null);
         }
 
-        for(int i = 0;i < songs.length;i++) {
-            if(songs[i] == null) {
+        for (int i = 0; i < songs.length; i++) {
+            if (songs[i] == null) {
                 continue;
             }
-            for(int j = i + 1;j < songs.length;j++) {
-                if(songs[j] != null && songs[i].getSha256().equals(songs[j].getSha256())) {
+            for (int j = i + 1; j < songs.length; j++) {
+                if (songs[j] != null && songs[i].getSha256().equals(songs[j].getSha256())) {
                     songs[j] = null;
                     count--;
                 }
             }
-            for(int j = 0;j < elements.length;j++) {
+            for (int j = 0; j < elements.length; j++) {
                 final SongData element = elements[j];
-                if(element.getPath() == null && (element.getMd5().length() > 0 && element.getMd5().equals(songs[i].getMd5()))
+                if (element.getPath() == null && (element.getMd5().length() > 0 && element.getMd5().equals(songs[i].getMd5()))
                         || (element.getSha256().length() > 0 && element.getSha256().equals(songs[i].getSha256()))) {
                     element.setPath(songs[i].getPath());
                     songs[i].merge(element);
@@ -124,17 +88,54 @@ public class SongBar extends SelectableBar {
         }
         SongBar[] result = new SongBar[count + noexistscount];
         noexistscount--;
-        for(int i = 0;i < elements.length;i++) {
-            if(elements[i].getPath() == null) {
+        for (int i = 0; i < elements.length; i++) {
+            if (elements[i].getPath() == null) {
                 result[count + (noexistscount--)] = new SongBar(elements[i]);
             }
         }
         count--;
-        for(SongData song : songs) {
-            if(song != null) {
+        for (SongData song : songs) {
+            if (song != null) {
                 result[count--] = new SongBar(song);
             }
         }
         return result;
+    }
+
+    public final SongData getSongData() {
+        return song;
+    }
+
+    public final boolean existsSong() {
+        return song.getPath() != null;
+    }
+
+    public Pixmap getBanner() {
+        return banner;
+    }
+
+    public void setBanner(Pixmap banner) {
+        this.banner = banner;
+    }
+
+    public Pixmap getStagefile() {
+        return stagefile;
+    }
+
+    public void setStagefile(Pixmap stagefile) {
+        this.stagefile = stagefile;
+    }
+
+    @Override
+    public final String getTitle() {
+        return song.getFullTitle();
+    }
+
+    public int getLamp(boolean isPlayer) {
+        final ScoreData score = isPlayer ? getScore() : getRivalScore();
+        if (score != null) {
+            return score.getClear();
+        }
+        return 0;
     }
 }

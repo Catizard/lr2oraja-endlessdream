@@ -11,7 +11,7 @@ repositories {
     mavenCentral()
     gradlePluginPortal()
 
-    flatDir{
+    flatDir {
         dirs("../lib")
     }
 }
@@ -33,21 +33,21 @@ tasks {
     // fat/uber-jar task provided by https://github.com/johnrengelman/shadow
     shadowJar {
         val platformProp = System.getProperty("platform")
-        val classifierPlatform = when(platformProp != null)  {
+        val classifierPlatform = when (platformProp != null) {
             true -> platformProp.plus("-").plus(libs.versions.endlessdream.get())
             false -> "".plus(libs.versions.endlessdream.get())
         }
         destinationDirectory.set(projectDir.resolveSibling("dist"))
         archiveBaseName.set("lr2oraja")
         archiveClassifier.set(classifierPlatform)
-	    mergeServiceFiles()
+        mergeServiceFiles()
     }
 
     // shadow task that extends java `application` plugin JavaExec to cover fatjars
     // used to test builds, does not contain portaudio natives.
     runShadow {
         val runDirProp = System.getProperty("runDir")
-        val runDir = when(runDirProp != null)  {
+        val runDir = when (runDirProp != null) {
             true -> FileSystems.getDefault().getPath(runDirProp).normalize().toAbsolutePath().toFile()
             false -> projectDir.resolve("../assets")
         }
@@ -58,8 +58,8 @@ tasks {
 // versions and bundles defined in ../gradle/libs.versions.toml
 dependencies {
     implementation(libs.bundles.libgdx)
-    
-    implementation(libs.gdx.platform)  {
+
+    implementation(libs.gdx.platform) {
         artifact {
             classifier = "natives-desktop"
         }

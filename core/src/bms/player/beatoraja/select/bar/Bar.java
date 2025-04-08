@@ -4,23 +4,23 @@ import bms.player.beatoraja.ScoreData;
 
 /**
  * 選曲用バーの抽象クラス
- * 
+ *
  * @author exch
  */
 public abstract class Bar {
 
-	/**
-	 * プレイヤースコア
-	 */
+    /**
+     * プレイヤースコア
+     */
     private ScoreData score;
-	/**
-	 * ライバルスコア
-	 */
+    /**
+     * ライバルスコア
+     */
     private ScoreData rscore;
 
     /**
      * バーのタイトルを取得する
-     * 
+     *
      * @return バーのタイトル
      */
     public abstract String getTitle();

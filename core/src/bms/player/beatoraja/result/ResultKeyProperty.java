@@ -22,8 +22,16 @@ public enum ResultKeyProperty {
         this.assign = keys;
     }
 
+    public static ResultKeyProperty get(Mode mode) {
+        try {
+            return valueOf(mode.name());
+        } catch (IllegalArgumentException e) {
+            return BEAT_7K;
+        }
+    }
+
     public ResultKey getAssign(int index) {
-        if(index < 0 || index >= assign.length) {
+        if (index < 0 || index >= assign.length) {
             return null;
         }
         return assign[index];
@@ -38,13 +46,5 @@ public enum ResultKeyProperty {
         REPLAY_DIFFERENT,
         REPLAY_SAME,
         CHANGE_GRAPH;
-    }
-
-    public static ResultKeyProperty get(Mode mode) {
-        try {
-            return valueOf(mode.name());
-        } catch (IllegalArgumentException e) {
-            return BEAT_7K;
-        }
     }
 }

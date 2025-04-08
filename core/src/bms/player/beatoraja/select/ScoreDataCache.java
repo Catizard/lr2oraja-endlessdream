@@ -3,7 +3,8 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.song.SongData;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * スコアデータのキャッシュ
@@ -28,7 +29,8 @@ public abstract class ScoreDataCache {
 
     /**
      * 指定した楽曲データ、LN MODEに対するスコアデータを返す
-     * @param song 楽曲データ
+     *
+     * @param song   楽曲データ
      * @param lnmode LN MODE
      * @return スコアデータ。存在しない場合はnull
      */
@@ -43,7 +45,6 @@ public abstract class ScoreDataCache {
     }
 
     /**
-     *
      * @param collector
      * @param songs
      * @param lnmode
@@ -57,14 +58,14 @@ public abstract class ScoreDataCache {
             if (scorecache[cacheindex].containsKey(song.getSha256())) {
                 collector.collect(song, scorecache[cacheindex].get(song.getSha256()));
             } else {
-            	if(noscore == null) {
-            		noscore = new Array<SongData>();
-            	}
+                if (noscore == null) {
+                    noscore = new Array<SongData>();
+                }
                 noscore.add(song);
             }
         }
 
-        if(noscore == null) {
+        if (noscore == null) {
             return;
         }
         // キャッシュに存在しなかったスコアデータをキャッシュに登録
@@ -73,7 +74,7 @@ public abstract class ScoreDataCache {
         final ScoreDataCollector cachecollector = (song, score) -> {
             final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
             scorecache[cacheindex].put(song.getSha256(), score);
-        	collector.collect(song, score);
+            collector.collect(song, score);
         };
         readScoreDatasFromSource(cachecollector, noscores, lnmode);
     }
