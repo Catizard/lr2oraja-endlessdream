@@ -2,21 +2,23 @@
 
 This fix patch is for mac user who suffering from launching game itself and incorrect sound play issue.
 
-> [!warning]
->
-> I haven't tested this patch on `x86` chip mac, I simply don't have one.
->
-> And also this patch might be broken on linux machine, that's why the original pull request was closed.
-
 ## Building from source
 
-> `arm` jdk is required
 
 **MacOS(arm chip):**
 
 ```sh
 ./gradlew core:shadowJar -Dplatform=macos -Darch=aarch64
 ```
+
+**MacOS(x86-64 chip):**
+
+```sh
+./gradlew core:shadowJar -Dplatform=macos
+```
+
+> :warning:
+> I don't own a x86-64 mac, this patch is tested by Hezzle, see https://github.com/exch-bms2/beatoraja/issues/838#issuecomment-2799932462
 
 This task will create a jar located in `dist/` that can be used with any working installation of the game.
 
@@ -34,4 +36,5 @@ There is a way to play the old version of `vanilla oraja`. You need an old versi
 
 ## Special Thanks
 
-Thanks for Seraxis, the original `Endless Dream` author.
+Thanks for Seraxis, the original `Endless Dream` author. This code patch cannot be applied without mature build tool invovling.
+Thanks for Hezzle, who confirms that this code patch is working on `x86-64` macos.
