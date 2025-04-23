@@ -685,6 +685,6 @@ public class PlayDataAccessor {
     }
 
     private String getReplayDataFolder() {
-        return playerpath + File.separatorChar + player + File.separatorChar + "replay";
+        return playerpath + File.separatorChar + player + File.separatorChar + "replayData";
     }
 }

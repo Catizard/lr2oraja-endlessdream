@@ -45,7 +45,7 @@ public class IntegerPropertyFactory {
             final int mode = (optionid - NUMBER_DURATION_LANECOVER_ON) / 4;
             result = (state) -> {
                 if (state instanceof BMSPlayer) {
-                    final LaneRenderer lanerender = ((BMSPlayer) state).getLanerender();
+                    final LaneRenderer lanerender = ((BMSPlayer) state).getLaneRender();
                     double bpm = 0;
                     switch (mode) {
                         case 0:
@@ -235,7 +235,7 @@ public class IntegerPropertyFactory {
             case NUMBER_HISPEED_LR2:
                 return (state) -> {
                     if (state instanceof BMSPlayer) {
-                        return (int) (((BMSPlayer) state).getLanerender().getHispeed() * 100);
+                        return (int) (((BMSPlayer) state).getLaneRender().getHispeed() * 100);
                     } else if (state.main.getPlayerResource().getSongdata() != null) {
                         SongData song = state.main.getPlayerResource().getSongdata();
                         PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
@@ -247,7 +247,7 @@ public class IntegerPropertyFactory {
             case NUMBER_HISPEED:
                 return (state) -> {
                     if (state instanceof BMSPlayer) {
-                        return (int) (((BMSPlayer) state).getLanerender().getHispeed());
+                        return (int) (((BMSPlayer) state).getLaneRender().getHispeed());
                     } else if (state.main.getPlayerResource().getSongdata() != null) {
                         SongData song = state.main.getPlayerResource().getSongdata();
                         PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
@@ -259,7 +259,7 @@ public class IntegerPropertyFactory {
             case NUMBER_HISPEED_AFTERDOT:
                 return (state) -> {
                     if (state instanceof BMSPlayer) {
-                        return (int) ((((BMSPlayer) state).getLanerender().getHispeed() * 100) % 100);
+                        return (int) ((((BMSPlayer) state).getLaneRender().getHispeed() * 100) % 100);
                     } else if (state.main.getPlayerResource().getSongdata() != null) {
                         SongData song = state.main.getPlayerResource().getSongdata();
                         PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
@@ -274,7 +274,7 @@ public class IntegerPropertyFactory {
                         final PlayConfig pc = ((MusicSelector) state).getSelectedBarPlayConfig();
                         return pc != null ? pc.getDuration() : Integer.MIN_VALUE;
                     } else if (state instanceof BMSPlayer) {
-                        return ((BMSPlayer) state).getLanerender().getCurrentDuration();
+                        return ((BMSPlayer) state).getLaneRender().getCurrentDuration();
                     } else if (state.resource.getSongdata() != null) {
                         SongData song = state.resource.getSongdata();
                         PlayConfig pc = state.resource.getPlayerConfig().getPlayConfig(song.getMode())
@@ -289,7 +289,7 @@ public class IntegerPropertyFactory {
                         final PlayConfig pc = ((MusicSelector) state).getSelectedBarPlayConfig();
                         return pc != null ? pc.getDuration() * 3 / 5 : Integer.MIN_VALUE;
                     } else if (state instanceof BMSPlayer) {
-                        return ((BMSPlayer) state).getLanerender().getCurrentDuration() * 3 / 5;
+                        return ((BMSPlayer) state).getLaneRender().getCurrentDuration() * 3 / 5;
                     } else if (state.main.getPlayerResource().getSongdata() != null) {
                         SongData song = state.resource.getSongdata();
                         PlayConfig pc = state.resource.getPlayerConfig().getPlayConfig(song.getMode())
@@ -303,21 +303,21 @@ public class IntegerPropertyFactory {
             case NUMBER_LANECOVER1:
                 return (state) -> {
                     if (state instanceof BMSPlayer) {
-                        return (int) (((BMSPlayer) state).getLanerender().getLanecover() * 1000);
+                        return (int) (((BMSPlayer) state).getLaneRender().getLanecover() * 1000);
                     }
                     return Integer.MIN_VALUE;
                 };
             case NUMBER_LIFT1:
                 return (state) -> {
                     if (state instanceof BMSPlayer) {
-                        return (int) (((BMSPlayer) state).getLanerender().getLiftRegion() * 1000);
+                        return (int) (((BMSPlayer) state).getLaneRender().getLiftRegion() * 1000);
                     }
                     return Integer.MIN_VALUE;
                 };
             case NUMBER_HIDDEN1:
                 return (state) -> {
                     if (state instanceof BMSPlayer) {
-                        return (int) (((BMSPlayer) state).getLanerender().getHiddenCover() * 1000);
+                        return (int) (((BMSPlayer) state).getLaneRender().getHiddenCover() * 1000);
                     }
                     return Integer.MIN_VALUE;
                 };
@@ -352,7 +352,7 @@ public class IntegerPropertyFactory {
             case NUMBER_NOWBPM:
                 return (state) -> {
                     if (state instanceof BMSPlayer) {
-                        return (int) (((BMSPlayer) state).getLanerender().getNowBPM());
+                        return (int) (((BMSPlayer) state).getLaneRender().getNowBPM());
                     }
                     return Integer.MIN_VALUE;
                 };

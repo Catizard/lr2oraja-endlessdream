@@ -87,7 +87,7 @@ public class BooleanPropertyFactory {
         switch (optionid) {
             case OPTION_TABLE_SONG:
                 return new DrawProperty(DrawProperty.TYPE_STATIC_WITHOUT_MUSICSELECT,
-                        (state) -> (state.resource.getTablename().length() != 0));
+                        (state) -> (state.resource.getTableName().length() != 0));
             case OPTION_RANDOMSELECTBAR:
                 return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
                         (state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof ExecutableBar : false));
@@ -332,11 +332,11 @@ public class BooleanPropertyFactory {
         lanecover1_changing(OPTION_LANECOVER1_CHANGING, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
                 (state) -> (state.main.getInputProcessor().startPressed() || state.main.getInputProcessor().isSelectPressed()))),
         lanecover1_on(OPTION_LANECOVER1_ON, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-                (state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLanerender().getPlayConfig().isEnablelanecover() : false))),
+                (state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLaneRender().getPlayConfig().isEnablelanecover() : false))),
         lift1_on(OPTION_LIFT1_ON, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-                (state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLanerender().getPlayConfig().isEnablelift() : false))),
+                (state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLaneRender().getPlayConfig().isEnablelift() : false))),
         hidden1_on(OPTION_HIDDEN1_ON, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
-                (state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLanerender().getPlayConfig().isEnablehidden() : false))),
+                (state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLaneRender().getPlayConfig().isEnablehidden() : false))),
         border_or_more_1p(OPTION_1P_BORDER_OR_MORE, new DrawProperty(DrawProperty.TYPE_NO_STATIC,
                 (state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getGauge().getGauge().isQualified() : false))),
 

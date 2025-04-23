@@ -220,7 +220,7 @@ public class MusicSelector extends MainState {
             }
             showNoteGraph = true;
         }
-        // get ir ranking
+        // get ir rankingData
         if (currentRankingDuration != -1 && timer.getNowTime() > timer.getTimer(TIMER_SONGBAR_CHANGE) + currentRankingDuration) {
             currentRankingDuration = -1;
             if (current instanceof SongBar && ((SongBar) current).existsSong() && play == null) {
@@ -266,11 +266,11 @@ public class MusicSelector extends MainState {
                                     String currenturl = ((TableBar) bar).getUrl();
                                     if (currenturl != null && urls.contains(currenturl, false)) {
                                         isdtable = true;
-                                        resource.setTablename(bar.getTitle());
+                                        resource.setTableName(bar.getTitle());
                                     }
                                 }
                                 if (bar instanceof HashBar && isdtable) {
-                                    resource.setTablelevel(bar.getTitle());
+                                    resource.setTableLevel(bar.getTitle());
                                     break;
                                 }
                             }
@@ -309,11 +309,11 @@ public class MusicSelector extends MainState {
                                 String currenturl = ((TableBar) bar).getUrl();
                                 if (currenturl != null && urls.contains(currenturl, false)) {
                                     isdtable = true;
-                                    resource.setTablename(bar.getTitle());
+                                    resource.setTableName(bar.getTitle());
                                 }
                             }
                             if (bar instanceof HashBar && isdtable) {
-                                resource.setTablelevel(bar.getTitle());
+                                resource.setTableLevel(bar.getTitle());
                                 break;
                             }
                         }

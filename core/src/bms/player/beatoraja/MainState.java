@@ -10,6 +10,8 @@ import bms.player.beatoraja.skin.property.EventFactory.EventType;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.IntMap;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Optional;
 
@@ -26,10 +28,12 @@ public abstract class MainState {
     public final TimerManager timer;
     public final PlayerResource resource;
     private final ScoreDataProperty score = new ScoreDataProperty();
-    /**
-     * スキン
-     */
+
+    @Getter
     private Skin skin;
+
+    @Getter
+    @Setter
     private Stage stage;
 
     public MainState(MainController main) {
@@ -103,10 +107,6 @@ public abstract class MainState {
         return score;
     }
 
-    public Skin getSkin() {
-        return skin;
-    }
-
     public void setSkin(Skin skin) {
         if (this.skin != null) {
             this.skin.dispose();
@@ -141,28 +141,15 @@ public abstract class MainState {
         return main.getOffset(id);
     }
 
-    public TextureRegion getImage(int imageid) {
-        switch (imageid) {
-            case IMAGE_BACKBMP:
-                return resource.getBMSResource().getBackbmp();
-            case IMAGE_STAGEFILE:
-                return resource.getBMSResource().getStagefile();
-            case IMAGE_BANNER:
-                return resource.getBMSResource().getBanner();
-            case IMAGE_BLACK:
-                return main.black;
-            case IMAGE_WHITE:
-                return main.white;
-        }
-        return null;
-    }
-
-    public Stage getStage() {
-        return stage;
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
+    public TextureRegion getImage(int imageId) {
+        return switch (imageId) {
+            case IMAGE_BACKBMP -> resource.getBMSResource().getBackbmp();
+            case IMAGE_STAGEFILE -> resource.getBMSResource().getStagefile();
+            case IMAGE_BANNER -> resource.getBMSResource().getBanner();
+            case IMAGE_BLACK -> main.black;
+            case IMAGE_WHITE -> main.white;
+            default -> null;
+        };
     }
 
     public String getSound(SystemSoundManager.SoundType sound) {

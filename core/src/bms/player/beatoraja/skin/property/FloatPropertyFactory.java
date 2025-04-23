@@ -192,7 +192,7 @@ public class FloatPropertyFactory {
                 }),
         lanecover(4, (state) -> {
             if (state instanceof BMSPlayer) {
-                final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
+                final PlayConfig pc = ((BMSPlayer) state).getLaneRender().getPlayConfig();
                 if (pc.isEnablelanecover()) {
                     float lane = pc.getLanecover();
                     if (pc.isEnablelift()) {
@@ -205,7 +205,7 @@ public class FloatPropertyFactory {
         }),
         lanecover2(5, (state) -> {
             if (state instanceof BMSPlayer) {
-                final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
+                final PlayConfig pc = ((BMSPlayer) state).getLaneRender().getPlayConfig();
                 if (pc.isEnablelanecover()) {
                     float lane = pc.getLanecover();
                     if (pc.isEnablelift()) {

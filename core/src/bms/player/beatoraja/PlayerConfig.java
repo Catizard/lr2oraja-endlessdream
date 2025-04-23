@@ -269,8 +269,8 @@ public class PlayerConfig {
     }
 
     private static void copyReplays(Config config) {
-        Path player1ReplayDir = Paths.get(config.getPlayerpath() + "/player1/replay");
-        Path parentReplayDir = Paths.get("replay");
+        Path player1ReplayDir = Paths.get(config.getPlayerpath() + "/player1/replayData");
+        Path parentReplayDir = Paths.get("replayData");
 
         createDirectory(player1ReplayDir);
         if (!Files.exists(parentReplayDir)) {

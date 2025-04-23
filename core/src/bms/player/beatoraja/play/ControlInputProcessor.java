@@ -85,7 +85,7 @@ public class ControlInputProcessor {
     }
 
     public void input() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
         // 各種コントロール入力判定
         if (enableControl) {
@@ -162,7 +162,7 @@ public class ControlInputProcessor {
         if (input.isControlKeyPressed(ControlKeys.ESCAPE)) {
             player.stopPlay();
         }
-        // play speed change (autoplay or replay only)
+        // play speed change (autoplay or replayData only)
         if (autoplay.mode == BMSPlayerMode.Mode.AUTOPLAY || autoplay.mode == BMSPlayerMode.Mode.REPLAY) {
             if (input.getControlKeyState(ControlKeys.NUM1)) {
                 player.setPlaySpeed(25);
@@ -186,7 +186,7 @@ public class ControlInputProcessor {
      * 「レーンカバーがオフ」で「リフトとHIDDENが共にオン」の時は「START+SELECT短押し」で切り替え
      */
     private void setCoverValue(float value) {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         if (lanerender.isEnableLanecover() || (!lanerender.isEnableLift() && !lanerender.isEnableHidden())) {
             lanerender.setLanecover(lanerender.getLanecover() + value);
         } else if (lanerender.isEnableLift() && (!lanerender.isEnableHidden() || isChangeLift)) {
@@ -230,7 +230,7 @@ public class ControlInputProcessor {
     }
 
     private void greenNumberChange(int up1, int up2, int down1, int down2) {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change duration by SELECT + Scratch
@@ -257,7 +257,7 @@ public class ControlInputProcessor {
     }
 
     void processStart7key() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change hi speed by START + Keys
@@ -282,7 +282,7 @@ public class ControlInputProcessor {
     }
 
     void processSelect7key() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change duration by SELECT + Scratch
@@ -307,7 +307,7 @@ public class ControlInputProcessor {
     }
 
     void processStart5key() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change hi speed by START + Keys
@@ -332,7 +332,7 @@ public class ControlInputProcessor {
     }
 
     void processSelect5key() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change duration by SELECT + Scratch
@@ -357,7 +357,7 @@ public class ControlInputProcessor {
     }
 
     void processStart9key() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change hi speed by START + Keys(0-6)
@@ -382,7 +382,7 @@ public class ControlInputProcessor {
     }
 
     void processSelect9key() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change duration by SELECT + Keys
@@ -404,7 +404,7 @@ public class ControlInputProcessor {
     }
 
     void processStart24key() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change duration by START + Keys/Wheel
@@ -432,7 +432,7 @@ public class ControlInputProcessor {
     }
 
     void processSelect24key() {
-        final LaneRenderer lanerender = player.getLanerender();
+        final LaneRenderer lanerender = player.getLaneRender();
         final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 
         // change duration by SELECT + Keys/Wheel

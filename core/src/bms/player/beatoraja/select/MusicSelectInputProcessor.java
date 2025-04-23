@@ -110,7 +110,7 @@ public class MusicSelectInputProcessor {
 
         if (input.isControlKeyPressed(ControlKeys.NUM4)
                 || (!input.startPressed() && !input.isSelectPressed() && !input.getControlKeyState(ControlKeys.NUM5) && property.isPressed(input, NEXT_REPLAY, true))) {
-            // change replay
+            // change replayData
             select.execute(MusicSelectCommand.NEXT_REPLAY);
         }
         if (input.startPressed() && !input.isSelectPressed()) {
@@ -303,7 +303,7 @@ public class MusicSelectInputProcessor {
                     // auto play
                     select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : BMSPlayerMode.AUTOPLAY);
                 } else if (property.isPressed(input, MusicSelectKey.REPLAY, true)) {
-                    // replay
+                    // replayData
                     select.selectSong(config.isEventMode() ? BMSPlayerMode.PLAY : ((select.getSelectedReplay() >= 0) ? BMSPlayerMode.getReplayMode(select.getSelectedReplay()) : BMSPlayerMode.PLAY));
                 }
             } else {

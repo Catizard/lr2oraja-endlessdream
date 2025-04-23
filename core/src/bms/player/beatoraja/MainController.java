@@ -102,7 +102,8 @@ public class MainController implements ApplicationListener {
     private final RivalDataAccessor rivals = new RivalDataAccessor();
     private final RankingDataCache irCache = new RankingDataCache();
     /**
-     * 1曲プレイで指定したBMSファイル
+     * You can specify a bms file path before starting the game, this would force
+     * beatoraja playing the specified bms. Not a very useful feature, you can ignore it.
      */
     private final Path bmsFile;
     /**
@@ -118,6 +119,7 @@ public class MainController implements ApplicationListener {
     /**
      * Beatoraja contains many scenes(select, play...), this is the ref to current running scene<br>
      * If you know some kind of `elm` structure program, you can easily understand it
+     * @see MainStateType
      */
     private MainState currentState;
     /**

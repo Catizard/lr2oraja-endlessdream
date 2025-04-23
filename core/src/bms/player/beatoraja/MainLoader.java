@@ -208,10 +208,6 @@ public class MainLoader extends Application {
         }
     }
 
-    public static Path getBMSPath() {
-        return bmsPath;
-    }
-
     public static void putIllegalSong(String hash) {
         illegalSongs.add(hash);
     }
@@ -243,8 +239,8 @@ public class MainLoader extends Application {
             ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
             FXMLLoader loader = new FXMLLoader(
                     MainLoader.class.getResource("/bms/player/beatoraja/launcher/PlayConfigurationView.fxml"), bundle);
-            VBox stackPane = (VBox) loader.load();
-            PlayConfigurationView bmsinfo = (PlayConfigurationView) loader.getController();
+            VBox stackPane = loader.load();
+            PlayConfigurationView bmsinfo = loader.getController();
             bmsinfo.setBMSInformationLoader(this);
             bmsinfo.update(config);
             Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());

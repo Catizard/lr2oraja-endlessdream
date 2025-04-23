@@ -83,8 +83,8 @@ public class StringPropertyFactory {
                     return ((MusicSelector) state).getSelectedBar().getTitle();
                 }
             } else if ((state instanceof MusicDecide || state instanceof CourseResult)) {
-                if (state.resource.getCoursetitle() != null) {
-                    return state.resource.getCoursetitle();
+                if (state.resource.getCourseTitle() != null) {
+                    return state.resource.getCourseTitle();
                 }
             }
             final SongData song = state.resource.getSongdata();
@@ -103,8 +103,8 @@ public class StringPropertyFactory {
                     return ((MusicSelector) state).getSelectedBar().getTitle();
                 }
             } else if ((state instanceof MusicDecide || state instanceof CourseResult)) {
-                if (state.resource.getCoursetitle() != null) {
-                    return state.resource.getCoursetitle();
+                if (state.resource.getCourseTitle() != null) {
+                    return state.resource.getCourseTitle();
                 }
             }
             final SongData song = state.resource.getSongdata();
@@ -267,9 +267,9 @@ public class StringPropertyFactory {
             }
             return "";
         }),
-        tablename(1001, (state) -> (state.resource.getTablename())),
-        tablelevel(1002, (state) -> (state.resource.getTablelevel())),
-        tablefull(1003, (state) -> (state.resource.getTableFullname())),
+        tablename(1001, (state) -> (state.resource.getTableName())),
+        tablelevel(1002, (state) -> (state.resource.getTableLevel())),
+        tablefull(1003, (state) -> (state.resource.getTableFullName())),
         version(1010, (state) -> (state.main.getVersion())),
         irname(1020, (state) -> {
             final IRConfig[] irconfig = state.resource.getPlayerConfig().getIrconfig();

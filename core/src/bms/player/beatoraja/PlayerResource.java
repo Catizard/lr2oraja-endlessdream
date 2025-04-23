@@ -11,6 +11,7 @@ import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
+import lombok.Data;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,8 +22,8 @@ import java.util.logging.Logger;
  *
  * @author exch
  */
+@Data
 public class PlayerResource {
-
     /**
      * 選曲中のBMS
      */
@@ -36,33 +37,33 @@ public class PlayerResource {
     /**
      * BMSModelの元々のモード
      */
-    private bms.model.Mode orgmode;
+    private bms.model.Mode originalMode;
 
-    private PlayerData playerdata = new PlayerData();
+    private PlayerData playerData = new PlayerData();
 
     private Config config;
-    private PlayerConfig pconfig;
+    private PlayerConfig playerConfig;
     /**
      * プレイモード
      */
-    private BMSPlayerMode mode;
+    private BMSPlayerMode playMode;
 
-    private BMSResource bmsresource;
+    private BMSResource bmsResource;
 
     /**
      * スコア
      */
-    private ScoreData score;
+    private ScoreData scoreData;
     /**
      * ライバルスコア
      */
-    private ScoreData rscore;
+    private ScoreData rivalScoreData;
     /**
      * ターゲットスコア
      */
-    private ScoreData tscore;
+    private ScoreData targetScoreData;
 
-    private RankingData ranking;
+    private RankingData rankingData;
     /**
      * スコア更新するかどうか
      */
@@ -74,7 +75,7 @@ public class PlayerResource {
      */
     private FloatArray[] gauge;
 
-    private ReplayData replay;
+    private ReplayData replayData;
 
     private Path[] bmsPaths;
     private boolean loop;
@@ -82,7 +83,7 @@ public class PlayerResource {
     /**
      * コース
      */
-    private CourseData coursedata;
+    private CourseData courseData;
     /**
      * コースのBMSモデル
      */
@@ -97,10 +98,7 @@ public class PlayerResource {
     private Array<FloatArray[]> coursegauge = new Array<FloatArray[]>();
 
     private Array<ReplayData> courseReplay = new Array<ReplayData>();
-    /**
-     * コーススコア
-     */
-    private ScoreData cscore;
+    private ScoreData courseScoreData;
     /**
      * コンボ数。コースプレイ時の引継ぎに使用
      */
@@ -118,39 +116,38 @@ public class PlayerResource {
     /**
      * 現在プレイしている楽曲を含む難易度表とレベル
      */
-    private String tablename = "";
-    private String tablelevel = "";
-    private String tablefull;
+    private String tableName = "";
+    private String tableLevel = "";
 
     public PlayerResource(AudioDriver audio, Config config, PlayerConfig pconfig) {
         this.config = config;
-        this.pconfig = pconfig;
-        this.bmsresource = new BMSResource(audio, config, pconfig);
+        this.playerConfig = pconfig;
+        this.bmsResource = new BMSResource(audio, config, pconfig);
         this.orgGaugeOption = pconfig.getGauge();
     }
 
     public void clear() {
         course = null;
         courseindex = 0;
-        cscore = null;
-        score = null;
+        courseScoreData = null;
+        scoreData = null;
 //		rscore = null;
-        tscore = null;
+        targetScoreData = null;
         gauge = null;
         courseReplay.clear();
         coursegauge.clear();
         combo = 0;
         maxcombo = 0;
         bmsPaths = null;
-        setTablename("");
-        setTablelevel("");
+        setTableName("");
+        setTableLevel("");
     }
 
     public boolean setBMSFile(final Path f, BMSPlayerMode mode) {
         // TODO play mode, リプレイデータでの読み込み分岐をここで行う
-        this.mode = mode;
-        replay = new ReplayData();
-        model = loadBMSModel(f, pconfig.getLnmode());
+        this.playMode = mode;
+        replayData = new ReplayData();
+        model = loadBMSModel(f, playerConfig.getLnmode());
         if (model == null) {
             Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
             return false;
@@ -159,15 +156,15 @@ public class PlayerResource {
             return false;
         }
 
-        orgmode = model.getMode();
-        bmsresource.setBMSFile(model, f, config, mode);
+        originalMode = model.getMode();
+        bmsResource.setBMSFile(model, f, config, mode);
         if (songdata != null) {
             songdata.setBMSModel(model);
         } else {
             songdata = new SongData(model, false);
         }
-        if (tablename.length() == 0 || courseindex != 0) {
-            setTableinfo();
+        if (tableName.length() == 0 || courseindex != 0) {
+            setTableInfo();
         }
         return true;
     }
@@ -218,70 +215,18 @@ public class PlayerResource {
         return model;
     }
 
-    public long getMarginTime() {
-        return marginTime;
-    }
-
-    public BMSPlayerMode getPlayMode() {
-        return mode;
-    }
-
-    public void setPlayMode(BMSPlayerMode mode) {
-        this.mode = mode;
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    public PlayerConfig getPlayerConfig() {
-        return pconfig;
-    }
-
     public BGAProcessor getBGAManager() {
-        return bmsresource.getBGAProcessor();
+        return bmsResource.getBGAProcessor();
     }
 
     public boolean mediaLoadFinished() {
-        return bmsresource.mediaLoadFinished();
-    }
-
-    public ScoreData getScoreData() {
-        return score;
-    }
-
-    public void setScoreData(ScoreData score) {
-        this.score = score;
-    }
-
-    public ScoreData getRivalScoreData() {
-        return rscore;
-    }
-
-    public void setRivalScoreData(ScoreData rscore) {
-        this.rscore = rscore;
-    }
-
-    public ScoreData getTargetScoreData() {
-        return tscore;
-    }
-
-    public void setTargetScoreData(ScoreData tscore) {
-        this.tscore = tscore;
-    }
-
-    public RankingData getRankingData() {
-        return ranking;
-    }
-
-    public void setRankingData(RankingData ranking) {
-        this.ranking = ranking;
+        return bmsResource.mediaLoadFinished();
     }
 
     public boolean setCourseBMSFiles(Path[] files) {
         Array<BMSModel> models = new Array();
         for (Path f : files) {
-            BMSModel model = loadBMSModel(f, pconfig.getLnmode());
+            BMSModel model = loadBMSModel(f, playerConfig.getLnmode());
             if (model == null) {
                 return false;
             }
@@ -318,7 +263,6 @@ public class PlayerResource {
             if (setBMSFile(bmsPaths[courseindex++], BMSPlayerMode.AUTOPLAY)) {
                 return true;
             }
-            ;
         } while (orgindex != courseindex);
         return false;
     }
@@ -329,7 +273,7 @@ public class PlayerResource {
             return false;
         } else {
             songdata = null;
-            setBMSFile(Paths.get(course[courseindex].getPath()), mode);
+            setBMSFile(Paths.get(course[courseindex].getPath()), playMode);
             return true;
         }
     }
@@ -340,77 +284,21 @@ public class PlayerResource {
 
     public void reloadBMSFile() {
         if (model != null) {
-            model = loadBMSModel(Paths.get(model.getPath()), pconfig.getLnmode());
+            model = loadBMSModel(Paths.get(model.getPath()), playerConfig.getLnmode());
         }
-        final String name = tablename;
-        final String lev = tablelevel;
+        final String name = tableName;
+        final String lev = tableLevel;
         clear();
-        tablename = name;
-        tablelevel = lev;
+        tableName = name;
+        tableLevel = lev;
     }
 
-    public FloatArray[] getGauge() {
-        return gauge;
-    }
-
-    public void setGauge(FloatArray[] gauge) {
-        this.gauge = gauge;
-    }
-
-    public GrooveGauge getGrooveGauge() {
-        return grooveGauge;
-    }
-
-    public void setGrooveGauge(GrooveGauge grooveGauge) {
-        this.grooveGauge = grooveGauge;
-    }
-
-    public ReplayData getReplayData() {
-        return replay;
-    }
-
-    public void setReplayData(ReplayData replay) {
-        this.replay = replay;
-    }
-
-    public ScoreData getCourseScoreData() {
-        return cscore;
-    }
-
-    public void setCourseScoreData(ScoreData cscore) {
-        this.cscore = cscore;
-    }
-
-    public boolean isUpdateScore() {
-        return updateScore;
-    }
-
-    public void setUpdateScore(boolean b) {
-        this.updateScore = b;
-    }
-
-    public boolean isUpdateCourseScore() {
-        return updateCourseScore;
-    }
-
-    public void setUpdateCourseScore(boolean updateCourseScore) {
-        this.updateCourseScore = updateCourseScore;
-    }
-
-    public CourseData getCourseData() {
-        return coursedata;
-    }
-
-    public void setCourseData(CourseData coursedata) {
-        this.coursedata = coursedata;
-    }
-
-    public String getCoursetitle() {
-        return coursedata != null ? coursedata.getName() : null;
+    public String getCourseTitle() {
+        return courseData != null ? courseData.getName() : null;
     }
 
     public CourseDataConstraint[] getConstraint() {
-        return coursedata != null ? coursedata.getConstraint() : new CourseDataConstraint[0];
+        return courseData != null ? courseData.getConstraint() : new CourseDataConstraint[0];
     }
 
     public ReplayData[] getCourseReplay() {
@@ -429,92 +317,22 @@ public class PlayerResource {
         coursegauge.add(gauge);
     }
 
-    public int getCombo() {
-        return combo;
-    }
-
-    public void setCombo(int combo) {
-        this.combo = combo;
-    }
-
-    public int getMaxcombo() {
-        return maxcombo;
-    }
-
-    public void setMaxcombo(int maxcombo) {
-        this.maxcombo = maxcombo;
-    }
-
     public void dispose() {
-        if (bmsresource != null) {
-            bmsresource.dispose();
-            bmsresource = null;
+        if (bmsResource != null) {
+            bmsResource.dispose();
+            bmsResource = null;
         }
-    }
-
-    public SongData getSongdata() {
-        return songdata;
-    }
-
-    public void setSongdata(SongData songdata) {
-        this.songdata = songdata;
     }
 
     public BMSResource getBMSResource() {
-        return bmsresource;
+        return bmsResource;
     }
 
-    public int getOrgGaugeOption() {
-        return orgGaugeOption;
+    public String getTableFullName() {
+        return tableLevel + tableName;
     }
 
-    public void setOrgGaugeOption(int orgGaugeOption) {
-        this.orgGaugeOption = orgGaugeOption;
-    }
-
-    public int getAssist() {
-        return assist;
-    }
-
-    public void setAssist(int assist) {
-        this.assist = assist;
-    }
-
-    public String getTablename() {
-        return tablename;
-    }
-
-    public void setTablename(String tablename) {
-        this.tablename = tablename;
-        this.tablefull = null;
-    }
-
-    public String getTablelevel() {
-        return tablelevel;
-    }
-
-    public void setTablelevel(String tablelevel) {
-        this.tablelevel = tablelevel;
-        this.tablefull = null;
-    }
-
-    public String getTableFullname() {
-        if (tablefull == null) {
-            tablefull = tablelevel + tablename;
-        }
-        return tablefull;
-    }
-
-
-    public PlayerData getPlayerData() {
-        return playerdata;
-    }
-
-    public void setPlayerData(PlayerData playerdata) {
-        this.playerdata = playerdata;
-    }
-
-    private void setTableinfo() {
+    private void setTableInfo() {
         final String[] urls = this.getConfig().getTableURL();
         final TableDataAccessor tdaccessor = new TableDataAccessor(config.getTablepath());
         final TableData[] tds = tdaccessor.readAll();
@@ -529,8 +347,8 @@ public class PlayerResource {
                                     ts.getMd5().equals(this.getSongdata().getMd5())) ||
                                     (ts.getMd5().length() != 0 && this.getSongdata().getMd5().length() != 0 &&
                                             ts.getSha256().equals(this.getSongdata().getSha256()))) {
-                                setTablename(td.getName());
-                                setTablelevel(tf.getName());
+                                setTableName(td.getName());
+                                setTableLevel(tf.getName());
                                 return;
                             }
                         }
@@ -538,15 +356,7 @@ public class PlayerResource {
                 }
             }
         }
-        setTablename("");
-        setTablelevel("");
-    }
-
-    public bms.model.Mode getOriginalMode() {
-        return orgmode;
-    }
-
-    public void setOriginalMode(bms.model.Mode orgmode) {
-        this.orgmode = orgmode;
+        setTableName("");
+        setTableLevel("");
     }
 }

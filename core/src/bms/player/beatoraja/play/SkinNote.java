@@ -45,11 +45,11 @@ public class SkinNote extends SkinObject {
     public void prepare(long time, MainState state) {
         if (renderer == null) {
             final BMSPlayer player = (BMSPlayer) state;
-            if (player.getLanerender() == null) {
+            if (player.getLaneRender() == null) {
                 draw = false;
                 return;
             }
-            renderer = player.getLanerender();
+            renderer = player.getLaneRender();
         }
         this.time = time;
         super.prepare(time, state);
