@@ -5,6 +5,7 @@ plugins {
     id("application")
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.endlessdream.extra.multiplatform-convention")
+    id("io.freefair.lombok") version "8.13.1"
 }
 
 repositories {

@@ -31,6 +31,7 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
 import bms.player.beatoraja.stream.StreamController;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.InputMultiplexer;
@@ -48,6 +49,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.StringBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,68 +66,105 @@ import java.util.logging.Logger;
  *
  * @author exch
  */
-public class MainController {
+@Getter
+public class MainController implements ApplicationListener {
 
     public static final boolean debug = false;
     public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
     private static final String VERSION = "LR2oraja Endless Dream 0.2.1";
+
     /**
-     * 起動時間
+     * Game start time
      */
-    private final long boottime = System.currentTimeMillis();
+    private final long bootTime = System.currentTimeMillis();
+    /**
+     * A calendar singleton, not very useful
+     */
     private final Calendar cl = Calendar.getInstance();
+    /**
+     * Current player config
+     */
+    private final PlayerConfig playerConfig;
     private final SkinOffset[] offset = new SkinOffset[offsetCount];
-    private final Array<MainStateListener> stateListener = new Array<MainStateListener>();
+    private final Array<MainStateListener> stateListener = new Array<>();
+    /**
+     * A shared StringBuilder, to reduce the new-destroy cost,
+     * because it's used in render steps
+     */
     private final StringBuilder message = new StringBuilder();
+    private final TimerManager timer;
+    /**
+     * Beatoraja's global configuration
+     */
+    private final Config config;
+    private final boolean songUpdated;
+    private final IRStatus[] ir;
+    private final RivalDataAccessor rivals = new RivalDataAccessor();
+    private final RankingDataCache irCache = new RankingDataCache();
+    /**
+     * 1曲プレイで指定したBMSファイル
+     */
+    private final Path bmsFile;
+    /**
+     * プレイデータアクセサ
+     */
+    private final PlayDataAccessor playData;
+    private final SystemSoundManager sound;
+    private final BMSPlayerMode auto;
     public ImGuiRenderer imGui;
-    public List<IRSendStatus> irSendStatus = new ArrayList<IRSendStatus>();
+    public List<IRSendStatus> irSendStatus = new ArrayList<>();
     protected TextureRegion black;
     protected TextureRegion white;
+    /**
+     * Beatoraja contains many scenes(select, play...), this is the ref to current running scene<br>
+     * If you know some kind of `elm` structure program, you can easily understand it
+     */
+    private MainState currentState;
+    /**
+     * In-game message render, call
+     * <pre><code>
+     *      messageRenderer.addMessage(message, duration, color, type);
+     * </code></pre>
+     * to render an in-game message
+     */
+    private MessageRenderer messageRenderer;
+    /**
+     * Stream request polling controller<br>
+     * See stream request module
+     */
+    private StreamController streamController;
     private long mouseMovedTime;
     private BMSPlayer bmsplayer;
     private MusicDecide decide;
     private MusicSelector selector;
     private MusicResult result;
-    private CourseResult gresult;
-    private KeyConfiguration keyconfig;
-    private SkinConfiguration skinconfig;
+    private CourseResult courseResult;
+    /**
+     * Keymap configuration
+     * TODO: is it part of the player config?
+     */
+    private KeyConfiguration keymapConfig;
+    private SkinConfiguration skinConfig;
     private AudioDriver audio;
-    private PlayerResource resource;
-    private BitmapFont systemfont;
-    private MessageRenderer messageRenderer;
-    private MainState current;
-    private TimerManager timer;
-    private Config config;
-    private PlayerConfig player;
-    private BMSPlayerMode auto;
-    private boolean songUpdated;
-    private SongInformationAccessor infodb;
-    private IRStatus[] ir;
-    private RivalDataAccessor rivals = new RivalDataAccessor();
-    private RankingDataCache ircache = new RankingDataCache();
-    private SpriteBatch sprite;
+    private PlayerResource playerResource;
+    private BitmapFont systemFont;
     /**
-     * 1曲プレイで指定したBMSファイル
+     * songinfo.db file accessor
      */
-    private Path bmsfile;
-    private BMSPlayerInputProcessor input;
+    private SongInformationAccessor infoDatabase;
+    private SpriteBatch spriteBatch;
+    private BMSPlayerInputProcessor inputProcessor;
     /**
-     * FPSを描画するかどうか
+     * Whether to draw fps or not
      */
-    private boolean showfps;
-    /**
-     * プレイデータアクセサ
-     */
-    private PlayDataAccessor playdata;
-    private SystemSoundManager sound;
+    private boolean showFps;
     private Thread screenshot;
     private MusicDownloadProcessor download;
-    private StreamController streamController;
-    private long prevtime;
+    private long prevTime;
     private UpdateThread updateSong;
     private UpdateThread downloadIpfs;
 
-    public MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated) {
+    public MainController(Path f, Config config, PlayerConfig playerConfig, BMSPlayerMode auto, boolean songUpdated) {
         this.auto = auto;
         this.config = config;
         this.songUpdated = songUpdated;
@@ -132,64 +173,71 @@ public class MainController {
             offset[i] = new SkinOffset();
         }
 
-        if (player == null) {
+        if (playerConfig == null) {
             try {
-                player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername());
+                playerConfig = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername());
             } catch (PlayerConfigException e) {
                 Logger.getGlobal().severe(e.getLocalizedMessage());
             }
         }
-        this.player = player;
+        this.playerConfig = playerConfig;
 
-        this.bmsfile = f;
+        this.bmsFile = f;
 
         if (config.isEnableIpfs()) {
             Path ipfspath = Paths.get("ipfs").toAbsolutePath();
-            if (!ipfspath.toFile().exists())
-                ipfspath.toFile().mkdirs();
+            if (!ipfspath.toFile().exists() && !ipfspath.toFile().mkdirs()) {
+                Logger.getGlobal().severe("Failed to create ipfs directory");
+            }
             List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
             if (ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())) {
                 roots.add(ipfspath.toString());
-                getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
+                getConfig().setBmsroot(roots.toArray(new String[0]));
             }
         }
         try {
             Class.forName("org.sqlite.JDBC");
             if (config.isUseSongInfo()) {
-                infodb = new SongInformationAccessor(config.getSonginfopath());
+                infoDatabase = new SongInformationAccessor(config.getSonginfopath());
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
-        playdata = new PlayDataAccessor(config);
+        playData = new PlayDataAccessor(config);
 
-        Array<IRStatus> irarray = new Array<IRStatus>();
-        for (IRConfig irconfig : player.getIrconfig()) {
-            final IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
-            if (ir != null) {
-                if (irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {
-                } else {
-                    try {
-                        IRResponse<IRPlayerData> response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
-                        if (response.isSucceeded()) {
-                            irarray.add(new IRStatus(irconfig, ir, response.getData()));
-                        } else {
-                            Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
-                        }
-                    } catch (IllegalArgumentException e) {
-                        Logger.getGlobal().info("trying pre-0.8.5 IR login method");
-                        IRResponse<IRPlayerData> response = ir.login(irconfig.getUserid(), irconfig.getPassword());
-                        if (response.isSucceeded()) {
-                            irarray.add(new IRStatus(irconfig, ir, response.getData()));
-                        } else {
-                            Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+        Array<IRStatus> irarray = new Array<>();
+
+        if (playerConfig == null) {
+            Logger.getGlobal().severe("Player config is missing, skipping ir connect steps. Please check your config files!");
+        } else if (playerConfig.getIrconfig() == null) {
+            Logger.getGlobal().severe("IR config from player config is empty, skipping ir connect steps. Please check your config files!");
+        } else {
+            for (IRConfig irconfig : playerConfig.getIrconfig()) {
+                final IRConnection ir = IRConnectionManager.getIRConnection(irconfig.getIrname());
+                if (ir != null) {
+                    if (!irconfig.getUserid().isEmpty() && !irconfig.getPassword().isEmpty()) {
+                        try {
+                            IRResponse<IRPlayerData> response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
+                            if (response.isSucceeded()) {
+                                irarray.add(new IRStatus(irconfig, ir, response.getData()));
+                            } else {
+                                Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+                            }
+                        } catch (IllegalArgumentException e) {
+                            Logger.getGlobal().info("trying pre-0.8.5 IR login method");
+                            IRResponse<IRPlayerData> response = ir.login(irconfig.getUserid(), irconfig.getPassword());
+                            if (response.isSucceeded()) {
+                                irarray.add(new IRStatus(irconfig, ir, response.getData()));
+                            } else {
+                                Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+                            }
                         }
                     }
                 }
             }
-
         }
+
         ir = irarray.toArray(IRStatus.class);
 
         rivals.update(this);
@@ -225,12 +273,8 @@ public class MainController {
         return MainLoader.getScoreDatabaseAccessor();
     }
 
-    public SongInformationAccessor getInfoDatabase() {
-        return infodb;
-    }
-
     public PlayDataAccessor getPlayDataAccessor() {
-        return playdata;
+        return playData;
     }
 
     public RivalDataAccessor getRivalDataAccessor() {
@@ -238,92 +282,60 @@ public class MainController {
     }
 
     public RankingDataCache getRankingDataCache() {
-        return ircache;
-    }
-
-    public SpriteBatch getSpriteBatch() {
-        return sprite;
-    }
-
-    public PlayerResource getPlayerResource() {
-        return resource;
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    public PlayerConfig getPlayerConfig() {
-        return player;
+        return irCache;
     }
 
     public void changeState(MainStateType state) {
         MainState newState = null;
+        //@formatter:off
         switch (state) {
             case MUSICSELECT:
-                if (this.bmsfile != null) {
+                if (this.bmsFile != null) {
                     exit();
                 } else {
                     newState = selector;
                 }
                 break;
-            case DECIDE:
-                newState = decide;
-                break;
+            case DECIDE: newState = decide; break;
             case PLAY:
                 if (bmsplayer != null) {
                     bmsplayer.dispose();
                 }
-                bmsplayer = new BMSPlayer(this, resource);
+                bmsplayer = new BMSPlayer(this, playerResource);
                 newState = bmsplayer;
                 break;
-            case RESULT:
-                newState = result;
-                break;
-            case COURSERESULT:
-                newState = gresult;
-                break;
-            case CONFIG:
-                newState = keyconfig;
-                break;
-            case SKINCONFIG:
-                newState = skinconfig;
-                break;
+            case RESULT: newState = result; break;
+            case COURSERESULT: newState = courseResult; break;
+            case CONFIG: newState = keymapConfig; break;
+            case SKINCONFIG: newState = skinConfig; break;
         }
+        //@formatter:on
 
-        if (newState != null && current != newState) {
-            if (current != null) {
-                current.shutdown();
-                current.setSkin(null);
+        if (newState != null && currentState != newState) {
+            if (currentState != null) {
+                currentState.shutdown();
+                currentState.setSkin(null);
             }
             newState.create();
             if (newState.getSkin() != null) {
                 newState.getSkin().prepare(newState);
             }
-            current = newState;
+            currentState = newState;
             timer.setMainState(newState);
-            current.prepare();
+            currentState.prepare();
             updateMainStateListener(0);
         }
-        if (current.getStage() != null) {
-            Gdx.input.setInputProcessor(new InputMultiplexer(current.getStage(), input.getKeyBoardInputProcesseor()));
+        if (currentState.getStage() != null) {
+            Gdx.input.setInputProcessor(new InputMultiplexer(currentState.getStage(), inputProcessor.getKeyBoardInputProcesseor()));
         } else {
-            Gdx.input.setInputProcessor(input.getKeyBoardInputProcesseor());
+            Gdx.input.setInputProcessor(inputProcessor.getKeyBoardInputProcesseor());
         }
     }
 
-    public MainState getCurrentState() {
-        return current;
-    }
-
-    public void setPlayMode(BMSPlayerMode auto) {
-        this.auto = auto;
-
-    }
-
+    @Override
     public void create() {
         final long t = System.currentTimeMillis();
-        sprite = new SpriteBatch();
+        spriteBatch = new SpriteBatch();
         SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
 
@@ -333,14 +345,14 @@ public class MainController {
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(config.getSystemfontpath()));
             FreeTypeFontParameter parameter = new FreeTypeFontParameter();
             parameter.size = 24;
-            systemfont = generator.generateFont(parameter);
+            systemFont = generator.generateFont(parameter);
             generator.dispose();
         } catch (GdxRuntimeException e) {
             Logger.getGlobal().severe("System Font読み込み失敗");
         }
         messageRenderer = new MessageRenderer(config.getMessagefontpath());
 
-        input = new BMSPlayerInputProcessor(config, player);
+        inputProcessor = new BMSPlayerInputProcessor(config, playerConfig);
         switch (config.getAudioConfig().getDriver()) {
             case OpenAL:
                 audio = new GdxSoundDriver(config);
@@ -350,19 +362,19 @@ public class MainController {
 //			break;
         }
 
-        resource = new PlayerResource(audio, config, player);
+        playerResource = new PlayerResource(audio, config, playerConfig);
         selector = new MusicSelector(this, songUpdated);
-        if (player.getRequestEnable()) {
-            streamController = new StreamController(selector, (player.getRequestNotify() ? messageRenderer : null));
+        if (playerConfig.getRequestEnable()) {
+            streamController = new StreamController(selector, (playerConfig.getRequestNotify() ? messageRenderer : null));
             streamController.run();
         }
         decide = new MusicDecide(this);
         result = new MusicResult(this);
-        gresult = new CourseResult(this);
-        keyconfig = new KeyConfiguration(this);
-        skinconfig = new SkinConfiguration(this, player);
-        if (bmsfile != null) {
-            if (resource.setBMSFile(bmsfile, auto)) {
+        courseResult = new CourseResult(this);
+        keymapConfig = new KeyConfiguration(this);
+        skinConfig = new SkinConfiguration(this, playerConfig);
+        if (bmsFile != null) {
+            if (playerResource.setBMSFile(bmsFile, auto)) {
                 changeState(MainStateType.PLAY);
             } else {
                 // ダミーステートに移行してすぐexitする
@@ -381,18 +393,18 @@ public class MainController {
                 final long now = System.nanoTime() / 1000000;
                 if (time != now) {
                     time = now;
-                    input.poll();
+                    inputProcessor.poll();
                 } else {
                     try {
                         Thread.sleep(0, 500000);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                     }
                 }
             }
         });
         polling.start();
 
-        Array<String> targetlist = new Array<String>(player.getTargetlist());
+        Array<String> targetlist = new Array<>(playerConfig.getTargetlist());
         for (int i = 0; i < rivals.getRivalCount(); i++) {
             targetlist.add("RIVAL_" + (i + 1));
         }
@@ -446,7 +458,7 @@ public class MainController {
 
                         try {
                             Thread.sleep(3000, 0);
-                        } catch (InterruptedException e) {
+                        } catch (InterruptedException ignored) {
                         }
                     } catch (Exception e) {
                         Logger.getGlobal().severe(e.getMessage());
@@ -457,67 +469,71 @@ public class MainController {
         }
     }
 
+    @Override
     public void render() {
 //		input.poll();
         timer.update();
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        current.render();
-        sprite.begin();
-        if (current.getSkin() != null) {
-            current.getSkin().updateCustomObjects(current);
-            current.getSkin().drawAllObjects(sprite, current);
-        }
-        sprite.end();
+        // Render current scene
+        currentState.render();
 
-        final Stage stage = current.getStage();
+        // TODO: what is this?
+        spriteBatch.begin();
+        if (currentState.getSkin() != null) {
+            currentState.getSkin().updateCustomObjects(currentState);
+            currentState.getSkin().drawAllObjects(spriteBatch, currentState);
+        }
+        spriteBatch.end();
+
+        final Stage stage = currentState.getStage();
         if (stage != null) {
             stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
             stage.draw();
         }
 
         // show fps
-        if (showfps && systemfont != null) {
-            sprite.begin();
-            systemfont.setColor(Color.CYAN);
+        if (showFps && systemFont != null) {
+            spriteBatch.begin();
+            systemFont.setColor(Color.CYAN);
             message.setLength(0);
-            systemfont.draw(sprite, message.append("FPS ").append(Gdx.graphics.getFramesPerSecond()), 10,
+            systemFont.draw(spriteBatch, message.append("FPS ").append(Gdx.graphics.getFramesPerSecond()), 10,
                     config.getResolution().height - 2);
             if (debug) {
                 message.setLength(0);
-                systemfont.draw(sprite, message.append("Skin Pixmap Images ").append(SkinLoader.getResource().size()), 10,
+                systemFont.draw(spriteBatch, message.append("Skin Pixmap Images ").append(SkinLoader.getResource().size()), 10,
                         config.getResolution().height - 26);
                 message.setLength(0);
-                systemfont.draw(sprite, message.append("Total Memory Used(MB) ").append(Runtime.getRuntime().totalMemory() / (1024 * 1024)), 10,
+                systemFont.draw(spriteBatch, message.append("Total Memory Used(MB) ").append(Runtime.getRuntime().totalMemory() / (1024 * 1024)), 10,
                         config.getResolution().height - 50);
                 message.setLength(0);
-                systemfont.draw(sprite, message.append("Total Free Memory(MB) ").append(Runtime.getRuntime().freeMemory() / (1024 * 1024)), 10,
+                systemFont.draw(spriteBatch, message.append("Total Free Memory(MB) ").append(Runtime.getRuntime().freeMemory() / (1024 * 1024)), 10,
                         config.getResolution().height - 74);
                 message.setLength(0);
-                systemfont.draw(sprite, message.append("Max Sprite In Batch ").append(sprite.maxSpritesInBatch), 10,
+                systemFont.draw(spriteBatch, message.append("Max Sprite In Batch ").append(spriteBatch.maxSpritesInBatch), 10,
                         config.getResolution().height - 98);
                 message.setLength(0);
-                systemfont.draw(sprite, message.append("Skin Pixmap Resource Size ").append(SkinLoader.getResource().size()), 10,
+                systemFont.draw(spriteBatch, message.append("Skin Pixmap Resource Size ").append(SkinLoader.getResource().size()), 10,
                         config.getResolution().height - 122);
                 message.setLength(0);
-                systemfont.draw(sprite, message.append("Stagefile Pixmap Resource Size ").append(selector.getStagefileResource().size()), 10,
+                systemFont.draw(spriteBatch, message.append("Stagefile Pixmap Resource Size ").append(selector.getStagefileResource().size()), 10,
                         config.getResolution().height - 146);
                 message.setLength(0);
-                systemfont.draw(sprite, message.append("Banner Pixmap Resource Size ").append(selector.getBannerResource().size()), 10,
+                systemFont.draw(spriteBatch, message.append("Banner Pixmap Resource Size ").append(selector.getBannerResource().size()), 10,
                         config.getResolution().height - 170);
             }
 
-            sprite.end();
+            spriteBatch.end();
         }
-        imGui.start();
-        imGui.render();
-        imGui.end();
+        ImGuiRenderer.start();
+        ImGuiRenderer.render();
+        ImGuiRenderer.end();
 
         // show message
-        sprite.begin();
-        messageRenderer.render(current, sprite, 100, config.getResolution().height - 2);
-        sprite.end();
+        spriteBatch.begin();
+        messageRenderer.render(currentState, spriteBatch, 100, config.getResolution().height - 2);
+        spriteBatch.end();
 
         // TODO renderループに入れるのではなく、MusicDownloadProcessorのListenerとして実装したほうがいいのでは
         if (download != null && download.isDownload()) {
@@ -525,32 +541,32 @@ public class MainController {
         }
 
         final long time = System.currentTimeMillis();
-        if (time > prevtime) {
-            prevtime = time;
-            current.input();
+        if (time > prevTime) {
+            prevTime = time;
+            currentState.input();
             // event - move pressed
-            if (input.isMousePressed()) {
-                input.setMousePressed();
-                current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+            if (inputProcessor.isMousePressed()) {
+                inputProcessor.setMousePressed();
+                currentState.getSkin().mousePressed(currentState, inputProcessor.getMouseButton(), inputProcessor.getMouseX(), inputProcessor.getMouseY());
             }
             // event - move dragged
-            if (input.isMouseDragged()) {
-                input.setMouseDragged();
-                current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+            if (inputProcessor.isMouseDragged()) {
+                inputProcessor.setMouseDragged();
+                currentState.getSkin().mouseDragged(currentState, inputProcessor.getMouseButton(), inputProcessor.getMouseX(), inputProcessor.getMouseY());
             }
 
             // マウスカーソル表示判定
-            if (input.isMouseMoved()) {
-                input.setMouseMoved(false);
+            if (inputProcessor.isMouseMoved()) {
+                inputProcessor.setMouseMoved(false);
                 mouseMovedTime = time;
             }
-            Gdx.input.setCursorCatched(current == bmsplayer && time > mouseMovedTime + 5000);
+            Gdx.input.setCursorCatched(currentState == bmsplayer && time > mouseMovedTime + 5000);
             // FPS表示切替
-            if (input.isActivated(KeyCommand.SHOW_FPS)) {
-                showfps = !showfps;
+            if (inputProcessor.isActivated(KeyCommand.SHOW_FPS)) {
+                showFps = !showFps;
             }
-            // fullscrees - windowed
-            if (input.isActivated(KeyCommand.SWITCH_SCREEN_MODE)) {
+            // full-screen -> windowed
+            if (inputProcessor.isActivated(KeyCommand.SWITCH_SCREEN_MODE)) {
                 boolean fullscreen = Gdx.graphics.isFullscreen();
                 Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
                 if (fullscreen) {
@@ -561,25 +577,8 @@ public class MainController {
                 config.setDisplaymode(fullscreen ? Config.DisplayMode.WINDOW : Config.DisplayMode.FULLSCREEN);
             }
 
-            // if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
-            // int resolution = config.getResolution();
-            // resolution = (resolution + 1) % RESOLUTION.length;
-            // if (config.isFullscreen()) {
-            // Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
-            // (int) RESOLUTION[resolution].height);
-            // Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-            // Gdx.graphics.setFullscreenMode(currentMode);
-            // }
-            // else {
-            // Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
-            // (int) RESOLUTION[resolution].height);
-            // }
-            // config.setResolution(resolution);
-            // input.getFunctiontime()[4] = 0;
-            // }
-
             // screen shot
-            if (input.isActivated(KeyCommand.SAVE_SCREENSHOT)) {
+            if (inputProcessor.isActivated(KeyCommand.SAVE_SCREENSHOT)) {
                 if (screenshot == null || !screenshot.isAlive()) {
                     final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), true);
                     screenshot = new Thread(() -> {
@@ -587,13 +586,13 @@ public class MainController {
                         for (int i = 3; i < pixels.length; i += 4) {
                             pixels[i] = (byte) 0xff;
                         }
-                        new ScreenShotFileExporter().send(current, pixels);
+                        new ScreenShotFileExporter().send(currentState, pixels);
                     });
                     screenshot.start();
                 }
             }
 
-            if (input.isActivated(KeyCommand.POST_TWITTER)) {
+            if (inputProcessor.isActivated(KeyCommand.POST_TWITTER)) {
                 if (screenshot == null || !screenshot.isAlive()) {
                     final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), false);
                     screenshot = new Thread(() -> {
@@ -601,14 +600,14 @@ public class MainController {
                         for (int i = 3; i < pixels.length; i += 4) {
                             pixels[i] = (byte) 0xff;
                         }
-                        new ScreenShotTwitterExporter(player).send(current, pixels);
+                        new ScreenShotTwitterExporter(playerConfig).send(currentState, pixels);
                     });
                     screenshot.start();
                 }
             }
 
-            if (input.isActivated(KeyCommand.TOGGLE_MOD_MENU)) {
-                imGui.toggleMenu();
+            if (inputProcessor.isActivated(KeyCommand.TOGGLE_MOD_MENU)) {
+                ImGuiRenderer.toggleMenu();
             }
 
             if (download != null && download.getDownloadpath() != null) {
@@ -622,6 +621,7 @@ public class MainController {
         }
     }
 
+    @Override
     public void dispose() {
         saveConfig();
 
@@ -640,17 +640,17 @@ public class MainController {
         if (result != null) {
             result.dispose();
         }
-        if (gresult != null) {
-            gresult.dispose();
+        if (courseResult != null) {
+            courseResult.dispose();
         }
-        if (keyconfig != null) {
-            keyconfig.dispose();
+        if (keymapConfig != null) {
+            keymapConfig.dispose();
         }
-        if (skinconfig != null) {
-            skinconfig.dispose();
+        if (skinConfig != null) {
+            skinConfig.dispose();
         }
-        imGui.dispose();
-        resource.dispose();
+        ImGuiRenderer.dispose();
+        playerResource.dispose();
 //		input.dispose();
         SkinLoader.getResource().dispose();
         ShaderManager.dispose();
@@ -661,30 +661,29 @@ public class MainController {
         Logger.getGlobal().info("全リソース破棄完了");
     }
 
+    @Override
     public void pause() {
-        current.pause();
+        currentState.pause();
     }
 
+    @Override
     public void resize(int width, int height) {
-        current.resize(width, height);
+        currentState.resize(width, height);
     }
 
+    @Override
     public void resume() {
-        current.resume();
+        currentState.resume();
     }
 
     public void saveConfig() {
         Config.write(config);
-        PlayerConfig.write(config.getPlayerpath(), player);
+        PlayerConfig.write(config.getPlayerpath(), playerConfig);
         Logger.getGlobal().info("設定情報を保存");
     }
 
     public void exit() {
         Gdx.app.exit();
-    }
-
-    public BMSPlayerInputProcessor getInputProcessor() {
-        return input;
     }
 
     public AudioDriver getAudioProcessor() {
@@ -703,43 +702,19 @@ public class MainController {
         return download;
     }
 
-    public MessageRenderer getMessageRenderer() {
-        return messageRenderer;
-    }
-
-    public ImGuiRenderer getImGui() {
-        return imGui;
-    }
-
-    public void setImGui(ImGuiRenderer imGui) {
-        this.imGui = imGui;
-    }
-
     public void updateMainStateListener(int status) {
         for (MainStateListener listener : stateListener) {
-            listener.update(current, status);
+            listener.update(currentState, status);
         }
     }
 
     public long getPlayTime() {
-        return System.currentTimeMillis() - boottime;
+        return System.currentTimeMillis() - bootTime;
     }
 
-    public Calendar getCurrnetTime() {
+    public Calendar getCurrentTime() {
         cl.setTimeInMillis(System.currentTimeMillis());
         return cl;
-    }
-
-    public TimerManager getTimer() {
-        return timer;
-    }
-
-    public long getStartTime() {
-        return timer.getStartTime();
-    }
-
-    public long getStartMicroTime() {
-        return timer.getStartMicroTime();
     }
 
     public long getNowTime() {
@@ -758,32 +733,12 @@ public class MainController {
         return timer.getNowMicroTime(id);
     }
 
-    public long getTimer(int id) {
-        return getMicroTimer(id) / 1000;
-    }
-
     public long getMicroTimer(int id) {
         return timer.getMicroTimer(id);
     }
 
     public boolean isTimerOn(int id) {
         return getMicroTimer(id) != Long.MIN_VALUE;
-    }
-
-    public void setTimerOn(int id) {
-        timer.setTimerOn(id);
-    }
-
-    public void setTimerOff(int id) {
-        setMicroTimer(id, Long.MIN_VALUE);
-    }
-
-    public void setMicroTimer(int id, long microtime) {
-        timer.setMicroTimer(id, microtime);
-    }
-
-    public void switchTimer(int id, boolean on) {
-        timer.switchTimer(id, on);
     }
 
     public void updateSong(String path) {
@@ -808,19 +763,6 @@ public class MainController {
         if (downloadIpfs == null || !downloadIpfs.isAlive()) {
             downloadIpfs = new DownloadMessageThread(message);
             downloadIpfs.start();
-        }
-    }
-
-    public static class IRStatus {
-
-        public final IRConfig config;
-        public final IRConnection connection;
-        public final IRPlayerData player;
-
-        public IRStatus(IRConfig config, IRConnection connection, IRPlayerData player) {
-            this.config = config;
-            this.connection = connection;
-            this.player = player;
         }
     }
 
@@ -855,13 +797,22 @@ public class MainController {
         }
     }
 
-    abstract class UpdateThread extends Thread {
+    abstract static class UpdateThread extends Thread {
 
         protected String message;
 
         public UpdateThread(String message) {
             this.message = message;
         }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class IRStatus {
+        public IRConfig config;
+        public IRConnection connection;
+        public IRPlayerData player;
     }
 
     /**
