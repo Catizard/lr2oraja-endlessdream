@@ -57,7 +57,7 @@ public class BMSPlayer extends MainState {
      * リプレイデータ
      */
     private ReplayData replay = null;
-    private int playSpeed = 100;
+    @Getter private int playSpeed = 100;
     /**
      * リプレイHS保存用 STATE READY時に保存
      */
@@ -822,10 +822,6 @@ public class BMSPlayer extends MainState {
         }
 
         prevTime = micronow;
-    }
-
-    public int getPlaySpeed() {
-        return playSpeed;
     }
 
     public void setPlaySpeed(int playspeed) {

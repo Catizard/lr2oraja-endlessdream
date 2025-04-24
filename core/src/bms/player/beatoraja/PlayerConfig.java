@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.SerializationException;
+import lombok.Data;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +28,7 @@ import java.util.logging.Logger;
  *
  * @author exch
  */
+@Data
 public class PlayerConfig {
 
     public static final int JUDGETIMING_MAX = 500;
@@ -140,7 +142,7 @@ public class PlayerConfig {
      * GASで遷移可能なゲージの下限  ASSIST EASY, EASY, NORMALから選択
      */
     private int bottomShiftableGauge = GrooveGauge.ASSISTEASY;
-    private int autosavereplay[];
+    private int[] autoSaveReplay;
 
     /**
      * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
@@ -387,134 +389,6 @@ public class PlayerConfig {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getGauge() {
-        return gauge;
-    }
-
-    public void setGauge(int gauge) {
-        this.gauge = gauge;
-    }
-
-    public int getRandom() {
-        return random;
-    }
-
-    public void setRandom(int random) {
-        this.random = random;
-    }
-
-    public int getJudgetiming() {
-        return judgetiming;
-    }
-
-    public void setJudgetiming(int judgetiming) {
-        this.judgetiming = judgetiming;
-    }
-
-    public boolean isNotesDisplayTimingAutoAdjust() {
-        return notesDisplayTimingAutoAdjust;
-    }
-
-    public void setNotesDisplayTimingAutoAdjust(boolean notesDisplayTimingAutoAdjust) {
-        this.notesDisplayTimingAutoAdjust = notesDisplayTimingAutoAdjust;
-    }
-
-    public boolean isBpmguide() {
-        return bpmguide;
-    }
-
-    public void setBpmguide(boolean bpmguide) {
-        this.bpmguide = bpmguide;
-    }
-
-    public int getGaugeAutoShift() {
-        return gaugeAutoShift;
-    }
-
-    public void setGaugeAutoShift(int gaugeAutoShift) {
-        this.gaugeAutoShift = gaugeAutoShift;
-    }
-
-    public int getBottomShiftableGauge() {
-        return bottomShiftableGauge;
-    }
-
-    public void setBottomShiftableGauge(int bottomShiftableGauge) {
-        this.bottomShiftableGauge = bottomShiftableGauge;
-    }
-
-    public int getLnmode() {
-        return lnmode;
-    }
-
-    public void setLnmode(int lnmode) {
-        this.lnmode = lnmode;
-    }
-
-    public int getRandom2() {
-        return random2;
-    }
-
-    public void setRandom2(int random2) {
-        this.random2 = random2;
-    }
-
-    public int getDoubleoption() {
-        return doubleoption;
-    }
-
-    public void setDoubleoption(int doubleoption) {
-        this.doubleoption = doubleoption;
-    }
-
-    public int getExtranoteDepth() {
-        return extranoteDepth;
-    }
-
-    public void setExtranoteDepth(int extranoteDepth) {
-        this.extranoteDepth = extranoteDepth;
-    }
-
-    public int getExtranoteType() {
-        return extranoteType;
-    }
-
-    public void setExtranoteType(int extranoteType) {
-        this.extranoteType = extranoteType;
-    }
-
-    public boolean isExtranoteScratch() {
-        return extranoteScratch;
-    }
-
-    public void setExtranoteScratch(boolean extranoteScratch) {
-        this.extranoteScratch = extranoteScratch;
-    }
-
-    public boolean isShowjudgearea() {
-        return showjudgearea;
-    }
-
-    public void setShowjudgearea(boolean showjudgearea) {
-        this.showjudgearea = showjudgearea;
-    }
-
-    public boolean isMarkprocessednote() {
-        return markprocessednote;
-    }
-
-    public void setMarkprocessednote(boolean markprocessednote) {
-        this.markprocessednote = markprocessednote;
-    }
-
     public PlayModeConfig getPlayConfig(Mode modeId) {
         switch (modeId != null ? modeId : Mode.BEAT_7K) {
             case BEAT_5K:
@@ -557,32 +431,12 @@ public class PlayerConfig {
         }
     }
 
-    public PlayModeConfig getMode5() {
-        return mode5;
-    }
-
-    public void setMode5(PlayModeConfig mode5) {
-        this.mode5 = mode5;
-    }
-
-    public PlayModeConfig getMode7() {
-        return mode7;
-    }
-
-    public void setMode7(PlayModeConfig mode7) {
-        this.mode7 = mode7;
-    }
-
     public PlayModeConfig getMode10() {
         if (mode10 == null || mode10.getController().length < 2) {
             mode10 = new PlayModeConfig(Mode.BEAT_10K);
             Logger.getGlobal().warning("mode10のPlayConfigを再構成");
         }
         return mode10;
-    }
-
-    public void setMode10(PlayModeConfig mode10) {
-        this.mode10 = mode10;
     }
 
     public PlayModeConfig getMode14() {
@@ -593,60 +447,12 @@ public class PlayerConfig {
         return mode14;
     }
 
-    public void setMode14(PlayModeConfig mode14) {
-        this.mode14 = mode14;
-    }
-
-    public PlayModeConfig getMode9() {
-        return mode9;
-    }
-
-    public void setMode9(PlayModeConfig mode9) {
-        this.mode9 = mode9;
-    }
-
-    public PlayModeConfig getMode24() {
-        return mode24;
-    }
-
-    public void setMode24(PlayModeConfig mode24) {
-        this.mode24 = mode24;
-    }
-
     public PlayModeConfig getMode24double() {
         if (mode24double == null || mode24double.getController().length < 2) {
             mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
             Logger.getGlobal().warning("mode24doubleのPlayConfigを再構成");
         }
         return mode24double;
-    }
-
-    public void setMode24double(PlayModeConfig mode24double) {
-        this.mode24double = mode24double;
-    }
-
-    public Mode getMode() {
-        return mode;
-    }
-
-    public void setMode(Mode m) {
-        this.mode = m;
-    }
-
-    public int getSort() {
-        return this.sort;
-    }
-
-    public void setSort(int sort) {
-        this.sort = sort;
-    }
-
-    public int getMusicselectinput() {
-        return musicselectinput;
-    }
-
-    public void setMusicselectinput(int musicselectinput) {
-        this.musicselectinput = musicselectinput;
     }
 
     public SkinConfig[] getSkin() {
@@ -657,42 +463,6 @@ public class PlayerConfig {
         return skin;
     }
 
-    public void setSkin(SkinConfig[] skin) {
-        this.skin = skin;
-    }
-
-    public SkinConfig[] getSkinHistory() {
-        return skinHistory;
-    }
-
-    public void setSkinHistory(SkinConfig[] skinHistory) {
-        this.skinHistory = skinHistory;
-    }
-
-    public IRConfig[] getIrconfig() {
-        return irconfig;
-    }
-
-    public void setIrconfig(IRConfig[] irconfig) {
-        this.irconfig = irconfig;
-    }
-
-    public String getTargetid() {
-        return targetid;
-    }
-
-    public void setTargetid(String targetid) {
-        this.targetid = targetid;
-    }
-
-    public String[] getTargetlist() {
-        return targetlist;
-    }
-
-    public void setTargetlist(String[] targetlist) {
-        this.targetlist = targetlist;
-    }
-
     public int getMisslayerDuration() {
         if (misslayerDuration < 0) {
             misslayerDuration = 0;
@@ -700,104 +470,8 @@ public class PlayerConfig {
         return misslayerDuration;
     }
 
-    public void setMisslayerDuration(int misslayerTime) {
-        this.misslayerDuration = misslayerTime;
-    }
-
-    public boolean isCustomJudge() {
-        return customJudge;
-    }
-
-    public void setCustomJudge(boolean customJudge) {
-        this.customJudge = customJudge;
-    }
-
-    public int getKeyJudgeWindowRatePerfectGreat() {
-        return keyJudgeWindowRatePerfectGreat;
-    }
-
-    public void setKeyJudgeWindowRatePerfectGreat(int judgeWindowRatePerfectGreat) {
-        this.keyJudgeWindowRatePerfectGreat = judgeWindowRatePerfectGreat;
-    }
-
-    public int getKeyJudgeWindowRateGreat() {
-        return keyJudgeWindowRateGreat;
-    }
-
-    public void setKeyJudgeWindowRateGreat(int judgeWindowRateGreat) {
-        this.keyJudgeWindowRateGreat = judgeWindowRateGreat;
-    }
-
-    public int getKeyJudgeWindowRateGood() {
-        return keyJudgeWindowRateGood;
-    }
-
-    public void setKeyJudgeWindowRateGood(int judgeWindowRateGood) {
-        this.keyJudgeWindowRateGood = judgeWindowRateGood;
-    }
-
-    public int getScratchJudgeWindowRatePerfectGreat() {
-        return scratchJudgeWindowRatePerfectGreat;
-    }
-
-    public void setScratchJudgeWindowRatePerfectGreat(int judgeWindowRatePerfectGreat) {
-        this.scratchJudgeWindowRatePerfectGreat = judgeWindowRatePerfectGreat;
-    }
-
-    public int getScratchJudgeWindowRateGreat() {
-        return scratchJudgeWindowRateGreat;
-    }
-
-    public void setScratchJudgeWindowRateGreat(int judgeWindowRateGreat) {
-        this.scratchJudgeWindowRateGreat = judgeWindowRateGreat;
-    }
-
-    public int getScratchJudgeWindowRateGood() {
-        return scratchJudgeWindowRateGood;
-    }
-
-    public void setScratchJudgeWindowRateGood(int judgeWindowRateGood) {
-        this.scratchJudgeWindowRateGood = judgeWindowRateGood;
-    }
-
-    public int getHranThresholdBPM() {
-        return hranThresholdBPM;
-    }
-
-    public void setHranThresholdBPM(int hranThresholdBPM) {
-        this.hranThresholdBPM = hranThresholdBPM;
-    }
-
-    public int getSevenToNinePattern() {
-        return sevenToNinePattern;
-    }
-
-    public void setSevenToNinePattern(int sevenToNinePattern) {
-        this.sevenToNinePattern = sevenToNinePattern;
-    }
-
-    public int getSevenToNineType() {
-        return sevenToNineType;
-    }
-
-    public void setSevenToNineType(int sevenToNineType) {
-        this.sevenToNineType = sevenToNineType;
-    }
-
-    public int getExitPressDuration() {
-        return exitPressDuration;
-    }
-
-    public void setExitPressDuration(int exitPressDuration) {
-        this.exitPressDuration = exitPressDuration;
-    }
-
     public boolean isGuideSE() {
         return isGuideSE;
-    }
-
-    public void setGuideSE(boolean isGuideSE) {
-        this.isGuideSE = isGuideSE;
     }
 
     public boolean isWindowHold() {
@@ -816,103 +490,7 @@ public class PlayerConfig {
         this.isRandomSelect = isRandomSelect;
     }
 
-    public boolean isChartPreview() {
-        return chartPreview;
-    }
-
-    public void setChartPreview(boolean chartPreview) {
-        this.chartPreview = chartPreview;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public int[] getAutoSaveReplay() {
-        return autosavereplay;
-    }
-
-    public void setAutoSaveReplay(int autoSaveReplay[]) {
-        this.autosavereplay = autoSaveReplay;
-    }
-
-    public boolean isShowhiddennote() {
-        return showhiddennote;
-    }
-
-    public void setShowhiddennote(boolean showhiddennote) {
-        this.showhiddennote = showhiddennote;
-    }
-
-    public boolean isShowpastnote() {
-        return showpastnote;
-    }
-
-    public void setShowpastnote(boolean showpastnote) {
-        this.showpastnote = showpastnote;
-    }
-
-    public String getTwitterConsumerKey() {
-        return twitterConsumerKey;
-    }
-
-    public void setTwitterConsumerKey(String twitterConsumerKey) {
-        this.twitterConsumerKey = twitterConsumerKey;
-    }
-
-    public String getTwitterConsumerSecret() {
-        return twitterConsumerSecret;
-    }
-
-    public void setTwitterConsumerSecret(String twitterConsumerSecret) {
-        this.twitterConsumerSecret = twitterConsumerSecret;
-    }
-
-    public String getTwitterAccessToken() {
-        return twitterAccessToken;
-    }
-
-    public void setTwitterAccessToken(String twitterAccessToken) {
-        this.twitterAccessToken = twitterAccessToken;
-    }
-
-    public String getTwitterAccessTokenSecret() {
-        return twitterAccessTokenSecret;
-    }
-
-    public void setTwitterAccessTokenSecret(String twitterAccessTokenSecret) {
-        this.twitterAccessTokenSecret = twitterAccessTokenSecret;
-    }
-
     // --Stream
-    public boolean getRequestEnable() {
-        return enableRequest;
-    }
-
-    public void setRequestEnable(boolean requestEnable) {
-        this.enableRequest = requestEnable;
-    }
-
-    public boolean getRequestNotify() {
-        return notifyRequest;
-    }
-
-    public void setRequestNotify(boolean notifyEnable) {
-        this.notifyRequest = notifyEnable;
-    }
-
-    public int getMaxRequestCount() {
-        return maxRequestCount;
-    }
-
-    public void setMaxRequestCount(int maxRequestCount) {
-        this.maxRequestCount = maxRequestCount;
-    }
-
     public void validate() {
         if (skin == null) {
             skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
@@ -979,11 +557,11 @@ public class PlayerConfig {
         scratchJudgeWindowRateGood = MathUtils.clamp(scratchJudgeWindowRateGood, 0, 400);
         hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
 
-        if (autosavereplay == null) {
-            autosavereplay = new int[4];
+        if (autoSaveReplay == null) {
+            autoSaveReplay = new int[4];
         }
-        if (autosavereplay.length != 4) {
-            autosavereplay = Arrays.copyOf(autosavereplay, 4);
+        if (autoSaveReplay.length != 4) {
+            autoSaveReplay = Arrays.copyOf(autoSaveReplay, 4);
         }
         sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
         sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
@@ -1020,61 +598,5 @@ public class PlayerConfig {
 
         // --Stream
         maxRequestCount = MathUtils.clamp(maxRequestCount, 0, 100);
-    }
-
-    public int getMineMode() {
-        return mineMode;
-    }
-
-    public void setMineMode(int mineMode) {
-        this.mineMode = mineMode;
-    }
-
-    public int getScrollMode() {
-        return scrollMode;
-    }
-
-    public void setScrollMode(int scrollMode) {
-        this.scrollMode = scrollMode;
-    }
-
-    public int getScrollSection() {
-        return scrollSection;
-    }
-
-    public void setScrollSection(int scrollSection) {
-        this.scrollSection = scrollSection;
-    }
-
-    public double getScrollRate() {
-        return scrollRate;
-    }
-
-    public void setScrollRate(double scrollRate) {
-        this.scrollRate = scrollRate;
-    }
-
-    public int getLongnoteMode() {
-        return longnoteMode;
-    }
-
-    public void setLongnoteMode(int longnoteMode) {
-        this.longnoteMode = longnoteMode;
-    }
-
-    public double getLongnoteRate() {
-        return longnoteRate;
-    }
-
-    public void setLongnoteRate(double longnoteRate) {
-        this.longnoteRate = longnoteRate;
-    }
-
-    public boolean isEventMode() {
-        return eventMode;
-    }
-
-    public void setEventMode(boolean eventMode) {
-        this.eventMode = eventMode;
     }
 }

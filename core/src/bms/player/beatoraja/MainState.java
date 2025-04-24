@@ -71,10 +71,14 @@ public abstract class MainState {
     }
 
     public void dispose() {
-        Optional.ofNullable(skin).ifPresent(skin -> skin.dispose());
-        skin = null;
-        Optional.ofNullable(stage).ifPresent(skin -> skin.dispose());
-        stage = null;
+        if (skin != null) {
+            skin.dispose();
+            skin = null;
+        }
+        if (stage != null) {
+            stage.dispose();
+            stage = null;
+        }
     }
 
     public void executeEvent(int id) {
@@ -113,6 +117,7 @@ public abstract class MainState {
         }
         this.skin = skin;
         if (skin != null) {
+            // TODO: Still having no idea about what is the meaning of offset
             for (IntMap.Entry<Offset> e : skin.getOffset().entries()) {
                 SkinOffset offset = main.getOffset(e.key);
                 if (offset == null || e.value == null) {

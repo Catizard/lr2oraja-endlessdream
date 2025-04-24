@@ -108,8 +108,8 @@ public class MusicResult extends AbstractResult {
                 try {
                     boolean succeed = true;
                     int irsend = 0;
-                    List<IRSendStatus> removeIrSendStatus = new ArrayList<IRSendStatus>();
-                    List<IRSendStatus> scores = new ArrayList<IRSendStatus>();
+                    List<IRSendStatus> removeIrSendStatus = new ArrayList<>();
+                    List<IRSendStatus> scores = new ArrayList<>();
                     if (!main.irSendStatus.isEmpty()) {
                         scores = main.irSendStatus.subList(main.irSendStatus.size() - ir.length, main.irSendStatus.size());
                     }

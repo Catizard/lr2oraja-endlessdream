@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntIntMap;
 import com.badlogic.gdx.utils.IntMap;
+import lombok.Data;
 import org.lwjgl.opengl.GL11;
 
 import java.util.function.Consumer;
@@ -34,6 +35,7 @@ import java.util.logging.Logger;
  *
  * @author exch
  */
+@Data
 public class Skin {
 
     public final SkinHeader header;
@@ -79,8 +81,8 @@ public class Skin {
     private IntIntMap option = new IntIntMap();
     private IntMap<Offset> offset = new IntMap<Offset>();
     private SkinObjectRenderer renderer;
-    private long nextpreparetime;
-    private long prepareduration;
+    private long nextPrepareTime;
+    private long prepareDuration;
 
     public Skin(SkinHeader header) {
         this.header = header;
@@ -188,8 +190,8 @@ public class Skin {
             obj.load();
         }
 
-        prepareduration = state.main.getConfig().getPrepareFramePerSecond() > 0 ? 1000000 / state.main.getConfig().getPrepareFramePerSecond() : 1;
-        nextpreparetime = -1;
+        prepareDuration = state.main.getConfig().getPrepareFramePerSecond() > 0 ? 1000000 / state.main.getConfig().getPrepareFramePerSecond() : 1;
+        nextPrepareTime = -1;
     }
 
     public void drawAllObjects(SpriteBatch sprite, MainState state) {
@@ -206,13 +208,13 @@ public class Skin {
         }
 
         final long microtime = state.timer.getNowMicroTime();
-        if (nextpreparetime <= microtime) {
+        if (nextPrepareTime <= microtime) {
             final long time = state.timer.getNowTime();
             for (SkinObject obj : objectarray) {
                 obj.prepare(time, state);
             }
 
-            nextpreparetime += ((microtime - nextpreparetime) / prepareduration + 1) * prepareduration;
+            nextPrepareTime += ((microtime - nextPrepareTime) / prepareDuration + 1) * prepareDuration;
         }
 
         for (SkinObject obj : objectarray) {
@@ -249,54 +251,6 @@ public class Skin {
         }
     }
 
-    public int getFadeout() {
-        return fadeout;
-    }
-
-    public void setFadeout(int fadeout) {
-        this.fadeout = fadeout;
-    }
-
-    public int getInput() {
-        return input;
-    }
-
-    public void setInput(int input) {
-        this.input = input;
-    }
-
-    public int getScene() {
-        return scene;
-    }
-
-    public void setScene(int scene) {
-        this.scene = scene;
-    }
-
-    public IntIntMap getOption() {
-        return option;
-    }
-
-    public void setOption(IntIntMap option) {
-        this.option = option;
-    }
-
-    public IntMap<Offset> getOffset() {
-        return offset;
-    }
-
-    public void setOffset(IntMap<Offset> offset) {
-        this.offset = offset;
-    }
-
-    public float getWidth() {
-        return width;
-    }
-
-    public float getHeight() {
-        return height;
-    }
-
     public double getScaleX() {
         return dw;
     }
@@ -308,17 +262,11 @@ public class Skin {
     public SkinOffset getOffsetAll(MainState state) {
         SkinOffset offsetAll = null;
         if (state instanceof BMSPlayer) {
-            switch (((BMSPlayer) state).getSkinType()) {
-                case PLAY_5KEYS:
-                case PLAY_7KEYS:
-                case PLAY_9KEYS:
-                case PLAY_10KEYS:
-                case PLAY_14KEYS:
-                case PLAY_24KEYS:
-                case PLAY_24KEYS_DOUBLE:
-                    offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL);
-                    break;
-            }
+            offsetAll = switch (((BMSPlayer) state).getSkinType()) {
+                case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE ->
+                        state.getOffsetValue(SkinProperty.OFFSET_ALL);
+                default -> offsetAll;
+            };
         }
         return offsetAll;
     }
@@ -386,6 +334,7 @@ public class Skin {
         }
     }
 
+    @Data
     public static class SkinObjectRenderer {
 
         public static final int TYPE_NORMAL = 0;
@@ -521,30 +470,6 @@ public class Skin {
             if (blend >= 2) {
                 sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             }
-        }
-
-        public int getType() {
-            return type;
-        }
-
-        public void setType(int type) {
-            this.type = type;
-        }
-
-        public int getBlend() {
-            return blend;
-        }
-
-        public void setBlend(int blend) {
-            this.blend = blend;
-        }
-
-        public Color getColor() {
-            return color;
-        }
-
-        public void setColor(Color color) {
-            this.color = color;
         }
     }
 }

@@ -1,12 +1,14 @@
 package bms.player.beatoraja;
 
 import bms.player.beatoraja.skin.SkinType;
+import lombok.Data;
 
 /**
  * スキンコンフィグ
  *
  * @author exch
  */
+@Data
 public class SkinConfig implements Validatable {
     /**
      * ファイルパス
@@ -35,24 +37,8 @@ public class SkinConfig implements Validatable {
         return skin;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public Property getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Property property) {
-        this.properties = property;
-    }
-
     public boolean validate() {
-        if (path == null || path.length() == 0) {
+        if (path == null || path.isEmpty()) {
             return false;
         }
         if (properties == null) {
@@ -106,6 +92,7 @@ public class SkinConfig implements Validatable {
      *
      * @author exch
      */
+    @Data
     public static class Property implements Validatable {
         /**
          * 設定項目名-数値のセット
@@ -119,30 +106,6 @@ public class SkinConfig implements Validatable {
          * 設定項目名-オフセットのセット
          */
         private Offset[] offset = new Offset[0];
-
-        public Option[] getOption() {
-            return option;
-        }
-
-        public void setOption(Option[] option) {
-            this.option = option;
-        }
-
-        public FilePath[] getFile() {
-            return file;
-        }
-
-        public void setFile(FilePath[] file) {
-            this.file = file;
-        }
-
-        public Offset[] getOffset() {
-            return offset;
-        }
-
-        public void setOffset(Offset[] offset) {
-            this.offset = offset;
-        }
 
         public boolean validate() {
             if (option == null) {

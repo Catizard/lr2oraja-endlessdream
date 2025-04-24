@@ -110,7 +110,7 @@ public class MainController implements ApplicationListener {
      * プレイデータアクセサ
      */
     private final PlayDataAccessor playData;
-    private final SystemSoundManager sound;
+    private final SystemSoundManager soundManager;
     private final BMSPlayerMode auto;
     public ImGuiRenderer imGui;
     public List<IRSendStatus> irSendStatus = new ArrayList<>();
@@ -147,7 +147,7 @@ public class MainController implements ApplicationListener {
      */
     private KeyConfiguration keymapConfig;
     private SkinConfiguration skinConfig;
-    private AudioDriver audio;
+    private AudioDriver audioProcessor;
     private PlayerResource playerResource;
     private BitmapFont systemFont;
     /**
@@ -247,7 +247,7 @@ public class MainController implements ApplicationListener {
         switch (config.getAudioConfig().getDriver()) {
             case PortAudio:
                 try {
-                    audio = new PortAudioDriver(config);
+                    audioProcessor = new PortAudioDriver(config);
                 } catch (Throwable e) {
                     e.printStackTrace();
                     config.getAudioConfig().setDriver(DriverType.OpenAL);
@@ -256,7 +256,7 @@ public class MainController implements ApplicationListener {
         }
 
         timer = new TimerManager();
-        sound = new SystemSoundManager(this);
+        soundManager = new SystemSoundManager(this);
 
         if (config.isUseDiscordRPC()) {
             stateListener.add(new DiscordListener());
@@ -357,17 +357,17 @@ public class MainController implements ApplicationListener {
         inputProcessor = new BMSPlayerInputProcessor(config, playerConfig);
         switch (config.getAudioConfig().getDriver()) {
             case OpenAL:
-                audio = new GdxSoundDriver(config);
+                audioProcessor = new GdxSoundDriver(config);
                 break;
 //		case AudioDevice:
 //			audio = new GdxAudioDeviceDriver(config);
 //			break;
         }
 
-        playerResource = new PlayerResource(audio, config, playerConfig);
+        playerResource = new PlayerResource(audioProcessor, config, playerConfig);
         selector = new MusicSelector(this, songUpdated);
-        if (playerConfig.getRequestEnable()) {
-            streamController = new StreamController(selector, (playerConfig.getRequestNotify() ? messageRenderer : null));
+        if (playerConfig.isEnableRequest()) {
+            streamController = new StreamController(selector, (playerConfig.isNotifyRequest() ? messageRenderer : null));
             streamController.run();
         }
         decide = new MusicDecide(this);
@@ -688,16 +688,8 @@ public class MainController implements ApplicationListener {
         Gdx.app.exit();
     }
 
-    public AudioDriver getAudioProcessor() {
-        return audio;
-    }
-
     public IRStatus[] getIRStatus() {
         return ir;
-    }
-
-    public SystemSoundManager getSoundManager() {
-        return sound;
     }
 
     public MusicDownloadProcessor getMusicDownloadProcessor() {

@@ -11,7 +11,7 @@ import static bms.player.beatoraja.skin.SkinProperty.TIMER_FADEOUT;
 import static bms.player.beatoraja.skin.SkinProperty.TIMER_STARTINPUT;
 
 /**
- * 曲決定部分。
+ * The transition between selecting song and playing song
  *
  * @author exch
  */
@@ -37,8 +37,8 @@ public class MusicDecide extends MainState {
     }
 
     public void render() {
-        long nowtime = timer.getNowTime();
-        if (nowtime > getSkin().getInput()) {
+        long nowTime = timer.getNowTime();
+        if (nowTime > getSkin().getInput()) {
             timer.switchTimer(TIMER_STARTINPUT, true);
         }
         if (timer.isTimerOn(TIMER_FADEOUT)) {
@@ -46,7 +46,7 @@ public class MusicDecide extends MainState {
                 main.changeState(cancel ? MainStateType.MUSICSELECT : MainStateType.PLAY);
             }
         } else {
-            if (nowtime > getSkin().getScene()) {
+            if (nowTime > getSkin().getScene()) {
                 timer.setTimerOn(TIMER_FADEOUT);
             }
         }

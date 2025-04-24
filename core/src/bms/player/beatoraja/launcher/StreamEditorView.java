@@ -28,8 +28,8 @@ public class StreamEditorView implements Initializable {
         if (this.player == null) {
             return;
         }
-        enableRequest.setSelected(this.player.getRequestEnable());
-        notifyRequest.setSelected(this.player.getRequestNotify());
+        enableRequest.setSelected(this.player.isEnableRequest());
+        notifyRequest.setSelected(this.player.isNotifyRequest());
         maxRequestCount.getValueFactory().setValue(this.player.getMaxRequestCount());
     }
 
@@ -37,8 +37,8 @@ public class StreamEditorView implements Initializable {
         if (this.player == null) {
             return;
         }
-        player.setRequestEnable(enableRequest.isSelected());
-        player.setRequestNotify(notifyRequest.isSelected());
+        player.setEnableRequest(enableRequest.isSelected());
+        player.setNotifyRequest(notifyRequest.isSelected());
         player.setMaxRequestCount(maxRequestCount.getValue());
     }
 }
