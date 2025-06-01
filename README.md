@@ -34,6 +34,8 @@ There is a way to play the old version of `vanilla oraja`. You need an old versi
 
 ## Known Issues
 
+Cannot play video contents' color correctly. Seems to be a FFMPEG problem but no idea how to fix it currently.
+
 ## Special Thanks
 
 Thanks for Seraxis, the original `Endless Dream` author. This code patch cannot be applied without mature build tool invovling.
