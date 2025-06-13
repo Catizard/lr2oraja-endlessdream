@@ -34,7 +34,7 @@ There is a way to play the old version of `vanilla oraja`. You need an old versi
 
 ## Known Issues
 
-Cannot play video contents' color correctly. Seems to be a FFMPEG problem but no idea how to fix it currently.
+Cannot play video contents' color correctly. Seems to be a FFMPEG problem but no idea how to fix it currently. See main branch for temporary fix.
 
 ## Special Thanks
 
