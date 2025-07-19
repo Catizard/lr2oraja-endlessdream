@@ -63,6 +63,7 @@ public class ImGuiRenderer {
         rangesBuilder.addRanges(io.getFonts().getGlyphRangesDefault());
         rangesBuilder.addRanges(io.getFonts().getGlyphRangesCyrillic());
         rangesBuilder.addRanges(io.getFonts().getGlyphRangesJapanese());
+        rangesBuilder.addChar('★');
 
         // Font config for additional fonts
         // This is a natively allocated struct so don't forget to call destroy after atlas is built

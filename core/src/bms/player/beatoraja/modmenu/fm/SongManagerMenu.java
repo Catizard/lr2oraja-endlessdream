@@ -30,6 +30,8 @@ public class SongManagerMenu {
      * Workaround since we cannot freeze the game main thread
      */
     private static List<ImBoolean> currentMarkList = new ArrayList<>();
+
+    private static List<String> currentReverseLookupList = new ArrayList<>();
     /**
      * Last selected song data ref<br>
      * Used to detect if player changed current selected song
@@ -67,6 +69,17 @@ public class SongManagerMenu {
                         }
                     }
                 }
+                if (ImGui.button("Show Reverse Lookup")) {
+                    ImGui.openPopup("Reverse Lookup");
+                }
+                if (ImGui.beginPopup("Reverse Lookup", ImGuiWindowFlags.AlwaysAutoResize)) {
+                    for (int i = 0;i < currentReverseLookupList.size();++i) {
+                        ImGui.pushID(i);
+                        ImGui.bulletText(currentReverseLookupList.get(i));
+                        ImGui.popID();
+                    }
+                    ImGui.endPopup();;
+                }
                 if (ImGui.button("Add to folders")) {
                     ImGui.openPopup("Add song to folder popup");
                 }
@@ -93,6 +106,7 @@ public class SongManagerMenu {
                     }
                     ImGui.endPopup();
                 }
+
             }
 
         }
@@ -113,11 +127,12 @@ public class SongManagerMenu {
         if (currentSongData.isEmpty()) {
             return ;
         }
+        String currentMd5 = currentSongData.get().getMd5();
+        String currentSha256 = currentSongData.get().getSha256();
         if (lastSongData.isPresent()) {
             String lastPath = lastSongData.get().getPath();
             String lastSha256 = lastSongData.get().getSha256();
             String currentPath = currentSongData.get().getPath();
-            String currentSha256 = currentSongData.get().getSha256();
             if (lastPath.equals(currentPath) && lastSha256.equals(currentSha256)) {
                 return ;// Okay dokey
             }
@@ -130,6 +145,7 @@ public class SongManagerMenu {
                 .map(ImBoolean::new)
                 .toList();
         currentMarkList = new ArrayList<>(folderMarkList);
+        currentReverseLookupList = getReverseLookupData(currentMd5, currentSha256);
     }
 
     private static Optional<SongData> getCurrentSongData() {
@@ -148,6 +164,10 @@ public class SongManagerMenu {
             return Optional.ofNullable(sd);
         }
         return Optional.empty();
+    }
+
+    private static List<String> getReverseLookupData(String md5, String sha256) {
+        return selector.main.getPlayerResource().getReverseLookupData(md5, sha256);
     }
 
     /**
