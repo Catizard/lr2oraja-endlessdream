@@ -1,5 +1,8 @@
 # LR2oraja \~Endless Dream\~ OSX Fix
 
+> [!warning]
+> This branch has been outdated and will be deleted in the near future, please see [here](https://github.com/seraxis/lr2oraja-endlessdream/pull/47) instead
+
 This fix patch is for mac user who suffering from launching game itself and incorrect sound play issue.
 
 ## Building from source
