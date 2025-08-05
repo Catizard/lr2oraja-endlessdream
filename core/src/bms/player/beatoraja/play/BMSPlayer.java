@@ -229,6 +229,10 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 
+			if (FreqTrainerMenu.isFreqTrainerEnabled() && FreqTrainerMenu.isFreqNegative()) {
+				score = false;
+			}
+
 			Array<PatternModifier> mods = new Array<PatternModifier>();
 
 			if(config.getScrollMode() > 0) {
