@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.modmenu.ArenaMenu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.IntArray;
@@ -14,7 +15,7 @@ import com.badlogic.gdx.Input.Keys;
  * 
  * @author exch
  */
-public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements InputProcessor {
+public class KeyBoardInputProcessor extends BMSPlayerInputDevice implements InputProcessor {
 
 	public static final int MASK_SHIFT = 1 << 0;
 	public static final int MASK_CTRL = 1 << 1;
@@ -57,7 +58,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	 */
 	private int duration;
 
-	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, KeyboardConfig config, Resolution resolution) {
+	public KeyBoardInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, KeyboardConfig config, Resolution resolution) {
 		super(bmsPlayerInputProcessor, Type.KEYBOARD);
 		this.mouseScratchInput = new MouseScratchInput(bmsPlayerInputProcessor, this, config);
 		this.setConfig(config);
@@ -97,7 +98,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public void poll(final long microtime) {
-		if (!textmode) {
+		if (!textmode && !ArenaMenu.isFocused) {
 			for (int i = 0; i < keys.length; i++) {
 				if(keys[i] < 0) {
 					continue;
@@ -122,16 +123,19 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
 			}
 		}
-		
-		for (ControlKeys key : ControlKeys.values()) {
-			final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
-			if (!(textmode && key.text) && pressed != keystate[key.keycode]) {
-				keystate[key.keycode] = pressed;
-				keytime[key.keycode] = microtime;
-				keymodifiers[key.keycode] = pressed ? currentlyHeldModifiers() : 0;
+
+		if (!ArenaMenu.isFocused) {
+			for (ControlKeys key : ControlKeys.values()) {
+				final boolean pressed = Gdx.input.isKeyPressed(key.keycode);
+				if (!(textmode && key.text) && pressed != keystate[key.keycode]) {
+					keystate[key.keycode] = pressed;
+					keytime[key.keycode] = microtime;
+					keymodifiers[key.keycode] = pressed ? currentlyHeldModifiers() : 0;
+				}
 			}
 		}
-		
+
+
 		mouseScratchInput.poll(microtime);
 	}
 

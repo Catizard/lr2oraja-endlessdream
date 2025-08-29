@@ -5,7 +5,7 @@ kotlin = "1.9.20"
 gdx = "1.13.0"
 gdx-controllers = "2.2.3"
 lwjgl = "3.3.3"
-imgui = "1.86.12"
+imgui = "1.89.0"
 javacv = "1.5.9"
 ffmpeg = "6.0-1.5.9"
 jflac = "1.5.2"
@@ -19,7 +19,8 @@ java-discord = "2.0.1-all"
 xz = "1.10"
 shapedrawer = "2.5.0"
 guacamole = "0.3.5"
-
+websocket = "1.6.0"
+msgpack = "0.9.10"
 
 [libraries]
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -69,6 +70,9 @@ jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-an
 
 twitter4j = { group = "org.twitter4j" , name = "twitter4j-core", version.ref = "twitter4j" }
 javadiscord = { group = "club.minnced", name = "java-discord-rpc", version.ref = "java-discord" }
+javawebsocket = { group = "org.java-websocket", name = "Java-WebSocket", version.ref = "websocket" }
+msgpack = { group = "org.msgpack", name = "msgpack-core", version.ref = "msgpack" }
+# msgpack-jackson = { group = "org.msgpack", name = "jackson-dataformat-msgpack", version.ref = "msgpack" }
 
 [bundles]
 libgdx = ["gdx-core", "gdx-backend", "gdx-freetype",  "gdx-controllers-core", "gdx-controllers-desktop"]
@@ -77,3 +81,4 @@ imgui = ["imgui", "imgui-lwjgl3", "imgui-linux", "imgui-windows", "imgui-macos"]
 ffmpeg = ["javacv", "javacpp", "ffmpeg"]
 codecs = ["commons-codec", "jflac"]
 jackson = ["jackson-core", "jackson-databind", "jackson-annotations"]
+msgpack = ["msgpack"]
