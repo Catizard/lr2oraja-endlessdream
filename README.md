@@ -27,17 +27,17 @@ Need some time to polish this project...
 
 ## Other things you might want ask
 
-Q: How do I pick a song/get ready?
+Q: How do I pick a song/get ready?  
 A: Just launch the bms as usual. If you are the lobby's host, then the song would be picked for the lobby. For other users, selecting the same song with host and you are ready.
 
-Q: What's the current progress?
+Q: What's the current progress?  
 A: Only the basic functionality of client side has been implemented. Server side 0%.
 
-Q: Does this branch has any relationship with lr2oraja arena or something similar?
+Q: Does this branch has any relationship with lr2oraja arena or something similar?  
 A: No. This branch is only a code port result from LR2ArenaEx.
 
-Q: Why this code is a branch not a standalone repo?
+Q: Why this code is a branch not a standalone repo?  
 A: To hard to think of a name for the repo...I don't want something like lr2oraja-endlessdream-arenaex
 
-Q: Does this branch allows IR connections?
+Q: Does this branch allows IR connections?  
 A: Technically yes but this branch is based on dev branch of Endless Dream. So I think I'll disallow the connection in the near future.
