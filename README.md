@@ -17,7 +17,7 @@ Need some time to polish this project...
 - [ ] Play scene
     - [ ] Auto select the host's song
     - [ ] A/AA/AAA limits are miscalculated
-    - [ ] The height of graph menu should be adjusted. I don't know why there's a horizontal bar
+    - [x] The height of graph menu should be adjusted. I don't know why there's a horizontal bar
     - [ ] Kick users/Give host to other users are not implemented yet
     - [ ] Hijack the IR display to render lobby result instead
 - [ ] Settings
