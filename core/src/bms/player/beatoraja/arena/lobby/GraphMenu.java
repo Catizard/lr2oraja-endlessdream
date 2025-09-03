@@ -23,8 +23,8 @@ public class GraphMenu {
         MaxCombo
     }
 
-    private static final float graphWidth = 200;
-    private static final float graphHeight = 600;
+    private static final float graphWidth = 150;
+    private static final float graphHeight = 400;
     private static SortType sortType = SortType.Score;
 
     public static void show(ImBoolean showGraphMenu) {
@@ -38,9 +38,9 @@ public class GraphMenu {
                     case MaxCombo -> lhs.getMaxCombo() - rhs.getMaxCombo();
                 }).toList();
 
-                ImGui.setNextWindowSizeConstraints(0, 0, graphWidth * 2.0f, graphHeight);
+                ImGui.setNextWindowSizeConstraints(0, 0, graphWidth * 2.0f, graphHeight * 1.5f);
                 // TODO: We don't have auto resize here
-                ImGui.beginChild("GraphDisp", graphWidth * 2, graphHeight, true, ImGuiWindowFlags.HorizontalScrollbar);
+                ImGui.beginChild("GraphDisp", 0, graphHeight, true, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.HorizontalScrollbar);
                 {
                     List<Integer> values = new ArrayList<>();
                     List<String> labels = new ArrayList<>();
@@ -71,7 +71,7 @@ public class GraphMenu {
 
                 ImGui.sameLine();
 
-                ImGui.beginChild("ScoreDetails", graphWidth, graphHeight, true, ImGuiWindowFlags.AlwaysAutoResize);
+                ImGui.beginChild("ScoreDetails", graphWidth + 40, graphHeight, true, ImGuiWindowFlags.AlwaysAutoResize);
                 {
                     int entryIdx = 0;
                     for (Peer value : sortedPeers) {
@@ -173,6 +173,7 @@ public class GraphMenu {
 
     private static void displayGraph(List<Integer> values, List<String> labels, List<Double> positions, List<Peer> peers, SortType sortType) {
         float adjGraphWidth = graphWidth;
+        float adjGraphHeight = graphHeight - 40; // TODO: This probably could be replace with child window flags, but we don't have it currently
         if (Client.state.getPeers().size() > 2) {
             adjGraphWidth *= (float) (Client.state.getPeers().size() * 0.5);
         }
@@ -183,7 +184,7 @@ public class GraphMenu {
             case MaxCombo -> "Max Combo";
         };
 
-        if (ImPlot.beginPlot("##GraphPlot", new ImVec2(adjGraphWidth, graphHeight), ImPlotFlags.NoFrame | ImPlotFlags.NoInputs | ImPlotFlags.NoTitle | ImPlotFlags.NoLegend)) {
+        if (ImPlot.beginPlot("##GraphPlot", new ImVec2(adjGraphWidth, adjGraphHeight), ImPlotFlags.NoFrame | ImPlotFlags.NoInputs | ImPlotFlags.NoTitle | ImPlotFlags.NoLegend)) {
             ImPlot.setupAxes("Players", yLabel, ImPlotAxisFlags.AutoFit | ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.AutoFit | ImPlotAxisFlags.NoLabel);
             double[] positionsArray = new double[positions.size()];
             for (int i = 0; i < positions.size(); ++i) {
@@ -193,16 +194,18 @@ public class GraphMenu {
             ImPlot.setupAxisTicks(ImPlotAxis.X1, positionsArray, labels.size(), labelsArray);
             if (sortType == SortType.Score) {
                 double[] rankPos = new double[]{
-                        1, 1, 1
+                        1, 2, 3, 4
                 };
                 Optional<Integer> maxScore = Client.state.getMaxScore();
-                maxScore.stream().peek((limit) -> {
+                maxScore.ifPresent(limit -> {
                     rankPos[0] = Math.ceil(limit * 0.666);
                     rankPos[1] = Math.ceil(limit * 0.777);
                     rankPos[2] = Math.ceil(limit * 0.888);
+                    rankPos[3] = limit;
                 });
-                String[] rankLabels = new String[]{"A", "AA", "AAA"};
+                String[] rankLabels = new String[]{"A", "AA", "AAA", "MAX"};
                 ImPlot.setupAxisTicks(ImPlotAxis.Y1, rankPos, rankPos.length, rankLabels);
+                ImPlot.setupAxisLimits(ImPlotAxis.Y1, 0, maxScore.orElse(4), ImPlotCond.Always);
             } else if (sortType == SortType.MaxCombo) {
                 int maxCombo = Client.state.getMaxCombo().orElse(1);
                 ImPlot.setupAxisLimits(ImPlotAxis.Y1, 0, maxCombo, ImPlotCond.Always);
