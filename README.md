@@ -15,15 +15,20 @@ Need some time to polish this project...
 
 - [ ] Porting whole server side
 - [ ] Play scene
-    - [ ] Auto select the host's song
-    - [ ] A/AA/AAA limits are miscalculated
+    - [x] Auto select the host's song(see note below)
+    - [x] A/AA/AAA limits are miscalculated
     - [x] The height of graph menu should be adjusted. I don't know why there's a horizontal bar
-    - [ ] Kick users/Give host to other users are not implemented yet
+    - [x] Kick users/Give host to other users are not implemented yet
     - [ ] Hijack the IR display to render lobby result instead
 - [ ] Settings
     - [ ] Items are not implemented
     - [ ] Random seed is not implemented
     - [ ] Option & Gauge are not implemented
+
+> [!INFO]
+> The auto-select feature is currently implemented in an awkward way: for every non-host user, selecting any chart would equally choose the host song if it exists.
+> So basically, once host setup the song, other users can pick any song and this will pick the same song from host if possible
+> There's a risk of crashing if we implement the direct state change instead, still need some time to do the task
 
 ## Other things you might want ask
 

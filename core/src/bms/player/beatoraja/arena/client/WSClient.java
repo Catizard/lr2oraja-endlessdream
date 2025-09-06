@@ -11,6 +11,8 @@ import bms.player.beatoraja.arena.network.SelectedBMSMessage;
 import bms.player.beatoraja.modmenu.ImGuiNotify;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
+import bms.player.beatoraja.stream.command.StreamCommand;
+import bms.player.beatoraja.stream.command.StreamRequestCommand;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
@@ -108,13 +110,14 @@ public class WSClient extends WebSocketClient {
             case STC_SELECTED_CHART_RANDOM -> {
                 Logger.getGlobal().info("[+] Received selected bms");
                 SelectedBMSMessage selectedBMSMessage = new SelectedBMSMessage(value);
+                String md5 = selectedBMSMessage.getMd5();
 
                 Client.state.getSelectedSongRemote().setTitle(selectedBMSMessage.getTitle());
-                Client.state.getSelectedSongRemote().setMd5(selectedBMSMessage.getMd5());
+                Client.state.getSelectedSongRemote().setMd5(md5);
                 Client.state.getSelectedSongRemote().setArtist(selectedBMSMessage.getArtist());
 
                 Lobby.addToLog(String.format("[#] Selected song: %s / %s", selectedBMSMessage.getTitle(), selectedBMSMessage.getArtist()));
-                Lobby.addToLog(String.format("[#] Hash: %s", selectedBMSMessage.getMd5()));
+                Lobby.addToLog(String.format("[#] Hash: %s", md5));
 
                 // TODO: Setup item here
                 //	hooks::maniac::itemModeEnabled = selectedBms.itemModeEnabled;
@@ -130,7 +133,7 @@ public class WSClient extends WebSocketClient {
                 //	}
                 SongDatabaseAccessor songDataAccessor = MainLoader.getScoreDatabaseAccessor();
                 String[] queryHash = new String[1];
-                queryHash[0] = selectedBMSMessage.getMd5();
+                queryHash[0] = md5;
                 SongData[] songDatas = songDataAccessor.getSongDatas(queryHash);
                 if (songDatas.length == 0) {
                     Client.state.getSelectedSongRemote().setPath("");
@@ -141,6 +144,7 @@ public class WSClient extends WebSocketClient {
                     Client.state.setCurrentSongData(songDatas[0]);
                     Client.state.getSelectedSongRemote().setPath(songDatas[0].getPath());
                 }
+                // TODO: Pick the song for user
             }
             case STC_USERLIST -> {
                 Client.updatePeerState(value);
