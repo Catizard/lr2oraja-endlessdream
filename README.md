@@ -20,6 +20,8 @@ Need some time to polish this project...
     - [x] The height of graph menu should be adjusted. I don't know why there's a horizontal bar
     - [x] Kick users/Give host to other users are not implemented yet
     - [ ] Hijack the IR display to render lobby result instead
+    - [ ] The play result should be reversed
+    - [ ] Cancel event seems not sending
 - [ ] Settings
     - [ ] Items are not implemented
     - [ ] Random seed is not implemented
