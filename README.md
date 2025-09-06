@@ -25,7 +25,7 @@ Need some time to polish this project...
     - [ ] Random seed is not implemented
     - [ ] Option & Gauge are not implemented
 
-> [!INFO]
+> [!note]
 > The auto-select feature is currently implemented in an awkward way: for every non-host user, selecting any chart would equally choose the host song if it exists.
 > So basically, once host setup the song, other users can pick any song and this will pick the same song from host if possible
 > There's a risk of crashing if we implement the direct state change instead, still need some time to do the task
