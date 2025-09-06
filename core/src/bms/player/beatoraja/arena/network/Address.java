@@ -2,9 +2,12 @@ package bms.player.beatoraja.arena.network;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePack;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 public class Address implements Serializable {
@@ -26,6 +29,20 @@ public class Address implements Serializable {
     public Address(String host, int port) {
         this.host = host;
         this.port = port;
+    }
+
+    public byte[] pack() {
+        try {
+            MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+            packer.packArrayHeader(2);
+            packer.packString(host);
+            packer.packInt(port);
+            packer.close();
+            return packer.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

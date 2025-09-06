@@ -45,14 +45,10 @@ public class Lobby {
             if (Client.state.getHost().equals(Client.state.getRemoteId()) && ImGui.beginPopupContextItem()) {
                 ImGui.textDisabled(String.format("Selected user: %s", peer.getUserName()));
                 if (ImGui.menuItem("Give host")) {
-                    // TODO: Send message here
-                    // network::Address userId = key;
-                    // client::Send (network::ClientToServer::CTS_SET_HOST, msgpack_utils::pack (userId));
+                    Client.send(ClientToServer.CTS_SET_HOST, address.pack());
                 }
                 if (ImGui.menuItem("Kick")) {
-                    // TODO: Send message here
-//                    network::Address userId = key;
-//                    client::Send (network::ClientToServer::CTS_KICK_USER, msgpack_utils::pack (userId));
+                    Client.send(ClientToServer.CTS_KICK_USER, address.pack());
                 }
                 ImGui.endPopup();
             }
