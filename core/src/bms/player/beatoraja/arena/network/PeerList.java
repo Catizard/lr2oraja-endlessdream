@@ -1,8 +1,13 @@
 package bms.player.beatoraja.arena.network;
 
+import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
+import org.msgpack.value.ImmutableValue;
 import org.msgpack.value.Value;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +17,11 @@ public class PeerList {
 
     public PeerList() {
 
+    }
+
+    public PeerList(Map<Address, Peer> list, Address host) {
+        this.list = list;
+        this.host = host;
     }
 
     public PeerList(Value value) {
@@ -26,6 +36,24 @@ public class PeerList {
         });
         Value hostValue = arrayValue.get(1);
         this.host = new Address(hostValue);
+    }
+
+    public byte[] pack() {
+        try {
+            MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+            packer.packArrayHeader(2);
+            packer.packMapHeader(this.list.size());
+            for (Map.Entry<Address, Peer> entry : this.list.entrySet()) {
+                packer.writePayload(entry.getKey().pack());
+                packer.writePayload(entry.getValue().pack());
+            }
+            packer.writePayload(host.pack());
+            packer.close();
+            return packer.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     public Map<Address, Peer> getList() {

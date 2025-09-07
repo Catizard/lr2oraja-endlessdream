@@ -1,7 +1,11 @@
 package bms.player.beatoraja.arena.network;
 
+import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePack;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
+
+import java.io.IOException;
 
 public class Peer {
     private String userName;
@@ -9,7 +13,7 @@ public class Peer {
     private boolean ready;
     private Score score;
     private int option;
-    private int gague;
+    private int gauge;
 
     public Peer() {
 
@@ -22,7 +26,25 @@ public class Peer {
         this.ready = arr.get(2).asBooleanValue().getBoolean();
         this.score = new Score(arr.get(3));
         this.option = arr.get(4).asIntegerValue().toInt();
-        this.gague = arr.get(5).asIntegerValue().toInt();
+        this.gauge = arr.get(5).asIntegerValue().toInt();
+    }
+
+    public byte[] pack() {
+        try {
+            MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+            packer.packArrayHeader(6);
+            packer.packString(userName);
+            packer.packString(selectedMD5);
+            packer.packBoolean(ready);
+            packer.writePayload(score.pack());
+            packer.packInt(option);
+            packer.packInt(gauge);
+            packer.close();
+            return packer.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     public String getUserName() {
@@ -65,12 +87,12 @@ public class Peer {
         this.option = option;
     }
 
-    public int getGague() {
-        return gague;
+    public int getGauge() {
+        return gauge;
     }
 
-    public void setGague(int gague) {
-        this.gague = gague;
+    public void setGauge(int gauge) {
+        this.gauge = gauge;
     }
 
     public int getExScore() {

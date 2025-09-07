@@ -86,7 +86,7 @@ public class GraphMenu {
                         ImGui.text(String.format("%d (%.2f%%)", value.getExScore(), value.getRate()));
 
                         String opt = Random.getRandom(value.getOption(), Mode.BEAT_7K).name();
-                        String gauge = Gauge.from(value.getGague()).getName();
+                        String gauge = Gauge.from(value.getGauge()).getName();
 
                         sb.append("[").append(gauge).append("]");
                         sb.append("[").append(opt).append("]");

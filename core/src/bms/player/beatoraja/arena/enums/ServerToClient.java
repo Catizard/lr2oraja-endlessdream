@@ -31,4 +31,8 @@ public enum ServerToClient {
             default -> throw new IllegalStateException("Unexpected value: " + value);
         };
     }
+
+    public char getValue() {
+        return value;
+    }
 }

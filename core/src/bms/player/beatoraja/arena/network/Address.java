@@ -9,6 +9,7 @@ import org.msgpack.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 
 public class Address implements Serializable {
     private String host = "";
@@ -29,6 +30,11 @@ public class Address implements Serializable {
     public Address(String host, int port) {
         this.host = host;
         this.port = port;
+    }
+
+    public Address(InetSocketAddress inetSocketAddress) {
+        this(inetSocketAddress.getAddress().getHostAddress(), inetSocketAddress.getPort());
+        //   \-> this prevents host name (e.g. localhost vs 127.0.0.1)
     }
 
     public byte[] pack() {

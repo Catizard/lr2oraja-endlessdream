@@ -2,6 +2,7 @@ package bms.player.beatoraja.modmenu;
 
 import bms.player.beatoraja.arena.client.Client;
 import bms.player.beatoraja.arena.lobby.Lobby;
+import bms.player.beatoraja.arena.server.ArenaServer;
 import bms.player.beatoraja.arena.server.Server;
 import imgui.ImGui;
 import imgui.flag.ImGuiFocusedFlags;
@@ -54,13 +55,13 @@ public class ArenaMenu {
 
                     ImGui.beginDisabled(Server.started.get());
                     if (ImGui.button("Start")) {
-                        Server.start();
+                        ArenaServer.start();
                     }
                     ImGui.endDisabled();
 
                     ImGui.beginDisabled(!Server.started.get());
                     if (ImGui.button("Stop")) {
-                        Server.stop();
+                        ArenaServer.stop();
                     }
                     ImGui.endDisabled();
                     ImGui.checkbox("Auto-rotate host after each song", Server.autoRotateHost);
