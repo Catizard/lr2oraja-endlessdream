@@ -2,18 +2,19 @@
 
 This is an unauthorized, hand-crafted [LR2ArenaEx](https://github.com/SayakaIsBaka/LR2ArenaEx) port. And based on Endless Dream's main branch(`0.3.0`).
 
-In short, this branch brings the functionality:
+In short, this repo brings the functionality:
 
 - As a client join other LR2ArenaEx's server session
 - Can play with LR2 users
+- Host as a server
 
-To build this branch, follow the instruction from main branch's README file but upgrade the jdk version to 17 at least.
+To build this branch, follow the instruction from upstream's README and rememeber to upgrade the jdk version to 17 at least.
 
 ## Development
 
 Need some time to polish this project...
 
-- [ ] Porting whole server side
+- [x] Porting whole server side
 - [ ] Play scene
     - [x] Auto select the host's song(see note below)
     - [x] A/AA/AAA limits are miscalculated
@@ -22,6 +23,7 @@ Need some time to polish this project...
     - [ ] Hijack the IR display to render lobby result instead
     - [ ] The play result should be reversed
     - [ ] Cancel event seems not sending
+    - [ ] Hijack the pace maker to see lobby's status(optional)
 - [ ] Settings
     - [ ] Items are not implemented
     - [ ] Random seed is not implemented
@@ -45,7 +47,6 @@ A: No. This branch is only a code port result from LR2ArenaEx.
 
 Q: Why this code is a branch not a standalone repo?(outdated)
 A: It's a standalone repo now because I find that github action is only triggered on main branch...
-
 
 Q: Does this branch allows IR connections?  
 A: Technically yes but this branch is based on dev branch of Endless Dream. So I think I'll disallow the connection in the near future.
