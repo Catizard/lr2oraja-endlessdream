@@ -4,10 +4,7 @@ import bms.player.beatoraja.MainLoader;
 import bms.player.beatoraja.arena.enums.ClientToServer;
 import bms.player.beatoraja.arena.enums.ServerToClient;
 import bms.player.beatoraja.arena.lobby.Lobby;
-import bms.player.beatoraja.arena.network.Address;
-import bms.player.beatoraja.arena.network.Message;
-import bms.player.beatoraja.arena.network.ScoreMessage;
-import bms.player.beatoraja.arena.network.SelectedBMSMessage;
+import bms.player.beatoraja.arena.network.*;
 import bms.player.beatoraja.modmenu.ImGuiNotify;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
@@ -72,10 +69,7 @@ public class WSClient extends WebSocketClient {
 
     public void send(ClientToServer id, byte[] data) {
         if (this.isOpen() && Client.connected.get()) {
-            byte[] out = new byte[data.length + 1];
-            out[0] = ((byte) id.getValue());
-            System.arraycopy(data, 0, out, 1, data.length);
-            super.send(out);
+            super.send(PackUtil.concat(((byte) id.getValue()), data));
         }
     }
 

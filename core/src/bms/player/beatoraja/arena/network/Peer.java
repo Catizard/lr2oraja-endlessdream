@@ -9,9 +9,9 @@ import java.io.IOException;
 
 public class Peer {
     private String userName;
-    private String selectedMD5;
+    private String selectedMD5 = "";
     private boolean ready;
-    private Score score;
+    private Score score = new Score();
     private int option;
     private int gauge;
 
@@ -45,6 +45,12 @@ public class Peer {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    public void reset() {
+        this.selectedMD5 = "";
+        this.score = new Score();
+        this.ready = false;
     }
 
     public String getUserName() {

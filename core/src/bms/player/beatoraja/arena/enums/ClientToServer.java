@@ -19,6 +19,23 @@ public enum ClientToServer {
         this.value = (char)value;
     }
 
+    public static ClientToServer from(char value) {
+        return switch (value) {
+            case 1 -> CTS_SELECTED_BMS;
+            case 2 -> CTS_PLAYER_SCORE;
+            case 3 -> CTS_CHART_CANCELLED;
+            case 4 -> CTS_LOADING_COMPLETE;
+            case 5 -> CTS_USERNAME;
+            case 6 -> CTS_MESSAGE;
+            case 7 -> CTS_MISSING_CHART;
+            case 8 -> CTS_SET_HOST;
+            case 9 -> CTS_KICK_USER;
+            case 10 -> CTS_ITEM;
+            case 11 -> CTS_ITEM_SETTINGS;
+            default -> throw new IllegalStateException("Unexpected value: " + value);
+        };
+    }
+
     public char getValue() {
         return value;
     }
