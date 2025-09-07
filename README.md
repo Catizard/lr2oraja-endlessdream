@@ -43,8 +43,9 @@ A: Only the basic functionality of client side has been implemented. Server side
 Q: Does this branch has any relationship with lr2oraja arena or something similar?  
 A: No. This branch is only a code port result from LR2ArenaEx.
 
-Q: Why this code is a branch not a standalone repo?  
-A: To hard to think of a name for the repo...I don't want something like lr2oraja-endlessdream-arenaex
+Q: Why this code is a branch not a standalone repo?(outdated)
+A: It's a standalone repo now because I find that github action is only triggered on main branch...
+
 
 Q: Does this branch allows IR connections?  
 A: Technically yes but this branch is based on dev branch of Endless Dream. So I think I'll disallow the connection in the near future.
