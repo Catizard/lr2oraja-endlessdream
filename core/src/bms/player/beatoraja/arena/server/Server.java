@@ -100,12 +100,14 @@ public class Server extends WebSocketServer {
         Logger.getGlobal().info("Received: " + new String(data));
         // NOTE: If data is not representing an object, data in value object is the first byte of data array
         // In that case, don't use value object, see CTS_USERNAME for example
-        Value value;
-        try (MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(data)) {
-            value = unpacker.unpackValue();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        Value value = null;
+        if (data.length > 0) {
+            try (MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(data)) {
+                value = unpacker.unpackValue();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
         switch (ev) {
             case CTS_SELECTED_BMS -> {
