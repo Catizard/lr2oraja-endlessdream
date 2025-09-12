@@ -1035,6 +1035,11 @@ public class BMSPlayer extends MainState {
 		if (state == STATE_PRELOAD || state == STATE_READY) {
 			main.getAudioProcessor().setGlobalPitch(1f);
 			timer.setTimerOn(TIMER_FADEOUT);
+			if (resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY) {
+				state = STATE_ABORTED;
+			} else {
+				state = STATE_PRACTICE_FINISHED;
+			}
 			return;
 		}
 		if (timer.isTimerOn(TIMER_FAILED) || timer.isTimerOn(TIMER_FADEOUT)) {
