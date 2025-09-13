@@ -15,6 +15,7 @@ To build this branch, follow the instruction from upstream's README and rememebe
 Need some time to polish this project...
 
 - [x] Porting whole server side
+    - [ ] The server side is far from usable, need some time to test 
 - [ ] Play scene
     - [x] Auto select the host's song(see note below)
     - [x] A/AA/AAA limits are miscalculated
