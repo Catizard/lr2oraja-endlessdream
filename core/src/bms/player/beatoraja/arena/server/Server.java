@@ -74,8 +74,7 @@ public class Server extends WebSocketServer {
     @Override
     public void onError(WebSocket conn, Exception e) {
         e.printStackTrace();
-        Address clientAddress = new Address(conn.getRemoteSocketAddress());
-        ImGuiNotify.error(String.format("Server exception: %s, client: (%s:%d)", e.getMessage(), clientAddress.getHost(), clientAddress.getPort()));
+        ImGuiNotify.error(String.format("Server exception: %s", e.getMessage()));
     }
 
     @Override
@@ -89,7 +88,7 @@ public class Server extends WebSocketServer {
         super.stop();
         started.set(false);
         state = new ServerState();
-        Logger.getGlobal().info("[+] Server stoped");
+        Logger.getGlobal().info("[+] Server stopped");
     }
 
     private void parsePacket(Address clientAddress, ByteBuffer bytes) throws IOException {
@@ -116,7 +115,7 @@ public class Server extends WebSocketServer {
                     state.setCurrentRandomSeed(selectedBMSMessage.getRandomSeed());
                     // state.setItemModeEnabled(...);
                     state.resetEveryone();
-                    broadcast(ServerToClient.STC_SELECTED_CHART_RANDOM, selectedBMSMessage.pack(), clientAddress);
+                    broadcast(ServerToClient.STC_SELECTED_CHART_RANDOM, selectedBMSMessage.pack());
                 }
                 state.getPeer(clientAddress).ifPresent(peer -> {
                     peer.setSelectedMD5(selectedBMSMessage.getMd5());

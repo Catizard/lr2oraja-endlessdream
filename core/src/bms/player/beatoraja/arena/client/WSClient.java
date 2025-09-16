@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
 public class WSClient extends WebSocketClient {
-    private static boolean debug = true;
 
     public WSClient(URI serverUri) {
         super(serverUri);
@@ -108,6 +107,7 @@ public class WSClient extends WebSocketClient {
                 Client.state.getSelectedSongRemote().setMd5(md5);
                 Client.state.getSelectedSongRemote().setArtist(selectedBMSMessage.getArtist());
 
+
                 Lobby.addToLog(String.format("[#] Selected song: %s / %s", selectedBMSMessage.getTitle(), selectedBMSMessage.getArtist()));
                 Lobby.addToLog(String.format("[#] Hash: %s", md5));
 
@@ -135,8 +135,8 @@ public class WSClient extends WebSocketClient {
                 } else {
                     Client.state.setCurrentSongData(songDatas[0]);
                     Client.state.getSelectedSongRemote().setPath(songDatas[0].getPath());
+                    Client.state.setAutoSelectFlag(true);
                 }
-                // TODO: Pick the song for user
             }
             case STC_USERLIST -> {
                 Client.updatePeerState(value);

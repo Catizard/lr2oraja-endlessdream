@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.exceptions.PlayerConfigException;
+import bms.player.beatoraja.modmenu.ArenaMenu;
 import bms.player.beatoraja.modmenu.DownloadTaskMenu;
 import bms.player.beatoraja.modmenu.ImGuiNotify;
 import bms.player.beatoraja.modmenu.ImGuiRenderer;
@@ -375,6 +376,7 @@ public class MainController {
 	        streamController.run();
 		}
 		SongManagerMenu.injectMusicSelector(selector);
+		ArenaMenu.setMusicSelector(selector);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new CourseResult(this);

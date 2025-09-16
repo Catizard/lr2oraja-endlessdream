@@ -353,12 +353,6 @@ public final class MusicSelector extends MainState {
 
 	private void readChart(SongData song, Bar current) {
 		resource.clear();
-		// NOTE: This is not an elegant way but it works
-		if (Client.connected.get() && !Client.state.getRemoteId().equals(Client.state.getHost())) {
-			if (Client.state.getSelectedSongRemote() != null && Client.state.getCurrentSongData() != null) {
-				song = Client.state.getCurrentSongData();
-			}
-		}
 		if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 			// TODO 表名、フォルダ名をPlayerResource上でも重複実施している
 			final Queue<DirectoryBar> dir = manager.getDirectory();

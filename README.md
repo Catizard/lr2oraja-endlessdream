@@ -8,6 +8,8 @@ In short, this repo brings the functionality:
 - Can play with LR2 users
 - Host as a server
 
+And will be merged into endless dream's mainline once it's done
+
 To build this branch, follow the instruction from upstream's README and rememeber to upgrade the jdk version to 17 at least.
 
 ## Development
@@ -30,15 +32,13 @@ Need some time to polish this project...
     - [ ] Random seed is not implemented
     - [ ] Option & Gauge are not implemented
 
-> [!note]
-> The auto-select feature is currently implemented in an awkward way: for every non-host user, selecting any chart would equally choose the host song if it exists.
-> So basically, once host setup the song, other users can pick any song and this will pick the same song from host if possible
-> There's a risk of crashing if we implement the direct state change instead, still need some time to do the task
-
 ## Other things you might want ask
 
-Q: How do I pick a song/get ready?  
-A: Just launch the bms as usual. If you are the lobby's host, then the song would be picked for the lobby. For other users, selecting the same song with host and you are ready.
+Q: How do I pick a song/get ready?
+A: Just launch the bms as usual. If you are the lobby's host, then the song would be picked for the lobby. For other users, you'll be lead to the song lobby choose if possible.
+
+Q: What if auto select failed?
+A: Try pressing the "Jump" button in arena menu
 
 Q: What's the current progress?  
 A: Only the basic functionality of client side has been implemented. Server side 0%.

@@ -16,6 +16,8 @@ public class ClientState {
     // Extra fields
     // For play/score related data reference
     private SongData currentSongData;
+    // For auto-select once
+    private Boolean autoSelectFlag = false;
 
     public Map<Address, Peer> getPeers() {
         return peers;
@@ -55,6 +57,14 @@ public class ClientState {
 
     public void setCurrentSongData(SongData currentSongData) {
         this.currentSongData = currentSongData;
+    }
+
+    public Boolean getAutoSelectFlag() {
+        return autoSelectFlag;
+    }
+
+    public void setAutoSelectFlag(Boolean autoSelectFlag) {
+        this.autoSelectFlag = autoSelectFlag;
     }
 
     public Optional<Integer> getMaxScore() {

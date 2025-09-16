@@ -14,7 +14,6 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -78,6 +77,15 @@ public class Lobby {
 
         ImGui.pushItemWidth(mainWindowWidth - (fontSize * 3));
         ImGui.inputText("Artist", new ImString(Client.state.getSelectedSongRemote().getArtist()), ImGuiInputTextFlags.ReadOnly);
+        // NOTE: When trying to jump to the arena bar automatically, current scene should be musicselector
+        // otherwise the jump won't work
+        if (ImGui.button("Jump")) {
+            ArenaMenu.selectCurrentLobbySong();
+        }
+        buttonWidth = ImGui.calcTextSizeX("Jump") + ImGui.getStyle().getFramePaddingX() * 2;
+
+        ImGui.sameLine();
+        ImGui.pushItemWidth(mainWindowWidth - (fontSize * 3) - buttonWidth - gapSize);
         ImGui.inputText("Path", new ImString(Client.state.getSelectedSongRemote().getPath()), ImGuiInputTextFlags.ReadOnly);
         ImGui.popItemWidth();
 
