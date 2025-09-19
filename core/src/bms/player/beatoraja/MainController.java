@@ -9,6 +9,7 @@ import bms.player.beatoraja.exceptions.PlayerConfigException;
 import bms.player.beatoraja.modmenu.DownloadTaskMenu;
 import bms.player.beatoraja.modmenu.ImGuiNotify;
 import bms.player.beatoraja.modmenu.ImGuiRenderer;
+import bms.player.beatoraja.modmenu.SkinWidgetManager;
 import bms.player.beatoraja.modmenu.SongManagerMenu;
 import bms.tool.mdprocessor.HttpDownloadProcessor;
 import bms.tool.mdprocessor.HttpDownloadSource;
@@ -373,6 +374,7 @@ public class MainController {
 	        streamController.run();
 		}
 		SongManagerMenu.injectMusicSelector(selector);
+		SkinWidgetManager.setMainController(this);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new CourseResult(this);
