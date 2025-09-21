@@ -374,7 +374,6 @@ public class MainController {
 	        streamController.run();
 		}
 		SongManagerMenu.injectMusicSelector(selector);
-		SkinWidgetManager.setMainController(this);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new CourseResult(this);
