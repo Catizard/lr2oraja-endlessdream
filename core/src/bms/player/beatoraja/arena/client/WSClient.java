@@ -1,10 +1,10 @@
 package bms.player.beatoraja.arena.client;
 
 import bms.player.beatoraja.MainLoader;
-import bms.player.beatoraja.arena.enums.ClientToServer;
-import bms.player.beatoraja.arena.enums.ServerToClient;
 import bms.player.beatoraja.arena.lobby.Lobby;
-import bms.player.beatoraja.arena.network.*;
+import io.github.catizard.jlr2arenaex.enums.ClientToServer;
+import io.github.catizard.jlr2arenaex.enums.ServerToClient;
+import io.github.catizard.jlr2arenaex.network.*;
 import bms.player.beatoraja.modmenu.ImGuiNotify;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;

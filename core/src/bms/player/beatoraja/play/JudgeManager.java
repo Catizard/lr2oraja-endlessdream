@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import bms.player.beatoraja.arena.client.Client;
-import bms.player.beatoraja.arena.enums.ClientToServer;
-import bms.player.beatoraja.arena.network.Score;
+import io.github.catizard.jlr2arenaex.enums.ClientToServer;
+import io.github.catizard.jlr2arenaex.network.Score;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
@@ -770,7 +770,7 @@ public class JudgeManager {
             }           
         }
         // NOTE: Hook for Arena
-        Client.send(ClientToServer.CTS_PLAYER_SCORE, new Score(score).pack());
+        Client.send(ClientToServer.CTS_PLAYER_SCORE, createArenaScore(score).pack());
     }
 
     public long[] getRecentJudges() {
@@ -1064,5 +1064,18 @@ public class JudgeManager {
                 }
             }
         }
+    }
+
+    private Score createArenaScore(ScoreData scoreData) {
+        Score arenaScore = new Score();
+        arenaScore.setPoor(scoreData.getEpr() + scoreData.getLpr());
+        arenaScore.setBad(scoreData.getEbd() + scoreData.getLbd());
+        arenaScore.setGood(scoreData.getEgd() + scoreData.getLgd());
+        arenaScore.setGreat(scoreData.getEgr() + scoreData.getLgr());
+        arenaScore.setpGreat(scoreData.getEpg() + scoreData.getLpg());
+        arenaScore.setMaxCombo(scoreData.getCombo());
+        arenaScore.setScore(scoreData.getExscore());
+        arenaScore.setCurrentNotes(arenaScore.getPoor() + arenaScore.getBad() + arenaScore.getGood() + arenaScore.getGreat() + arenaScore.getpGreat());
+        return arenaScore;
     }
 }

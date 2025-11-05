@@ -1,7 +1,7 @@
 package bms.player.beatoraja.arena.client;
 
-import bms.player.beatoraja.arena.network.Address;
-import bms.player.beatoraja.arena.network.Peer;
+import io.github.catizard.jlr2arenaex.network.Address;
+import io.github.catizard.jlr2arenaex.network.Peer;
 import bms.player.beatoraja.song.SongData;
 
 import java.util.HashMap;

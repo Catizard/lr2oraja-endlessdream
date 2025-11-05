@@ -2,8 +2,8 @@ package bms.player.beatoraja.arena.lobby;
 
 import bms.model.Mode;
 import bms.player.beatoraja.arena.client.Client;
-import bms.player.beatoraja.arena.enums.Gauge;
-import bms.player.beatoraja.arena.network.Peer;
+import io.github.catizard.jlr2arenaex.enums.Gauge;
+import io.github.catizard.jlr2arenaex.network.Peer;
 import bms.player.beatoraja.pattern.Random;
 import imgui.ImGui;
 import imgui.ImVec2;

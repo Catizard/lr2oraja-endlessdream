@@ -13,8 +13,8 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.arena.client.Client;
-import bms.player.beatoraja.arena.enums.ClientToServer;
-import bms.player.beatoraja.arena.network.SelectedBMSMessage;
+import io.github.catizard.jlr2arenaex.enums.ClientToServer;
+import io.github.catizard.jlr2arenaex.network.SelectedBMSMessage;
 import bms.player.beatoraja.audio.BMSLoudnessAnalyzer;
 import bms.player.beatoraja.modmenu.FreqTrainerMenu;
 import bms.player.beatoraja.modmenu.ImGuiNotify;
@@ -676,7 +676,7 @@ public class BMSPlayer extends MainState {
 			case STATE_WAIT -> {
 				if (!firedWaitingReady) {
 					firedWaitingReady = true;
-					Client.send(ClientToServer.CTS_SELECTED_BMS, new SelectedBMSMessage(model, playinfo.randomoptionseed, playinfo.randomoption).pack());
+					Client.send(ClientToServer.CTS_SELECTED_BMS, createSelectedBMSMessage(model, playinfo.randomoptionseed, playinfo.randomoption).pack());
 					Client.send(ClientToServer.CTS_LOADING_COMPLETE, "".getBytes());
 					Client.acceptNextAllReady((allReady) -> this.allReady = allReady);
 				}
@@ -1255,5 +1255,14 @@ public class BMSPlayer extends MainState {
 
 	public long getNowQuarterNoteTime() {
 		return rhythm != null ? rhythm.getNowQuarterNoteTime() : 0;
+	}
+
+	private SelectedBMSMessage createSelectedBMSMessage(BMSModel model, long randomSeed, int randomOption) {
+		// TODO: items are not supported.
+		// NOTE: We need to convert a Raja seed to LR2 seed
+		// NOTE: Gauge isn't synced everytime, considering 99% raja users are using auto-shift, there's no reason
+		// to sync an initial gauge value. Also LR2 has a different gauge system definition, it's tedious to handle
+		// the assist clear & ex-hard etc
+		return new SelectedBMSMessage(LR2RandomPattern.fromRajaToLR2Seed(randomSeed), model.getMD5(), model.getTitle(), model.getArtist(), randomOption, 0, false);
 	}
 }

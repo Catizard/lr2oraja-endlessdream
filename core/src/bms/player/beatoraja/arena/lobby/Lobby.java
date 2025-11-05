@@ -2,8 +2,8 @@ package bms.player.beatoraja.arena.lobby;
 
 
 import bms.player.beatoraja.arena.client.Client;
-import bms.player.beatoraja.arena.enums.ClientToServer;
-import bms.player.beatoraja.arena.network.Address;
+import io.github.catizard.jlr2arenaex.enums.ClientToServer;
+import io.github.catizard.jlr2arenaex.network.Address;
 import bms.player.beatoraja.modmenu.ArenaMenu;
 import bms.player.beatoraja.modmenu.FontAwesomeIcons;
 import bms.player.beatoraja.modmenu.ImGuiNotify;

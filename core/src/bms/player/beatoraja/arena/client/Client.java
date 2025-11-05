@@ -1,7 +1,7 @@
 package bms.player.beatoraja.arena.client;
 
-import bms.player.beatoraja.arena.enums.ClientToServer;
-import bms.player.beatoraja.arena.network.PeerList;
+import io.github.catizard.jlr2arenaex.enums.ClientToServer;
+import io.github.catizard.jlr2arenaex.network.PeerList;
 import bms.player.beatoraja.modmenu.ImGuiNotify;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
