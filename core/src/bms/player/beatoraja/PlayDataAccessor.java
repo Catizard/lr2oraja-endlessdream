@@ -184,6 +184,16 @@ public final class PlayDataAccessor {
 	}
 
 	/**
+	 * Load one specific chart's play history
+	 *
+	 * @param hash chart's hash
+	 * @return play records
+	 */
+	public List<ScoreData> readScoreDataLog(String hash) {
+		return scoredatalogdb.getScoreDataLog(hash);
+	}
+
+	/**
 	 * スコアデータを書き込む
 	 * 
 	 * @param newscore

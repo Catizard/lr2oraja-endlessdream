@@ -1,11 +1,15 @@
 package bms.player.beatoraja.ir;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.MainController.IRStatus;
+import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.song.SongData;
+import javafx.util.Pair;
 
 /**
  * IRのランキングデータ
@@ -50,37 +54,32 @@ public class RankingData {
 	public static final int ACCESS = 1;
 	public static final int FINISH = 2;
 	public static final int FAIL = 3;
+
+	private Source source = Source.Local;
 	
 	/**
 	 * 最終更新時間
 	 */
 	private long lastUpdateTime;
+
+	public enum Source {
+		PrimaryIR, LR2IR, Local
+	}
 	
 	public void load(MainState mainstate, Object song) {
 		if(!(song instanceof SongData || song instanceof CourseData)) {
 			return;
-		}		
+		}
+		Logger.getGlobal().info("Load process triggered");
 		state = ACCESS;
 		Thread irprocess = new Thread(() -> {
-			final IRStatus[] ir = mainstate.main.getIRStatus();
-	        IRResponse<IRScoreData[]> response = null;
-	        if(song instanceof SongData) {
-	        	 response = ir[0].connection.getPlayData(null, new IRChartData((SongData) song));
-	        } else if(song instanceof CourseData) {
-		        response = ir[0].connection.getCoursePlayData(null, new IRCourseData((CourseData) song, mainstate.main.getPlayerConfig().getLnmode()));
-	        }
-	        if(response.isSucceeded()) {
-	        	updateScore(response.getData(), mainstate.getScoreDataProperty().getScoreData());
-	            Logger.getGlobal().fine("IRからのスコア取得成功 : " + response.getMessage());
-				state = FINISH;
-	        } else {
-	            Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
-				state = FAIL;
-	        }
-	        lastUpdateTime = System.currentTimeMillis();
+			switch (source) {
+				case PrimaryIR: loadFromPrimaryIR(mainstate, song); break;
+				case LR2IR: loadFromLR2IR(mainstate, song); break;
+				case Local: loadFromLocal(mainstate, song); break;
+			}
 		});
 		irprocess.start();
-
 	}
 	
 	public void updateScore(IRScoreData[] scores, ScoreData localscore) {
@@ -199,5 +198,66 @@ public class RankingData {
 	 */
 	public long getLastUpdateTime() {
 		return lastUpdateTime;
+	}
+
+	public Source getSource() {
+		return source;
+	}
+
+	public void setSource(Source source) {
+		this.source = source;
+	}
+
+	private void loadFromPrimaryIR(MainState mainState, Object song) {
+		final IRStatus[] ir = mainState.main.getIRStatus();
+		IRResponse<IRScoreData[]> response = null;
+		if (song instanceof SongData) {
+			response = ir[0].connection.getPlayData(null, new IRChartData((SongData) song));
+		} else if (song instanceof CourseData) {
+			response = ir[0].connection.getCoursePlayData(null, new IRCourseData((CourseData) song, mainState.main.getPlayerConfig().getLnmode()));
+		}
+		if (response.isSucceeded()) {
+			updateScore(response.getData(), mainState.getScoreDataProperty().getScoreData());
+			Logger.getGlobal().fine("IRからのスコア取得成功 : " + response.getMessage());
+			state = FINISH;
+		} else {
+			Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+			state = FAIL;
+		}
+		lastUpdateTime = System.currentTimeMillis();
+	}
+
+	private void loadFromLR2IR(MainState mainstate, Object song) {
+		if (song instanceof SongData songData) {
+			Pair<IRScoreData, LeaderboardEntry[]> scoreData = LR2IRConnection.getScoreData(new IRChartData(songData));
+			IRScoreData local = scoreData.getKey();
+			LeaderboardEntry[] response = scoreData.getValue();
+			if (local == null) {
+				Logger.getGlobal().warning("Failed to retrieve leaderboard from LR2IR");
+				state = FAIL;
+			} else {
+				updateScore(Arrays.stream(response).map(LeaderboardEntry::getIrScore).toArray(IRScoreData[]::new), local.convertToScoreData());
+				Logger.getGlobal().fine("Successfully retrieved leaderboard from LR2IR");
+				state = FINISH;
+			}
+		}
+		lastUpdateTime = System.currentTimeMillis();
+	}
+
+	private void loadFromLocal(MainState mainstate, Object song) {
+		String hash = null;
+		if (song instanceof SongData songData) {
+			hash = songData.getSha256();
+		} else if (song instanceof CourseData courseData) {
+			// TODO: implement me
+		}
+		List<ScoreData> localRecords = mainstate.main.getPlayDataAccessor().readScoreDataLog(hash);
+		updateScore(localRecords.stream().map(score -> {
+			score.setPlayer(StringPropertyFactory.getStringProperty(StringPropertyFactory.StringType.player.name())
+					.get(mainstate.main.getCurrentState()));
+			return new IRScoreData(score);
+		}).toArray(IRScoreData[]::new), null);
+		state = FINISH;
+		lastUpdateTime = System.currentTimeMillis();
 	}
 }
