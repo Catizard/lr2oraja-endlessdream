@@ -412,9 +412,19 @@ public class BMSPlayer extends MainState {
 					if (RandomTrainer.isActive()) {
 						Logger.getGlobal().info("RandomTrainer: Disabled during arena session");
 					}
-					int lr2Seed = Client.state.getRandomSeed();
-					long rajaSeed = LR2RandomPattern.fromLR2SeedToRaja(lr2Seed);
-					Logger.getGlobal().info(String.format("Arena: Applying random seed from host, converting from %d to %d", lr2Seed, rajaSeed));
+                    int lr2Seed = Client.state.getRandomSeed();
+                    long rajaSeed = 0;
+                    if (Client.state.getRandomFlip()) {
+                        HashMap<Integer, Long> seedmap = RandomTrainer.getRandomSeedMap();
+                        String lanePattern = new StringBuilder().append(
+                            LR2RandomPattern.getLR2LaneOrder(lr2Seed, false)
+                        ).reverse().toString();
+                        rajaSeed = seedmap.get(Integer.parseInt(lanePattern));
+                        Logger.getGlobal().info(String.format("Arena: Applying flipped random seed from host, converting from flipped pattern %s to %d", lanePattern, rajaSeed));
+                    } else {
+                        rajaSeed = LR2RandomPattern.fromLR2SeedToRaja(lr2Seed);
+                        Logger.getGlobal().info(String.format("Arena: Applying random seed from host, converting from %d to %d", lr2Seed, rajaSeed));
+                    }
 					pm.setSeed(rajaSeed);
 				} else if (ghostBattle.isPresent()) {
 					HashMap<Integer, Long> seedmap = RandomTrainer.getRandomSeedMap();
