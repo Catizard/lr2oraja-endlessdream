@@ -4,9 +4,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
+import java.util.logging.*;
 
 import de.damios.guacamole.gdx.log.LoggerService;
 import org.slf4j.Logger;
@@ -50,6 +48,7 @@ import org.slf4j.jul.JULServiceProvider;
  */
 public class MainLoader extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(MainLoader.class);
+	private static final Logger skinDebugger = LoggerFactory.getLogger("SkinDebugger");
 
 	private static final boolean ALLOWS_32BIT_JAVA = false;
 

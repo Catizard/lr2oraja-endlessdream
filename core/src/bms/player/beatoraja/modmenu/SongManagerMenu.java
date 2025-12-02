@@ -1,17 +1,20 @@
 package bms.player.beatoraja.modmenu;
 
-import bms.player.beatoraja.ClearType;
-import bms.player.beatoraja.ScoreData;
+import bms.player.beatoraja.*;
+import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.result.PreviewMusicResult;
 import bms.player.beatoraja.select.MusicSelectCommand;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
+import com.badlogic.gdx.utils.FloatArray;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -140,13 +143,14 @@ public class SongManagerMenu {
      * @param localHistory local records
      */
     private static void renderLocalHistoryTable(List<ScoreData> localHistory) {
-        if (ImGui.beginTable("Local History", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY, 0, ImGui.getTextLineHeight() * 20)) {
+        if (ImGui.beginTable("Local History", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY, 0, ImGui.getTextLineHeight() * 20)) {
             ImGui.tableSetupScrollFreeze(0, 1);
             ImGui.tableSetupColumn("Clear");
             ImGui.tableSetupColumn("Score");
             ImGui.tableSetupColumn("Freq");
             ImGui.tableSetupColumn("Judge");
             ImGui.tableSetupColumn("Time");
+            ImGui.tableSetupColumn("Op");
             ImGui.tableHeadersRow();
             for (ScoreData scoreData : localHistory) {
                 ImGui.tableNextRow();
@@ -170,6 +174,31 @@ public class SongManagerMenu {
 
                 ImGui.tableNextColumn();
                 ImGui.text(simpleDateFormat.format(new Date(scoreData.getDate() * 1000)));
+
+                ImGui.tableNextColumn();
+                if (ImGui.button("View##SongManager")) {
+                    if (selector.main.getCurrentState() instanceof MusicSelector) {
+                        PlayerResource resource = selector.main.getPlayerResource();
+                        // TODO: We need a better way to understand what's present in state
+                        if (resource.setBMSFile(Paths.get(getCurrentSongData().get().getPath()), BMSPlayerMode.PLAY)) {
+                            ImGuiNotify.info("LOADED!");
+                            resource.setScoreData(scoreData);
+                            // TODO: Gauge system
+                            resource.setGrooveGauge(GrooveGauge.create(resource.getBMSModel(), 4, resource));
+                            FloatArray[] gauges = new FloatArray[8];
+                            for (int i = 0; i < gauges.length; i++) {
+                                gauges[i] = new FloatArray();
+                                gauges[i].add(0.0f);
+                            }
+                            resource.setGauge(gauges);
+                        } else {
+                            ImGuiNotify.error("Failed to loading BMS : Song not found, or Song has error", 1200);
+                        }
+                        selector.main.changeState(MainState.MainStateType.PREVIEWRESULT);
+                    } else {
+                        ImGuiNotify.error("NOPE AND REPLACE ME WITH A BETTER STATEMENT PLS");
+                    }
+                }
 
                 ImGui.popID();
             }

@@ -8,6 +8,8 @@ import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.MusicResult;
 
 import static bms.player.beatoraja.play.GrooveGauge.*;
+
+import bms.player.beatoraja.result.PreviewMusicResult;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
@@ -160,7 +162,7 @@ public class SkinGauge extends SkinObject {
 		if(state instanceof AbstractResult) {
 			PlayerResource resource = state.resource;
 			FloatArray gaugeTransition;
-			if(state instanceof MusicResult) {
+			if(state instanceof MusicResult || state instanceof PreviewMusicResult) {
 				gaugeTransition = resource.getGauge()[type];
 			} else {
 				gaugeTransition = resource.getCourseGauge().get(resource.getCourseGauge().size - 1)[type];

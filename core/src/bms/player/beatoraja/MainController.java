@@ -3,6 +3,8 @@ package bms.player.beatoraja;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import bms.player.beatoraja.result.PreviewMusicResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +70,7 @@ public class MainController {
 	private MusicDecide decide;
 	private MusicSelector selector;
 	private MusicResult result;
+	private PreviewMusicResult previewResult;
 	private CourseResult gresult;
 	private KeyConfiguration keyconfig;
 	private SkinConfiguration skinconfig;
@@ -300,31 +303,20 @@ public class MainController {
 	public void changeState(MainStateType state) {
 		MainState newState = null;
 		switch (state) {
-		case MUSICSELECT:
-			if (this.bmsfile != null) {
-				exit();
-			} else {
-				newState = selector;
+			case MUSICSELECT -> {
+				if (this.bmsfile != null) {
+					exit();
+				} else {
+					newState = selector;
+				}
 			}
-			break;
-		case DECIDE:
-			newState = config.isSkipDecideScreen() ? createBMSPlayerState() : decide;
-			break;
-		case PLAY:
-			newState = createBMSPlayerState();
-			break;
-		case RESULT:
-			newState = result;
-			break;
-		case COURSERESULT:
-			newState = gresult;
-			break;
-		case CONFIG:
-			newState = keyconfig;
-			break;
-		case SKINCONFIG:
-			newState = skinconfig;
-			break;
+			case DECIDE -> newState = config.isSkipDecideScreen() ? createBMSPlayerState() : decide;
+			case PLAY -> newState = createBMSPlayerState();
+			case RESULT -> newState = result;
+			case COURSERESULT -> newState = gresult;
+			case CONFIG -> newState = keyconfig;
+			case SKINCONFIG -> newState = skinconfig;
+			case PREVIEWRESULT -> newState = previewResult;
 		}
 
 		if (newState != null && current != newState) {
@@ -430,6 +422,7 @@ public class MainController {
 		MiscSettingMenu.setMain(this);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
+		previewResult = new PreviewMusicResult(this);
 		gresult = new CourseResult(this);
 		keyconfig = new KeyConfiguration(this);
 		skinconfig = new SkinConfiguration(this, player);
