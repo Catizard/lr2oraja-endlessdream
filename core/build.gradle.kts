@@ -163,6 +163,10 @@ dependencies {
     annotationProcessor(libs.runtime.javadoc.scribe)
     implementation(libs.runtime.javadoc)
 
+    // runtime-javadoc is split into an annotation processor and a library
+    annotationProcessor(libs.runtime.javadoc.scribe)
+    implementation(libs.runtime.javadoc)
+
     // non-gradle managed file dependencies. jportaudio not on maven. "custom" scares me.
     implementation(":jportaudio")
     implementation(":luaj-jse:3.0.2-custom")
