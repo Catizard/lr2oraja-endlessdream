@@ -1,9 +1,11 @@
 package bms.player.beatoraja.modmenu;
 
 import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.ScoreData;
 import bms.player.beatoraja.select.MusicSelectCommand;
 import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.song.SongData;
 import imgui.ImGui;
@@ -14,6 +16,7 @@ import imgui.type.ImInt;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
@@ -42,23 +45,17 @@ public class SongManagerMenu {
 
     public static void show(ImBoolean showSongManager) {
         Optional<SongData> currentSongData = getCurrentSongData();
-        Optional<ScoreData> currentScoreData = getCurrentScoreData();
         if (ImGui.begin("Song Manager", showSongManager, ImGuiWindowFlags.AlwaysAutoResize)) {
-            String songName = currentSongData.map(SongData::getTitle).orElse("");
-            String sha256 = currentSongData.map(SongData::getSha256).orElse("");
-            String lastPlayRecordTime = currentScoreData.map(scoreData -> {
-                Date date = new Date(scoreData.getDate() * 1000L);
-                return simpleDateFormat.format(date);
-            }).orElse("Not played");
-            ImGui.text("current picking: " + songName);
+            Context ctx = new Context();
 
-            ImGui.text("Last played: " + lastPlayRecordTime);
+            ImGui.text("current picking: " + ctx.name);
+            ImGui.text("Last played: " + ctx.lastPlayedTime);
             if (ImGui.checkbox("Sort by last played", LAST_PLAYED_SORT)) {
                 selector.getBarManager().updateBar();
             }
 
-            if (songName.isEmpty()) {
-                ImGui.text("Not a selectable song");
+            if (!ctx.shouldRenderLocalHistory) {
+                ImGui.text("Not a selectable song or course");
             } else {
                 if (ImGui.button("Show Reverse Lookup")) {
                     updateReverseLookupData(currentSongData);
@@ -75,8 +72,8 @@ public class SongManagerMenu {
                 ImGui.bulletText("Local History");
                 ImGui.combo("sort", sortStrategy, SortStrategy.items);
                 ImGui.checkbox("Show Selected Mods Scores", showSelectedModdedScore);
-                List<ScoreData> localHistory = loadLocalHistory(sha256);
-                renderLocalHistoryTable(localHistory);
+                List<ScoreData> localHistory = loadLocalHistory(ctx.sha256);
+                renderLocalHistoryTable(ctx, localHistory);
             }
         }
         ImGui.end();
@@ -139,14 +136,15 @@ public class SongManagerMenu {
      * Render local records as a table
      * @param localHistory local records
      */
-    private static void renderLocalHistoryTable(List<ScoreData> localHistory) {
-        if (ImGui.beginTable("Local History", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY, 0, ImGui.getTextLineHeight() * 20)) {
+    private static void renderLocalHistoryTable(Context ctx, List<ScoreData> localHistory) {
+        if (ImGui.beginTable("Local History", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY, 0, ImGui.getTextLineHeight() * 20)) {
             ImGui.tableSetupScrollFreeze(0, 1);
             ImGui.tableSetupColumn("Clear");
             ImGui.tableSetupColumn("Score");
             ImGui.tableSetupColumn("Freq");
             ImGui.tableSetupColumn("Judge");
             ImGui.tableSetupColumn("Time");
+            ImGui.tableSetupColumn("Op##SongManagerMenu");
             ImGui.tableHeadersRow();
             for (ScoreData scoreData : localHistory) {
                 ImGui.tableNextRow();
@@ -171,6 +169,15 @@ public class SongManagerMenu {
                 ImGui.tableNextColumn();
                 ImGui.text(simpleDateFormat.format(new Date(scoreData.getDate() * 1000)));
 
+                ImGui.tableNextColumn();
+                if (ImGui.button("View##SongManagerMenu")) {
+                    if (ctx.isCourse) {
+                        selector.gotoCourseResultScene(ctx.courseData, scoreData, null);
+                    } else {
+                        selector.gotoResultScene(getCurrentSongData().get().getPath(), scoreData, null);
+                    }
+                }
+
                 ImGui.popID();
             }
             ImGui.endTable();
@@ -182,6 +189,16 @@ public class SongManagerMenu {
             final SongData sd = ((SongBar) selector.getSelectedBar()).getSongData();
             if (sd != null && sd.getPath() != null) {
                 return Optional.of(sd);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<CourseData> getCurrentCourseData() {
+        if (selector.getSelectedBar() instanceof GradeBar) {
+            CourseData courseData = ((GradeBar) selector.getSelectedBar()).getCourseData();
+            if (courseData != null) {
+                return Optional.of(courseData);
             }
         }
         return Optional.empty();
@@ -205,6 +222,44 @@ public class SongManagerMenu {
 
     public static void forceDisableLastPlayedSort() {
         LAST_PLAYED_SORT.set(false);
+    }
+
+    /**
+     * Wrap class for inner state, to make render function easier to write
+     */
+    private static class Context {
+        private final boolean shouldRenderLocalHistory;
+        private final boolean isCourse;
+        private final CourseData courseData;
+        private final String name;
+        private final String sha256;
+        private final String lastPlayedTime;
+
+        public Context() {
+            Optional<ScoreData> currentScoreData = getCurrentScoreData();
+            Optional<SongData> currentSongData = getCurrentSongData();
+            Optional<CourseData> currentCourseData = getCurrentCourseData();
+            String name = currentSongData.map(SongData::getTitle).orElse("");
+            if (currentCourseData.isPresent()) {
+                name = currentCourseData.get().getName();
+            }
+            String sha256 = currentSongData.map(SongData::getSha256).orElse("");
+            if (currentCourseData.isPresent()) {
+                sha256 = Arrays.stream(currentCourseData.get().getSong())
+                        .map(SongData::getSha256)
+                        .collect(Collectors.joining());
+            }
+
+            this.shouldRenderLocalHistory = currentSongData.isPresent() || currentCourseData.isPresent();
+            this.isCourse = currentCourseData.isPresent();
+            this.courseData = currentCourseData.orElse(null);
+            this.name = name;
+            this.sha256 = sha256;
+            this.lastPlayedTime = currentScoreData.map(scoreData -> {
+                Date date = new Date(scoreData.getDate() * 1000L);
+                return simpleDateFormat.format(date);
+            }).orElse("Not played");
+        }
     }
 
     private enum SortStrategy {
