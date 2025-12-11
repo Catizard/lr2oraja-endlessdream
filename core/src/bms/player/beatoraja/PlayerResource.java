@@ -326,6 +326,10 @@ public final class PlayerResource {
 		return course;
 	}
 
+	public void clearCourseBMSModels() {
+		course = null;
+	}
+
 	public void setAutoPlaySongs(Path[] paths, boolean loop) {
 		this.bmsPaths = paths;
 		this.loop = loop;
