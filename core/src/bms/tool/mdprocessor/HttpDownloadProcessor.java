@@ -16,10 +16,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
@@ -326,25 +323,64 @@ public class HttpDownloadProcessor {
      */
     private Path downloadFileFromURLWithHttpClient(DownloadTask task, String fallbackFileName) {
         Path result = null;
+        InputStream is = null;
+        FileOutputStream fos = null;
         try {
-            HttpRequest request = HttpRequest.newBuilder().uri(new URI(task.getUrl())).GET().build();
             HttpClient client = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.ALWAYS)
+                    .followRedirects(HttpClient.Redirect.NORMAL)
                     .build();
-            result = Path.of(downloadDirectory, fallbackFileName);
-            HttpResponse<Path> resp = client.send(request, HttpResponse.BodyHandlers.ofFile(result));
-            int responseCode = resp.statusCode();
+            HttpRequest downloadRequest = HttpRequest.newBuilder().uri(new URI(task.getUrl())).GET().build();
+            HttpResponse<InputStream> response = client.send(downloadRequest, HttpResponse.BodyHandlers.ofInputStream());
+            int responseCode = response.statusCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
                 if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
                     throw new FileNotFoundException("Package not found at " + httpDownloadSource.getName());
                 }
                 throw new IllegalStateException("Unexpected http response code: " + responseCode);
             }
+            Optional<String> candidateFileName = response.headers().firstValue("Content-Disposition");
+            String fileName = candidateFileName.map(contentDisposition -> {
+                Matcher matcher = Pattern.compile("filename=\"?([^\"]+)\"?").matcher(contentDisposition);
+                return matcher.find() ? matcher.group(1) : contentDisposition;
+            }).orElse(fallbackFileName);
+            OptionalLong contentLength = response.headers().firstValueAsLong("Content-Length");
+            if (contentLength.isPresent()) {
+                task.setContentLength(contentLength.getAsLong());
+            }
+            is = response.body();
+            result = Path.of(downloadDirectory, fileName);
+            fos = new FileOutputStream(result.toFile());
+
+            byte[] buffer = new byte[8192];
+            long downloadBytes = 0;
+
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, read);
+                downloadBytes += read;
+                task.setDownloadSize(downloadBytes);
+                task.setContentLength(contentLength.orElse(0L));
+            }
+            logger.info("[HttpDownloadProcessor] Download successfully to {}", result);
+            task.setDownloadTaskStatus(DownloadTask.DownloadTaskStatus.Downloaded);
         } catch (Exception e) {
             task.setDownloadSize(0);
             task.setContentLength(0);
             task.setErrorMessage(e.getMessage());
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (Exception e) {
+                // Do nothing
+            }
+
+
         }
         return result;
     }
