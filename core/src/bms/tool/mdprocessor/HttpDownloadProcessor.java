@@ -8,7 +8,11 @@ import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +24,9 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -160,11 +167,31 @@ public class HttpDownloadProcessor {
             downloadTask.setDownloadTaskStatus(DownloadTask.DownloadTaskStatus.Downloading);
             Path result = null;
             // 1) Download file from remote http server
+            // 1.1) Without modification, initial code
             try {
-                result = downloadFileFromURL(downloadTask, String.format("%s.7z", hash));
+                result = downloadFileFromURL(downloadTask, String.format("%s.7z", hash), null);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Failed downloading file without specifying protocol: {}", e.getMessage());
+                logger.error("Stack trace: ", e);
                 ImGuiNotify.error(String.format("Failed downloading from %s due to %s", httpDownloadSource.getName(), e.getMessage()));
+            }
+            // 1.2) Try forcing TLSv1.2
+            if (result == null) {
+                try {
+                    result = downloadFileFromURL(downloadTask, String.format("%s.7z", hash), "TLSv1.2");
+                } catch (Exception e) {
+                    logger.error("Failed downloading file with TLSv1.2: {}", e.getMessage());
+                    logger.error("Stack trace: ", e);
+                }
+            }
+            // 1.3) Try using httpClient
+            if (result == null) {
+                try {
+                    result = downloadFileFromURLWithHttpClient(downloadTask, String.format("%s.7z", hash));
+                } catch (Exception e) {
+                    logger.error("Failed downloading file with HttpClient: {}", e.getMessage());
+                    logger.error("Stack trace: ", e);
+                }
             }
             if (result == null) {
                 // Download failed, skip the remaining steps
@@ -213,15 +240,21 @@ public class HttpDownloadProcessor {
      * @param fallbackFileName fallback file name if remote server's response doesn't contain a valid file name
      * @return result file path, null if failed
      */
-    private Path downloadFileFromURL(DownloadTask task, String fallbackFileName) {
-        HttpURLConnection conn = null;
+    private Path downloadFileFromURL(DownloadTask task, String fallbackFileName, String protocol) {
+        HttpsURLConnection conn = null;
         InputStream is = null;
         FileOutputStream fos = null;
         Path result = null;
 
         try {
             URL url = new URL(task.getUrl());
-            conn = ((HttpURLConnection) url.openConnection());
+            conn = ((HttpsURLConnection) url.openConnection());
+            conn.setInstanceFollowRedirects(true);
+            if (protocol != null) {
+                SSLContext sslContext = SSLContext.getInstance(protocol);
+                sslContext.init(null, null, null);
+                conn.setSSLSocketFactory(sslContext.getSocketFactory());
+            }
             conn.connect();
             int responseCode = conn.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -263,8 +296,8 @@ public class HttpDownloadProcessor {
             logger.info("[HttpDownloadProcessor] Download successfully to {}", result);
             task.setDownloadTaskStatus(DownloadTask.DownloadTaskStatus.Downloaded);
         } catch (Exception e) {
-            e.printStackTrace();
 			logger.info("[HttpDownloadProcessor] Failed to download file from url: {}", e.getMessage());
+            logger.error("Stack trace: ", e);
             task.setDownloadSize(0);
             task.setContentLength(0);
             task.setErrorMessage(e.getMessage());
@@ -284,6 +317,34 @@ public class HttpDownloadProcessor {
             } catch (Exception e) {
                 // Do nothing...
             }
+        }
+        return result;
+    }
+
+    /**
+     * Similar to downloadFileFromURL but uses HttpClient rather than Connection api from jdk
+     */
+    private Path downloadFileFromURLWithHttpClient(DownloadTask task, String fallbackFileName) {
+        Path result = null;
+        try {
+            HttpRequest request = HttpRequest.newBuilder().uri(new URI(task.getUrl())).GET().build();
+            HttpClient client = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.ALWAYS)
+                    .build();
+            result = Path.of(downloadDirectory, fallbackFileName);
+            HttpResponse<Path> resp = client.send(request, HttpResponse.BodyHandlers.ofFile(result));
+            int responseCode = resp.statusCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                    throw new FileNotFoundException("Package not found at " + httpDownloadSource.getName());
+                }
+                throw new IllegalStateException("Unexpected http response code: " + responseCode);
+            }
+        } catch (Exception e) {
+            task.setDownloadSize(0);
+            task.setContentLength(0);
+            task.setErrorMessage(e.getMessage());
+            throw new RuntimeException(e);
         }
         return result;
     }

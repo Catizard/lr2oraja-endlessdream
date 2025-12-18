@@ -68,6 +68,9 @@ public class MainLoader extends Application {
 			System.exit(1);
 		}
 
+		// Open ssl verbose log
+		System.setProperty("javax.net.debug", "ssl");
+
 		java.util.logging.Logger rootLogger = LogManager.getLogManager().getLogger("");
 		try {
 			rootLogger.addHandler(new FileHandler("beatoraja_log.xml"));
@@ -254,6 +257,16 @@ public class MainLoader extends Application {
 				public void create() {
 					logger.info("Starting {}", Version.versionLong);
 					logger.info("[Build info] Build date: {}, Commit: {}", Version.getBuildDate(), Version.getGitCommitHash());
+					logger.info("[Proxy info] http_proxy: {}:{}, https_proxy: {}:{}",
+							System.getProperty("http.proxyHost"), System.getProperty("http.proxyPort"),
+							System.getProperty("https.proxyHost"), System.getProperty("https.proxyPort")
+					);
+					logger.info("[JDK info] version: {}, vendor: {}", System.getProperty("java.version"), System.getProperty("java.vendor"));
+					logger.info("[TLS info] protocols: {}, trustStore: {}, trustStorePassword: {}",
+							System.getProperty("jdk.tls.client.protocols"),
+							System.getProperty("javax.net.ssl.trustStore"),
+							System.getProperty("javax.net.ssl.trustStorePassword")
+					);
 					main.create();
 					if (displaymode == Config.DisplayMode.FULLSCREEN) {
 						Gdx.graphics.setFullscreenMode(finalGdxDisplayMode);
