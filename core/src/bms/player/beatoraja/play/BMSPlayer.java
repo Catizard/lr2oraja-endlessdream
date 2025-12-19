@@ -481,6 +481,7 @@ public class BMSPlayer extends MainState {
 		}
 		logger.info("アシストレベル : {} - スコア保存 : {} - no IR submit : {}", assist, score, forceNoIRSend);
 
+		resource.setGrooveGauge(gauge);
 		resource.setUpdateScore(score);
 		resource.setUpdateCourseScore(resource.isUpdateCourseScore() && score);
 		resource.setForceNoIRSend(forceNoIRSend);

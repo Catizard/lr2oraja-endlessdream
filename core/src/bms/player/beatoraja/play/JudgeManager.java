@@ -128,6 +128,7 @@ public class JudgeManager {
 
     private int pressesSinceLastAutoadjust = 0;
 
+    private boolean processMultiBad;
     private MultiBadCollector multiBadCollector = new MultiBadCollector();
 
     public JudgeManager(BMSPlayer main) {
@@ -216,6 +217,7 @@ public class JudgeManager {
             setCourseCombo(resource.getCombo());
             setCourseMaxcombo(resource.getMaxcombo());
         }
+        this.processMultiBad = resource.getGrooveGauge().isProcessMultiBad();
 
         Arrays.fill(recentJudges, Long.MIN_VALUE);
         this.recentJudgesIndex = 0;
@@ -457,8 +459,10 @@ public class JudgeManager {
 
                     if (tnote != null) {
                         // process multiBad
-                        for (int i=multiBadCollector.arrayStart; i<multiBadCollector.size; i++) {
-                            this.updateMicroMultiBad(state, multiBadCollector.noteList[i], mtime, 3, multiBadCollector.timeList[i], judgeVanish[3]);
+                        if (processMultiBad) {
+                            for (int i=multiBadCollector.arrayStart; i<multiBadCollector.size; i++) {
+                                this.updateMicroMultiBad(state, multiBadCollector.noteList[i], mtime, 3, multiBadCollector.timeList[i], judgeVanish[3]);
+                            }
                         }
 
                         // TODO この時点で空POOR処理を分岐させるべきか

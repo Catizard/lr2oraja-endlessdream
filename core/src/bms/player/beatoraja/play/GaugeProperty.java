@@ -10,6 +10,7 @@ import static bms.player.beatoraja.play.GrooveGauge.GaugeModifier.*;
 public enum GaugeProperty {
 
     FIVEKEYS(
+            false,
     		GaugeElementProperty.ASSIST_EASY_5,
             GaugeElementProperty.EASY_5,
             GaugeElementProperty.NORMAL_5,
@@ -20,6 +21,7 @@ public enum GaugeProperty {
             GaugeElementProperty.EXCLASS_5,
             GaugeElementProperty.EXHARDCLASS_5),
     SEVENKEYS(
+            false,
     		GaugeElementProperty.ASSIST_EASY,
             GaugeElementProperty.EASY,
             GaugeElementProperty.NORMAL,
@@ -30,6 +32,7 @@ public enum GaugeProperty {
             GaugeElementProperty.EXCLASS,
             GaugeElementProperty.EXHARDCLASS),
     PMS(
+            false,
             GaugeElementProperty.ASSIST_EASY_PMS,
             GaugeElementProperty.EASY_PMS,
             GaugeElementProperty.NORMAL_PMS,
@@ -40,6 +43,7 @@ public enum GaugeProperty {
             GaugeElementProperty.EXCLASS_PMS,
             GaugeElementProperty.EXHARDCLASS_PMS),
     KEYBOARD(
+            false,
             GaugeElementProperty.ASSIST_EASY_KB,
             GaugeElementProperty.EASY_KB,
             GaugeElementProperty.NORMAL_KB,
@@ -50,6 +54,7 @@ public enum GaugeProperty {
             GaugeElementProperty.EXCLASS_KB,
             GaugeElementProperty.EXHARDCLASS_KB),
     LR2(
+            true,
             GaugeElementProperty.ASSIST_EASY_LR2,
             GaugeElementProperty.EASY_LR2,
             GaugeElementProperty.NORMAL_LR2,
@@ -61,9 +66,11 @@ public enum GaugeProperty {
             GaugeElementProperty.EXHARDCLASS_LR2),
     ;
 
+    public final boolean processMultiBad;
     public final GaugeElementProperty[] values;
 
-    private GaugeProperty(GaugeElementProperty... values) {
+    private GaugeProperty(boolean processMultiBad, GaugeElementProperty... values) {
+        this.processMultiBad = processMultiBad;
         this.values = values;
     }
 

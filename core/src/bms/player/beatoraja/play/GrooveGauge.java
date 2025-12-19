@@ -31,6 +31,7 @@ public final class GrooveGauge {
 	private int type = -1;
 	
 	private Gauge[] gauges;
+	private boolean processMultiBad = false;
 
 	public GrooveGauge(BMSModel model, int type, GaugeProperty property) {
 		this.typeorg = this.type = type;
@@ -119,7 +120,11 @@ public final class GrooveGauge {
 	public Gauge getGauge(int type) {
 		return gauges[type];
 	}
-	
+
+	public boolean isProcessMultiBad() {
+		return processMultiBad;
+	}
+
 	public static GrooveGauge create(BMSModel model, int type, PlayerResource resource) {
 		int coursetype = 0;
 		GaugeProperty gauges = null;

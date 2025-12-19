@@ -16,7 +16,7 @@ public enum BMSPlayerRule {
 	Beatoraja_24(GaugeProperty.KEYBOARD, JudgeProperty.KEYBOARD, Mode.KEYBOARD_24K, Mode.KEYBOARD_24K_DOUBLE),
 	Beatoraja_Other(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
 
-	LR2(GaugeProperty.LR2, JudgeProperty.LR2),
+	LR2(GaugeProperty.LR2, JudgeProperty.LR2, Mode.BEAT_5K, Mode.BEAT_10K, Mode.BEAT_7K, Mode.BEAT_14K),
 
 	Default(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
 ;
@@ -109,7 +109,7 @@ public enum BMSPlayerRule {
 enum BMSPlayerRuleSet {
 	
 	Beatoraja(BMSPlayerRule.Beatoraja_5, BMSPlayerRule.Beatoraja_7, BMSPlayerRule.Beatoraja_9, BMSPlayerRule.Beatoraja_24,  BMSPlayerRule.Beatoraja_Other),
-	LR2(BMSPlayerRule.LR2);
+	LR2(BMSPlayerRule.LR2, BMSPlayerRule.Beatoraja_9);
 	
 	public final BMSPlayerRule[] ruleset;
 	
