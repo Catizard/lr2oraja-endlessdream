@@ -87,7 +87,7 @@ public class Skin {
 
 	private final IntMap<CustomEvent> customEvents = new IntMap<CustomEvent>();
 	private final IntMap<CustomTimer> customTimers = new IntMap<CustomTimer>();
-	private JsonSkinObjectLoader objectLoader;
+	private JSONSkinLoader loader;
 
 	/**
 	 * デバッグ用
@@ -393,12 +393,12 @@ public class Skin {
 		this.offset = offset;
 	}
 
-	public JsonSkinObjectLoader getObjectLoader() {
-		return objectLoader;
+	public JSONSkinLoader getLoader() {
+		return loader;
 	}
 
-	public void setObjectLoader(JsonSkinObjectLoader loader) {
-		this.objectLoader = loader;
+	public void setLoader(JSONSkinLoader loader) {
+		this.loader = loader;
 	}
 
 	public float getWidth() {

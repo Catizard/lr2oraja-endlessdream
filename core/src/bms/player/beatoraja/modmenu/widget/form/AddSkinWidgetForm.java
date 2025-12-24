@@ -1,5 +1,6 @@
 package bms.player.beatoraja.modmenu.widget.form;
 
+import bms.player.beatoraja.modmenu.widget.SkinResources;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinObject;
 import imgui.ImGui;
@@ -32,9 +33,9 @@ public class AddSkinWidgetForm {
 	// Tell the outside close this form
 	private final Runnable closeHook;
 
-	public AddSkinWidgetForm(SkinWidgetType widgetType, Skin skin, Consumer<SkinObject> addSkinObjectHook, Runnable closeHook) {
+	public AddSkinWidgetForm(SkinWidgetType widgetType, SkinResources resources, Consumer<SkinObject> addSkinObjectHook, Runnable closeHook) {
 		// The adding widget's type
-		this.formData = AddSkinWidgetFormData.createFormData(widgetType, skin);
+		this.formData = AddSkinWidgetFormData.createFormData(widgetType, resources);
 		// Current skin
 		this.addSkinObjectHook = addSkinObjectHook;
 		this.closeHook = closeHook;

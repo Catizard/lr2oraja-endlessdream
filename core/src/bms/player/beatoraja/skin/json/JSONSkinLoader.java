@@ -41,6 +41,8 @@ public class JSONSkinLoader extends SkinLoader {
 	protected ObjectMap<String, String> filemap = new ObjectMap<String, String>();
 
 	protected JsonSkinSerializer serializer;
+
+	private JsonSkinObjectLoader<?> objectLoader;
 	
 	protected static class SourceData {
 		public final String path;
@@ -271,7 +273,7 @@ public class JSONSkinLoader extends SkinLoader {
 		return skin;
 	}
 
-	public JsonSkinObjectLoader<?> getSkinObjectLoader(SkinType type) {
+	private JsonSkinObjectLoader<?> createSkinObjectLoader(SkinType type) {
 		return switch (type) {
 			case MUSIC_SELECT -> new JsonSelectSkinObjectLoader(this);
 			case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE ->
@@ -306,12 +308,13 @@ public class JSONSkinLoader extends SkinLoader {
 			sourceMap = new HashMap<>();
 			bitmapSourceMap = new HashMap<>();
 
-			JsonSkinObjectLoader objectLoader = getSkinObjectLoader(type);
+			JsonSkinObjectLoader objectLoader = createSkinObjectLoader(type);
+			this.setObjectLoader(objectLoader);
 
 			header.setSourceResolution(src);
 			header.setDestinationResolution(dstr);
 			skin = objectLoader.getSkin(header);
-			skin.setObjectLoader(objectLoader);
+			skin.setLoader(this);
 
 			IntIntMap op = new IntIntMap();
 			for (SkinHeader.CustomOption option : header.getCustomOptions()) {
@@ -460,7 +463,15 @@ public class JSONSkinLoader extends SkinLoader {
 			obj.setStretch(dst.stretch);
 		}
 	}
-	
+
+	public JsonSkinObjectLoader<?> getObjectLoader() {
+		return objectLoader;
+	}
+
+	public void setObjectLoader(JsonSkinObjectLoader<?> objectLoader) {
+		this.objectLoader = objectLoader;
+	}
+
 	protected Object getSource(String srcid, Path p) {
 		if(srcid == null) {
 			return null;

@@ -36,7 +36,7 @@ public class SkinWidgetManager {
     private static final EventHistory eventHistory = new EventHistory();
     private static final List<SkinWidget> widgets = new ArrayList<>();
     private static Skin currentSkin = null;
-    private static List<JsonSkin.Font> skinFonts = new ArrayList<>();
+    private static SkinResources currentSkinResources = null;
 
     private static final List<WidgetTableColumn> WIDGET_TABLE_COLUMNS = new ArrayList<>();
 
@@ -70,7 +70,7 @@ public class SkinWidgetManager {
                 return ;
             }
             currentSkin = skin;
-            skinFonts = skin.getObjectLoader().getSkinLoader().getSkinFonts();
+            currentSkinResources = SkinResources.createSkinResources(skin);
             SkinObject[] allSkinObjects = skin.getAllSkinObjects();
             // NOTE: We're using skin object's name as id, we need to keep name is unique
             Map<String, Integer> duplicatedSkinObjectNameCount = new HashMap<>();
@@ -161,7 +161,7 @@ public class SkinWidgetManager {
                     currentSkin.addCustomObject(obj);
                     changeSkin(currentSkin);
                 };
-                addSkinWidgetForm = new AddSkinWidgetForm(selectedWidgetType, currentSkin, hook, SkinWidgetManager::closeAddSkinWidgetForm);
+                addSkinWidgetForm = new AddSkinWidgetForm(selectedWidgetType, currentSkinResources, hook, SkinWidgetManager::closeAddSkinWidgetForm);
             }
             ImGui.endPopup();
         }
@@ -352,11 +352,14 @@ public class SkinWidgetManager {
      * Render skin resources
      */
     private static void renderResources() {
+        if (currentSkinResources == null) {
+            return ;
+        }
         if (ImGui.treeNodeEx("Font##SkinResources", ImGuiTreeNodeFlags.DefaultOpen)) {
             if (ImGui.beginTable("FontTable##SkinResources", 1, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY)) {
                 ImGui.tableSetupColumn("Name");
                 ImGui.tableHeadersRow();
-                for (JsonSkin.Font font : skinFonts) {
+                for (JsonSkin.Font font : currentSkinResources.skinFonts()) {
                     ImGui.tableNextRow();
                     ImGui.tableSetColumnIndex(0);
                     ImGui.text(font.id);
