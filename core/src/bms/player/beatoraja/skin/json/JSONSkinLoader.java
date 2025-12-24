@@ -267,6 +267,19 @@ public class JSONSkinLoader extends SkinLoader {
 		return skin;
 	}
 
+	public JsonSkinObjectLoader<?> getSkinObjectLoader(SkinType type) {
+		return switch (type) {
+			case MUSIC_SELECT -> new JsonSelectSkinObjectLoader(this);
+			case PLAY_5KEYS, PLAY_7KEYS, PLAY_9KEYS, PLAY_10KEYS, PLAY_14KEYS, PLAY_24KEYS, PLAY_24KEYS_DOUBLE ->
+					new JsonPlaySkinObjectLoader(this);
+			case DECIDE -> new JsonDecideSkinObjectLoader(this);
+			case RESULT -> new JsonResultSkinObjectLoader(this);
+			case COURSE_RESULT -> new JsonCourseResultSkinObjectLoader(this);
+			case SKIN_SELECT -> new JsonSkinConfigurationSkinObjectLoader(this);
+			default -> new JsonKeyConfigurationSkinObjectLoader(this);
+		};
+	}
+
 	protected HashSet<Integer> getEnabledOptions(SkinHeader header) {
 		HashSet<Integer> enabledOptions = new HashSet<>();
 		for (SkinHeader.CustomOption customOption : header.getCustomOptions()) {
@@ -289,42 +302,13 @@ public class JSONSkinLoader extends SkinLoader {
 			sourceMap = new HashMap<>();
 			bitmapSourceMap = new HashMap<>();
 
-			JsonSkinObjectLoader objectLoader = null;
-			switch(type) {
-			case MUSIC_SELECT:
-				objectLoader = new JsonSelectSkinObjectLoader(this);
-				break;
-			case PLAY_5KEYS:
-			case PLAY_7KEYS:
-			case PLAY_9KEYS:
-			case PLAY_10KEYS:
-			case PLAY_14KEYS:
-			case PLAY_24KEYS:
-			case PLAY_24KEYS_DOUBLE:
-				objectLoader = new JsonPlaySkinObjectLoader(this);
-				break;
-			case DECIDE:
-				objectLoader = new JsonDecideSkinObjectLoader(this);
-				break;
-			case RESULT:
-				objectLoader = new JsonResultSkinObjectLoader(this);
-				break;
-			case COURSE_RESULT:
-				objectLoader = new JsonCourseResultSkinObjectLoader(this);
-				break;
-			case SKIN_SELECT:
-				objectLoader = new JsonSkinConfigurationSkinObjectLoader(this);
-				break;
-			case KEY_CONFIG:
-			default:
-				objectLoader = new JsonKeyConfigurationSkinObjectLoader(this);
-				break;				
-			}
-			
+			JsonSkinObjectLoader objectLoader = getSkinObjectLoader(type);
+
 			header.setSourceResolution(src);
 			header.setDestinationResolution(dstr);
 			skin = objectLoader.getSkin(header);
-			
+			skin.setObjectLoader(objectLoader);
+
 			IntIntMap op = new IntIntMap();
 			for (SkinHeader.CustomOption option : header.getCustomOptions()) {
 				for (int i = 0; i < option.option.length; i++) {
@@ -363,11 +347,9 @@ public class JSONSkinLoader extends SkinLoader {
 
 				}
 				if (obj == null) {
-					if(objectLoader != null) {
-						SkinObject sobj = objectLoader.loadSkinObject(skin, sk, dst, p);
-						if(sobj != null) {
-							obj = sobj;
-						}
+					SkinObject sobj = objectLoader.loadSkinObject(skin, sk, dst, p);
+					if(sobj != null) {
+						obj = sobj;
 					}
 				}
 
@@ -423,7 +405,7 @@ public class JSONSkinLoader extends SkinLoader {
 		return skin;
 	}
 
-	private void setDestination(Skin skin, SkinObject obj, JsonSkin.Destination dst) {
+	public void setDestination(Skin skin, SkinObject obj, JsonSkin.Destination dst) {
 		JsonSkin.Animation prev = null;
 		for (JsonSkin.Animation a : dst.dst) {
 			if (prev == null) {

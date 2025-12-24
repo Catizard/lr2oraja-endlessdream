@@ -1,5 +1,7 @@
-package bms.player.beatoraja.modmenu;
+package bms.player.beatoraja.modmenu.widget;
 
+import bms.player.beatoraja.modmenu.ImGuiNotify;
+import bms.player.beatoraja.modmenu.widget.SkinWidgetDestination.MovingState;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinObject;
 import com.badlogic.gdx.Gdx;
@@ -17,27 +19,29 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 
 import java.text.DecimalFormat;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static bms.player.beatoraja.modmenu.ImGuiRenderer.windowHeight;
 
 public class SkinWidgetManager {
-    private static final double eps = 1e-5;
     private static final Object LOCK = new Object();
     private static final EventHistory eventHistory = new EventHistory();
     private static final List<SkinWidget> widgets = new ArrayList<>();
+    private static Skin currentSkin = null;
 
     private static final List<WidgetTableColumn> WIDGET_TABLE_COLUMNS = new ArrayList<>();
 
     static {
         WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("ID", new ImBoolean(true), true, null, null));
-        WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("x", new ImBoolean(true), false, SkinWidgetDestination::getDstX, Event.EventType.CHANGE_X));
-        WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("y", new ImBoolean(true), false, SkinWidgetDestination::getDstY, Event.EventType.CHANGE_Y));
-        WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("w", new ImBoolean(true), false, SkinWidgetDestination::getDstW, Event.EventType.CHANGE_W));
-        WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("h", new ImBoolean(true), false, SkinWidgetDestination::getDstH, Event.EventType.CHANGE_H));
+        WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("x", new ImBoolean(true), false, SkinWidgetDestination::getDstX, EventType.CHANGE_X));
+        WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("y", new ImBoolean(true), false, SkinWidgetDestination::getDstY, EventType.CHANGE_Y));
+        WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("w", new ImBoolean(true), false, SkinWidgetDestination::getDstW, EventType.CHANGE_W));
+        WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("h", new ImBoolean(true), false, SkinWidgetDestination::getDstH, EventType.CHANGE_H));
         WIDGET_TABLE_COLUMNS.add(new WidgetTableColumn("Operation", new ImBoolean(true), true, null, null));
     }
 
@@ -59,6 +63,7 @@ public class SkinWidgetManager {
             if (skin == null) {
                 return ;
             }
+            currentSkin = skin;
             SkinObject[] allSkinObjects = skin.getAllSkinObjects();
             // NOTE: We're using skin object's name as id, we need to keep name is unique
             Map<String, Integer> duplicatedSkinObjectNameCount = new HashMap<>();
@@ -69,13 +74,13 @@ public class SkinWidgetManager {
                 for (int i = 0; i < dsts.length; ++i) {
                     String dstBaseName = skinObjectName == null ? "Unnamed Destination" : skinObjectName;
                     String combinedName = dsts.length == 1 ? dstBaseName : String.format("%s(%d)", dstBaseName, i);
-                    destinations.add(new SkinWidgetDestination(combinedName, dsts[i]));
+                    destinations.add(new SkinWidgetDestination(combinedName, dsts[i], eventHistory::pushEvent));
                 }
                 String widgetBaseName = skinObjectName == null ? "Unnamed Widget" : skinObjectName;
                 Integer count = duplicatedSkinObjectNameCount.getOrDefault(widgetBaseName, 0);
                 duplicatedSkinObjectNameCount.compute(widgetBaseName, (pk, pv) -> pv == null ? 1 : pv + 1);
                 String widgetName = count == 0 ? widgetBaseName : String.format("%s(%d)", widgetBaseName, count);
-                widgets.add(new SkinWidget(widgetName, skinObject, destinations));
+                widgets.add(new SkinWidget(widgetName, skinObject, destinations, eventHistory::pushEvent));
             }
         }
     }
@@ -88,7 +93,11 @@ public class SkinWidgetManager {
                 } else {
                     if (ImGui.beginTabBar("SkinWidgetsTabBar")) {
                         if (ImGui.beginTabItem("SkinWidgets")) {
-                            if (ImGui.button("undo")) {
+                            if (ImGui.button("add##SkinWidgetManager")) {
+                                ImGui.openPopup("Add Widget Popup##SkinWidgetManager");
+                            }
+                            ImGui.sameLine();
+                            if (ImGui.button("undo##SkinWidgetManager")) {
                                 eventHistory.undo();
                             }
                             ImGui.sameLine();
@@ -100,7 +109,7 @@ public class SkinWidgetManager {
                                 exportChanges();
                             }
 
-
+                            renderAddWidgetPopup();
                             renderSkinWidgetsTable();
                             ImGui.endTabItem();
                         }
@@ -123,6 +132,26 @@ public class SkinWidgetManager {
                 }
             }
             ImGui.end();
+        }
+    }
+
+    /**
+     * Render the popup selectable menu for adding a skin widget
+     */
+    private static void renderAddWidgetPopup() {
+        if (ImGui.beginPopup("Add Widget Popup##SkinWidgetManager")) {
+            AddSkinWidgetForm.SkinWidgetType selectedWidgetType = AddSkinWidgetForm.renderSelectableList();
+            if (selectedWidgetType != null) {
+                // TODO: Extract this as a static method on SkinWidgetManager
+                Consumer<SkinObject> hook = obj -> {
+                    currentSkin.add(obj);
+                    currentSkin.addCustomObject(obj);
+                    changeSkin(currentSkin);
+                };
+                AddSkinWidgetForm addSkinWidgetForm = new AddSkinWidgetForm(selectedWidgetType, currentSkin, hook);
+                addSkinWidgetForm.render();
+            }
+            ImGui.endPopup();
         }
     }
 
@@ -155,14 +184,14 @@ public class SkinWidgetManager {
             ImGui.tableHeadersRow();
             for (SkinWidget widget : widgets) {
                 ImGui.tableNextRow();
-                ImGui.pushID(widget.name);
+                ImGui.pushID(widget.getName());
 
                 ImGui.tableSetColumnIndex(0);
                 boolean isWidgetDrawingOnScreen = widget.isDrawingOnScreen();
                 if (!isWidgetDrawingOnScreen) {
                     ImGui.pushStyleColor(ImGuiCol.Text, ImColor.rgb(128, 128, 128));
                 }
-                boolean isOpen = ImGui.treeNodeEx(widget.name);
+                boolean isOpen = ImGui.treeNodeEx(widget.getName());
                 if (!isWidgetDrawingOnScreen) {
                     ImGui.popStyleColor();
                 }
@@ -178,15 +207,15 @@ public class SkinWidgetManager {
                 }
 
                 if (isOpen) {
-                    for (SkinWidgetDestination dst : widget.destinations) {
-                        ImGui.pushID(dst.name);
+                    for (SkinWidgetDestination dst : widget.getDestinations()) {
+                        ImGui.pushID(dst.getName());
 
                         ImGui.tableNextRow();
                         ImGui.tableSetColumnIndex(0);
                         if (!isWidgetDrawingOnScreen) {
                             ImGui.pushStyleColor(ImGuiCol.Text, ImColor.rgb(128, 128, 128));
                         }
-                        ImGui.text(dst.name);
+                        ImGui.text(dst.getName());
                         if (!isWidgetDrawingOnScreen) {
                             ImGui.popStyleColor();
                         }
@@ -197,7 +226,7 @@ public class SkinWidgetManager {
                         // The remaining things are trivial
                         for (int i = 1; i <= colSize - 2;++i) {
                             WidgetTableColumn column = showingColumns.get(i);
-                            drawFloatValueColumn(i, eventHistory.hasEvent(dst.name, column.changeEventType), column.getter.apply(dst));
+                            drawFloatValueColumn(i, eventHistory.hasEvent(dst.getName(), column.changeEventType), column.getter.apply(dst));
                         }
 
                         ImGui.tableSetColumnIndex(colSize - 1);
@@ -235,10 +264,10 @@ public class SkinWidgetManager {
                             }
 
                             if (move_overlay_enabled.get()) {
-                                if (dst.movingState == 0) {
+                                if (dst.getMovingState() == MovingState.NONE) {
                                     Rectangle clonedRegion = new Rectangle(dst.getDstX(), dst.getDstY(), dst.getDstW(), dst.getDstH());
-                                    dst.beforeMove = new SkinObject.SkinObjectDestination(0, clonedRegion, null, 0, 0);
-                                    dst.movingState = 1;
+                                    dst.setBeforeMove(new SkinObject.SkinObjectDestination(0, clonedRegion, null, 0, 0));
+                                    dst.setMovingState(MovingState.STALE);
                                 }
                                 ImGui.pushStyleColor(ImGuiCol.WindowBg, 0, 0, 0, 0.4f);
                                 ImGui.pushStyleColor(ImGuiCol.Border, 0.2f, 0.4f, 1.f, 1.f);
@@ -267,12 +296,12 @@ public class SkinWidgetManager {
                                     dst.setDstH(h, false);
                                 }
                                 if (ImGui.isWindowFocused()) {
-                                    if (dst.movingState == 1) {
-                                        dst.movingState = 2;
+                                    if (dst.getMovingState() == MovingState.STALE) {
+                                        dst.setMovingState(MovingState.MOVED);
                                     }
                                 } else {
-                                    if (dst.movingState == 2) {
-                                        dst.movingState = 0;
+                                    if (dst.getMovingState() == MovingState.MOVED) {
+                                        dst.setMovingState(MovingState.NONE);
                                         dst.submitMovement();
                                     }
                                 }
@@ -282,14 +311,14 @@ public class SkinWidgetManager {
                                 ImGui.popStyleColor();
                                 ImGui.popStyleColor();
                             } else {
-                                dst.movingState = 0;
+                                dst.setMovingState(MovingState.NONE);
                             }
                             ImGui.endPopup();
                         } else {
                             // If user clicked the empty space while moving widgets, the whole popup would be closed too
                             // So we have to catch the "escaping" widget here
-                            if (dst.movingState == 2) {
-                                dst.movingState = 0;
+                            if (dst.getMovingState() == MovingState.MOVED) {
+                                dst.setMovingState(MovingState.NONE);
                                 dst.submitMovement();
                             }
                         }
@@ -353,9 +382,9 @@ public class SkinWidgetManager {
     private static void exportChanges() {
         List<String> changes = new ArrayList<>();
         widgets.forEach(widget -> {
-            widget.destinations.forEach(dst -> {
+            widget.getDestinations().forEach(dst -> {
                 boolean hasChangedX = false, hasChangedY = false, hasChangedW = false, hasChangedH = false;
-                for (Event<?> event : eventHistory.getEvents(dst.name)) {
+                for (Event<?> event : eventHistory.getEvents(dst.getName())) {
                     switch (event.type) {
                         case CHANGE_X -> hasChangedX = true;
                         case CHANGE_Y -> hasChangedY = true;
@@ -366,7 +395,7 @@ public class SkinWidgetManager {
                 if (!(hasChangedX || hasChangedY || hasChangedW || hasChangedH)) {
                     return ;
                 }
-                StringBuilder sb = new StringBuilder("{dst=").append(dst.name);
+                StringBuilder sb = new StringBuilder("{dst=").append(dst.getName());
                 if (hasChangedX) {
                     sb.append(", x=").append(dst.getDstX());
                 }
@@ -400,253 +429,7 @@ public class SkinWidgetManager {
     /**
      * Represents one widget table's column
      */
-    private record WidgetTableColumn(String name, ImBoolean show, boolean persistent, Function<SkinWidgetDestination, Float> getter, Event.EventType changeEventType) {
-    }
-
-    /**
-     * A simple wrapper class of SkinObject
-     *
-     * @implNote setter functions must provide an extra argument to not trigger event system
-     */
-    private static class SkinWidget {
-        private final String name;
-        // DON'T ACCESS THESE FIELDS DIRECTLY, USE GETTER/SETTER INSTEAD
-        private final SkinObject skinObject;
-        private final List<SkinWidgetDestination> destinations;
-
-        public SkinWidget(String name, SkinObject skinObject, List<SkinWidgetDestination> destinations) {
-            this.name = name;
-            this.skinObject = skinObject;
-            this.destinations = destinations;
-        }
-
-        public boolean isDrawingOnScreen() {
-            return skinObject.draw && skinObject.visible;
-        }
-
-        public void toggleVisible() {
-            toggleVisible(true);
-        }
-
-        public void toggleVisible(boolean createEvent) {
-            boolean isVisibleBefore = skinObject.visible;
-            if (createEvent) {
-                eventHistory.pushEvent(new ToggleVisibleEvent(this, isVisibleBefore));
-            }
-            skinObject.visible = !isVisibleBefore;
-        }
-    }
-
-    /**
-     * A simple wrapper class of SkinObject.SkinObjectDestination
-     *
-     * @implNote setter functions must provide an extra argument to not trigger event system
-     */
-    private static class SkinWidgetDestination {
-        private final String name;
-        private final SkinObject.SkinObjectDestination destination;
-        private SkinObject.SkinObjectDestination beforeMove = null;
-        /**
-         * <ul>
-         *     <li>0: haven't started moving</li>
-         *     <li>1: user enabled the move feature, but hasn't move around</li>
-         *     <li>2: user has moved the widget</li>
-         * </ul>
-         */
-        private int movingState;
-
-        public SkinWidgetDestination(String name, SkinObject.SkinObjectDestination destination) {
-            this.name = name;
-            this.destination = destination;
-            this.movingState = 0;
-        }
-
-        public float getDstX() {
-            return destination.region.x;
-        }
-
-        public float getDstY() {
-            return destination.region.y;
-        }
-
-        public float getDstW() {
-            return destination.region.width;
-        }
-
-        public float getDstH() {
-            return destination.region.height;
-        }
-
-        public void setDstX(float x) {
-            setDstX(x, true);
-        }
-
-        public void setDstX(float x, boolean createEvent) {
-            float previous = this.getDstX();
-            if (createEvent && Math.abs(x - previous) > eps) {
-                eventHistory.pushEvent(new ChangeSingleFieldEvent(Event.EventType.CHANGE_X, this, previous, x));
-            }
-            destination.region.x = x;
-        }
-
-        public void setDstY(float y) {
-            setDstY(y, true);
-        }
-
-        public void setDstY(float y, boolean createEvent) {
-            float previous = this.getDstY();
-            if (createEvent && Math.abs(y - previous) > eps) {
-                eventHistory.pushEvent(new ChangeSingleFieldEvent(Event.EventType.CHANGE_Y, this, previous, y));
-            }
-            destination.region.y = y;
-        }
-
-        public void setDstW(float w) {
-            setDstW(w, true);
-        }
-
-        public void setDstW(float w, boolean createEvent) {
-            float previous = this.getDstW();
-            if (createEvent && Math.abs(w - previous) > eps) {
-                eventHistory.pushEvent(new ChangeSingleFieldEvent(Event.EventType.CHANGE_W, this, previous, w));
-            }
-            destination.region.width = w;
-        }
-
-        public void setDstH(float h) {
-            setDstH(h, true);
-        }
-
-        public void setDstH(float h, boolean createEvent) {
-            float previous = this.getDstH();
-            if (createEvent && Math.abs(h - previous) > eps) {
-                eventHistory.pushEvent(new ChangeSingleFieldEvent(Event.EventType.CHANGE_H, this, previous, h));
-            }
-            destination.region.height = h;
-        }
-
-        /**
-         * Submit the move result, producing the event
-         */
-        public void submitMovement() {
-            if (beforeMove == null) {
-                ImGuiNotify.error("Cannot submit the move result because there's no original position");
-                return ;
-            }
-            float nextX = getDstX();
-            float nextY = getDstY();
-            float nextW = getDstW();
-            float nextH = getDstH();
-            // Reset the position, to mimic that we are never left the original position
-            setDstX(beforeMove.region.x, false);
-            setDstY(beforeMove.region.y, false);
-            setDstW(beforeMove.region.width, false);
-            setDstH(beforeMove.region.height, false);
-            // Truly move to the target position
-            setDstX(nextX);
-            setDstY(nextY);
-            setDstW(nextW);
-            setDstH(nextH);
-            beforeMove = null;
-        }
-    }
-
-    private abstract static class Event<T> {
-        protected EventType type;
-        protected T handle; // reference to the event object
-
-        // NOTE: This is kinda naive, but it works...
-        enum EventType {
-            // ChangeSingleFieldEvent
-            CHANGE_X,
-            CHANGE_Y,
-            CHANGE_W,
-            CHANGE_H,
-            // ToggleVisibleEvent
-            TOGGLE_VISIBLE
-        }
-
-        public Event(EventType type, T handle) {
-            this.type = type;
-            this.handle = handle;
-        }
-
-        public abstract void undo();
-
-        public abstract String getDescription();
-
-        public abstract String getName();
-    }
-
-    /**
-     * Records the event when changing a single field from a widget
-     */
-    private static class ChangeSingleFieldEvent extends Event<SkinWidgetDestination> {
-        private final float previous;
-        private final float current;
-
-        public ChangeSingleFieldEvent(EventType type, SkinWidgetDestination dst, float previous, float current) {
-            super(type, dst);
-            this.previous = previous;
-            this.current = current;
-        }
-
-        @Override
-        public void undo() {
-            switch (type) {
-                case CHANGE_X -> handle.setDstX(previous, false);
-                case CHANGE_Y -> handle.setDstY(previous, false);
-                case CHANGE_W -> handle.setDstW(previous, false);
-                case CHANGE_H -> handle.setDstH(previous, false);
-                default -> { /* Intentionally do nothing */ }
-            }
-        }
-
-        @Override
-        public String getDescription() {
-            String fieldName = switch (type) {
-                case CHANGE_X -> "x";
-                case CHANGE_Y -> "y";
-                case CHANGE_W -> "width";
-                case CHANGE_H -> "height";
-                default -> "[ERROR] Not a ChangeSingleFieldEvent";
-            };
-            return String.format("Changed %s's %s from %.4f to %.4f", handle.name, fieldName, previous, current);
-        }
-
-        @Override
-        public String getName() {
-            return handle.name;
-        }
-    }
-
-    /**
-     * Records the event when toggling the visibility of a widget
-     */
-    private static class ToggleVisibleEvent extends Event<SkinWidget> {
-        private final boolean isVisibleBefore;
-
-        public ToggleVisibleEvent(SkinWidget handle, boolean isVisibleBefore) {
-            super(EventType.TOGGLE_VISIBLE, handle);
-            this.isVisibleBefore = isVisibleBefore;
-        }
-
-        @Override
-        public void undo() {
-            handle.toggleVisible(false);
-        }
-
-        @Override
-        public String getDescription() {
-            return isVisibleBefore
-                    ? String.format("Make %s widget invisible", handle.name)
-                    : String.format("Make %s widget visible", handle.name);
-        }
-
-        @Override
-        public String getName() {
-            return handle.name;
-        }
+    private record WidgetTableColumn(String name, ImBoolean show, boolean persistent, Function<SkinWidgetDestination, Float> getter, EventType changeEventType) {
     }
 
     /**
@@ -669,7 +452,7 @@ public class SkinWidgetManager {
             eventStack.clear();
         }
 
-        public boolean hasEvent(String widgetName, Event.EventType eventType) {
+        public boolean hasEvent(String widgetName, EventType eventType) {
             if (!targetNameToEvents.containsKey(widgetName)) {
                 return false;
             }

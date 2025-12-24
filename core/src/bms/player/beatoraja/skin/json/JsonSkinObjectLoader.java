@@ -17,6 +17,8 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * JSONスキンオブジェクトローダー
@@ -574,6 +576,10 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		return obj;
 	}
 
+	public JSONSkinLoader getSkinLoader() {
+		return loader;
+	}
+
 	protected Texture getTexture(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
@@ -639,38 +645,38 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		return SkinLoader.getTexture(path, loader.usecim);
 	}
 
-	protected SkinText createText(JsonSkin.Text text, Path skinPath) {
-		for (JsonSkin.Font font : loader.sk.font) {
-			if (font.id.equals(text.font)) {
-				Path path = skinPath.getParent().resolve(font.path);
-				SkinText skinText;
-				StringProperty property = text.value;
-				if (property == null) {
-					property = StringPropertyFactory.getStringProperty(text.ref);
-				}
-				if (path.toString().toLowerCase().endsWith(".fnt")) {
-					if (!loader.bitmapSourceMap.containsKey(font.id)) {
-						SkinTextBitmap.SkinTextBitmapSource source = new SkinTextBitmap.SkinTextBitmapSource(path, loader.usecim);
-						source.setType(font.type);
-						loader.bitmapSourceMap.put(font.id, source);
-					}
-					skinText = new SkinTextBitmap(loader.bitmapSourceMap.get(font.id), text.size * ((float)loader.dstr.width / loader.sk.w), property);
-				} else {
-					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, property);
-				}
-				skinText.setConstantText(text.constantText);
-				skinText.setAlign(text.align);
-				skinText.setWrapping(text.wrapping);
-				skinText.setOverflow(text.overflow);
-				skinText.setOutlineColor(parseHexColor(text.outlineColor, Color.WHITE));
-				skinText.setOutlineWidth(text.outlineWidth);
-				skinText.setShadowColor(parseHexColor(text.shadowColor, Color.WHITE));
-				skinText.setShadowOffset(new Vector2(text.shadowOffsetX, text.shadowOffsetY));
-				skinText.setShadowSmoothness(text.shadowSmoothness);
-				return skinText;
-			}
+	public SkinText createText(JsonSkin.Text text, Path skinPath) {
+		Optional<JsonSkin.Font> optFont = Arrays.stream(loader.sk.font).filter(font -> font.id.equals(text.font)).findAny();
+		if (optFont.isEmpty()) {
+			return null;
 		}
-		return null;
+		JsonSkin.Font font = optFont.get();
+		Path path = skinPath.getParent().resolve(font.path);
+		SkinText skinText;
+		StringProperty property = text.value;
+		if (property == null) {
+			property = StringPropertyFactory.getStringProperty(text.ref);
+		}
+		if (path.toString().toLowerCase().endsWith(".fnt")) {
+			if (!loader.bitmapSourceMap.containsKey(font.id)) {
+				SkinTextBitmap.SkinTextBitmapSource source = new SkinTextBitmap.SkinTextBitmapSource(path, loader.usecim);
+				source.setType(font.type);
+				loader.bitmapSourceMap.put(font.id, source);
+			}
+			skinText = new SkinTextBitmap(loader.bitmapSourceMap.get(font.id), text.size * ((float) loader.dstr.width / loader.sk.w), property);
+		} else {
+			skinText = new SkinTextFont(path.toString(), 0, text.size, 0, property);
+		}
+		skinText.setConstantText(text.constantText);
+		skinText.setAlign(text.align);
+		skinText.setWrapping(text.wrapping);
+		skinText.setOverflow(text.overflow);
+		skinText.setOutlineColor(parseHexColor(text.outlineColor, Color.WHITE));
+		skinText.setOutlineWidth(text.outlineWidth);
+		skinText.setShadowColor(parseHexColor(text.shadowColor, Color.WHITE));
+		skinText.setShadowOffset(new Vector2(text.shadowOffsetX, text.shadowOffsetY));
+		skinText.setShadowSmoothness(text.shadowSmoothness);
+		return skinText;
 	}
 
 	protected Color parseHexColor(String hex, Color fallbackColor) {
