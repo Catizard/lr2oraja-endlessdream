@@ -2,6 +2,7 @@ package bms.player.beatoraja.modmenu.widget;
 
 import bms.player.beatoraja.modmenu.ImGuiNotify;
 import bms.player.beatoraja.modmenu.widget.SkinWidgetDestination.MovingState;
+import bms.player.beatoraja.modmenu.widget.form.AddSkinWidgetForm;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinObject;
 import com.badlogic.gdx.Gdx;
@@ -56,6 +57,8 @@ public class SkinWidgetManager {
 
     public static boolean focus = false;
 
+    private static AddSkinWidgetForm addSkinWidgetForm = null;
+
     public static void changeSkin(Skin skin) {
         synchronized (LOCK) {
             widgets.clear();
@@ -93,9 +96,11 @@ public class SkinWidgetManager {
                 } else {
                     if (ImGui.beginTabBar("SkinWidgetsTabBar")) {
                         if (ImGui.beginTabItem("SkinWidgets")) {
+                            ImGui.beginDisabled(addSkinWidgetForm != null);
                             if (ImGui.button("add##SkinWidgetManager")) {
                                 ImGui.openPopup("Add Widget Popup##SkinWidgetManager");
                             }
+                            ImGui.endDisabled();
                             ImGui.sameLine();
                             if (ImGui.button("undo##SkinWidgetManager")) {
                                 eventHistory.undo();
@@ -148,10 +153,12 @@ public class SkinWidgetManager {
                     currentSkin.addCustomObject(obj);
                     changeSkin(currentSkin);
                 };
-                AddSkinWidgetForm addSkinWidgetForm = new AddSkinWidgetForm(selectedWidgetType, currentSkin, hook);
-                addSkinWidgetForm.render();
+                addSkinWidgetForm = new AddSkinWidgetForm(selectedWidgetType, currentSkin, hook, SkinWidgetManager::closeAddSkinWidgetForm);
             }
             ImGui.endPopup();
+        }
+        if (addSkinWidgetForm != null) {
+            addSkinWidgetForm.render();
         }
     }
 
@@ -424,6 +431,10 @@ public class SkinWidgetManager {
     private static String normalizeFloat(float value) {
         DecimalFormat df = new DecimalFormat("#.####");
         return df.format(value);
+    }
+
+    private static void closeAddSkinWidgetForm() {
+        addSkinWidgetForm = null;
     }
 
     /**
