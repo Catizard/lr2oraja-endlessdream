@@ -5,6 +5,7 @@ import bms.player.beatoraja.modmenu.widget.SkinWidgetDestination.MovingState;
 import bms.player.beatoraja.modmenu.widget.form.AddSkinWidgetForm;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.json.JsonSkin;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Clipboard;
 import com.badlogic.gdx.math.Rectangle;
@@ -15,6 +16,7 @@ import imgui.ImVec2;
 import imgui.callback.ImListClipperCallback;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiTableFlags;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -34,6 +36,7 @@ public class SkinWidgetManager {
     private static final EventHistory eventHistory = new EventHistory();
     private static final List<SkinWidget> widgets = new ArrayList<>();
     private static Skin currentSkin = null;
+    private static List<JsonSkin.Font> skinFonts = new ArrayList<>();
 
     private static final List<WidgetTableColumn> WIDGET_TABLE_COLUMNS = new ArrayList<>();
 
@@ -67,6 +70,7 @@ public class SkinWidgetManager {
                 return ;
             }
             currentSkin = skin;
+            skinFonts = skin.getObjectLoader().getSkinLoader().getSkinFonts();
             SkinObject[] allSkinObjects = skin.getAllSkinObjects();
             // NOTE: We're using skin object's name as id, we need to keep name is unique
             Map<String, Integer> duplicatedSkinObjectNameCount = new HashMap<>();
@@ -94,8 +98,8 @@ public class SkinWidgetManager {
                 if (widgets.isEmpty()) {
                     ImGui.text("No skin is loaded");
                 } else {
-                    if (ImGui.beginTabBar("SkinWidgetsTabBar")) {
-                        if (ImGui.beginTabItem("SkinWidgets")) {
+                    if (ImGui.beginTabBar("SkinWidgetsTabBar##SkinWidgetManager")) {
+                        if (ImGui.beginTabItem("SkinWidgets##SkinWidgetManager")) {
                             ImGui.beginDisabled(addSkinWidgetForm != null);
                             if (ImGui.button("add##SkinWidgetManager")) {
                                 ImGui.openPopup("Add Widget Popup##SkinWidgetManager");
@@ -108,9 +112,9 @@ public class SkinWidgetManager {
                             ImGui.sameLine();
                             renderPreferColumnSetting();
                             ImGui.sameLine();
-                            ImGui.checkbox("Show Position", SHOW_CURSOR_POSITION);
+                            ImGui.checkbox("Show Position##SkinWidgetManager", SHOW_CURSOR_POSITION);
                             ImGui.sameLine();
-                            if (ImGui.button("export")) {
+                            if (ImGui.button("export##SkinWidgetManager")) {
                                 exportChanges();
                             }
 
@@ -118,7 +122,11 @@ public class SkinWidgetManager {
                             renderSkinWidgetsTable();
                             ImGui.endTabItem();
                         }
-                        if (ImGui.beginTabItem("History")) {
+                        if (ImGui.beginTabItem("Resources##SkinWidgetManager")) {
+                            renderResources();
+                            ImGui.endTabItem();
+                        }
+                        if (ImGui.beginTabItem("History##SkinWidgetManager")) {
                             renderHistoryTable();
                             ImGui.endTabItem();
                         }
@@ -337,6 +345,25 @@ public class SkinWidgetManager {
                 ImGui.popID();
             }
             ImGui.endTable();
+        }
+    }
+
+    /**
+     * Render skin resources
+     */
+    private static void renderResources() {
+        if (ImGui.treeNodeEx("Font##SkinResources", ImGuiTreeNodeFlags.DefaultOpen)) {
+            if (ImGui.beginTable("FontTable##SkinResources", 1, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY)) {
+                ImGui.tableSetupColumn("Name");
+                ImGui.tableHeadersRow();
+                for (JsonSkin.Font font : skinFonts) {
+                    ImGui.tableNextRow();
+                    ImGui.tableSetColumnIndex(0);
+                    ImGui.text(font.id);
+                }
+                ImGui.endTable();
+            }
+            ImGui.treePop();
         }
     }
 
