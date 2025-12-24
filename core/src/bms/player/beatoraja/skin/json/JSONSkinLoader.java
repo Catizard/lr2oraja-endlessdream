@@ -83,6 +83,10 @@ public class JSONSkinLoader extends SkinLoader {
 		lua.exportUtilities(state);
 	}
 
+	public List<JsonSkin.Font> getSkinFonts() {
+		return Arrays.stream(sk.font).toList();
+	}
+
 	public Skin loadSkin(Path p, SkinType type, SkinConfig.Property property) {
 		return load(p, type, property);
 	}
