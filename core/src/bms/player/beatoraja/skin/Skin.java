@@ -6,6 +6,8 @@ import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.json.JSONSkinLoader;
+import bms.player.beatoraja.skin.json.JsonSkinObjectLoader;
 import bms.player.beatoraja.skin.property.BooleanProperty;
 import bms.player.beatoraja.play.BMSPlayer;
 
@@ -24,11 +26,7 @@ import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntIntMap;
 import com.badlogic.gdx.utils.IntMap;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +63,7 @@ public class Skin {
 	 * 登録されているスキンオブジェクト
 	 */
 	private Array<SkinObject> objects = new Array<SkinObject>();
-	private SkinObject[] objectarray = new SkinObject[0];
+	private List<SkinObject> objectarray = new ArrayList<>();
 	/**
 	 * 除外されているスキンオブジェクト
 	 */
@@ -89,6 +87,7 @@ public class Skin {
 
 	private final IntMap<CustomEvent> customEvents = new IntMap<CustomEvent>();
 	private final IntMap<CustomTimer> customTimers = new IntMap<CustomTimer>();
+	private JsonSkinObjectLoader objectLoader;
 
 	/**
 	 * デバッグ用
@@ -124,6 +123,10 @@ public class Skin {
 
 	public void add(SkinObject object) {
 		objects.add(object);
+	}
+
+	public void addCustomObject(SkinObject object) {
+		objectarray.add(object);
 	}
 
 	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
@@ -211,7 +214,10 @@ public class Skin {
  		}
 		logger.info("描画されないことが確定しているSkinObject削除 : {} / {}", removes.size, objects.size);
 		objects.removeAll(removes, true);
-		objectarray = objects.toArray(SkinObject.class);
+		objectarray.clear();
+		for (int i = 0; i < objects.size; ++i) {
+			objectarray.add(objects.get(i));
+		}
 		option.clear();
 
 		for(SkinObject obj : objects) {
@@ -317,8 +323,8 @@ public class Skin {
 	}
 
 	public void mousePressed(MainState state, int button, int x, int y) {
-		for (int i = objectarray.length - 1; i >= 0; i--) {
-			final SkinObject obj = objectarray[i];
+		for (int i = objectarray.size() - 1; i >= 0; i--) {
+			final SkinObject obj = objectarray.get(i);
 			if (obj.draw && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
@@ -326,8 +332,8 @@ public class Skin {
 	}
 
 	public void mouseDragged(MainState state, int button, int x, int y) {
-		for (int i = objectarray.length - 1; i >= 0; i--) {
-			final SkinObject obj = objectarray[i];
+		for (int i = objectarray.size() - 1; i >= 0; i--) {
+			final SkinObject obj = objectarray.get(i);
 			if (obj instanceof SkinSlider && obj.draw && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
@@ -386,7 +392,15 @@ public class Skin {
 	public void setOffset(IntMap<Offset> offset) {
 		this.offset = offset;
 	}
-	
+
+	public JsonSkinObjectLoader getObjectLoader() {
+		return objectLoader;
+	}
+
+	public void setObjectLoader(JsonSkinObjectLoader loader) {
+		this.objectLoader = loader;
+	}
+
 	public float getWidth() {
 		return width;
 	}
