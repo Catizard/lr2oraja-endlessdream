@@ -1,7 +1,7 @@
 package bms.player.beatoraja.modmenu.widget.form;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.modmenu.widget.SkinResources;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.SkinText;
 import bms.player.beatoraja.skin.json.JsonSkin;
@@ -23,15 +23,15 @@ public class TextSkinWidgetFormData extends AddSkinWidgetFormData {
 	private List<String> fontCandidates;
 	private String fontName;
 
-	public TextSkinWidgetFormData(Skin skin) {
-		super(skin);
+	public TextSkinWidgetFormData(SkinResources resources) {
+		super(resources);
 		widgetName.clear();
 		widgetContent.clear();
 		widgetX.set(0);
 		widgetY.set(0);
 		fontSize.set(0);
 		// TODO: Handle no font to use case
-		fontCandidates = skin.getObjectLoader().getSkinLoader().getSkinFonts().stream().map(font -> font.id).toList();
+		fontCandidates = skinResources.skinFonts().stream().map(font -> font.id).toList();
 		fontName = fontCandidates.get(0);
 	}
 
@@ -62,12 +62,12 @@ public class TextSkinWidgetFormData extends AddSkinWidgetFormData {
 
 	@Override
 	public SkinObject createSkinObject() {
-		JsonSkinObjectLoader objectLoader = skin.getObjectLoader();
+		JsonSkinObjectLoader objectLoader = skinResources.skinLoader().getObjectLoader();
 		JsonSkin.Text text = new JsonSkin.Text();
 		text.font = fontName;
 		text.size = fontSize.get();
 		text.constantText = widgetContent.get();
-		SkinText obj = objectLoader.createText(text, skin.header.getPath());
+		SkinText obj = objectLoader.createText(text, skinResources.skinHeader().getPath());
 		obj.setName(widgetName.get());
 		JsonSkin.Destination dst = new JsonSkin.Destination();
 		dst.dst = new JsonSkin.Animation[]{
@@ -87,7 +87,7 @@ public class TextSkinWidgetFormData extends AddSkinWidgetFormData {
 				return true;
 			}
 		};
-		objectLoader.getSkinLoader().setDestination(skin, obj, dst);
+		objectLoader.getSkinLoader().setDestination(skinResources.skinRef(), obj, dst);
 		return obj;
 	}
 }
