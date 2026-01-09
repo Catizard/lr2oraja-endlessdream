@@ -21,6 +21,7 @@
 <?import javafx.scene.control.CheckBox?>
 
 <?import javafx.scene.layout.Region?>
+<?import java.net.URL?>
 <VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.ResourceConfigurationView">
 	<HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
 		<VBox.margin>
@@ -34,7 +35,7 @@
 		</Label>
 		<ListView fx:id="bmsroot"
 			onDragDropped="#songPathDragDropped" onDragOver="#onSongPathDragOver"
-			prefHeight="100.0" prefWidth="500.0" HBox.hgrow="ALWAYS">
+			prefHeight="100.0" prefWidth="500.0" HBox.hgrow="ALWAYS" >
 			<HBox.margin>
 				<Insets top="10.0" />
 			</HBox.margin>
@@ -85,7 +86,7 @@
 			</HBox>
 			<HBox VBox.vgrow="ALWAYS">
 				<EditableTableView fx:id="tableurl" prefHeight="167.0"
-					prefWidth="200.0" HBox.hgrow="ALWAYS">
+					prefWidth="200.0" HBox.hgrow="ALWAYS" style="-fx-cell-size: -1px">
 					<HBox.margin>
 						<Insets top="5.0" />
 					</HBox.margin>
@@ -123,7 +124,7 @@
 					</Button>
 				</VBox>
                 <EditableTableView fx:id="available_tables" prefHeight="167.0"
-                                   prefWidth="200.0" HBox.hgrow="ALWAYS">
+                                   prefWidth="200.0" HBox.hgrow="ALWAYS" style="-fx-cell-size: -1px">
                     <HBox.margin>
                         <Insets top="5.0" right="10.0" />
                     </HBox.margin>
@@ -159,5 +160,8 @@
 			<Insets left="10.0" />
 		</VBox.margin>
 	</CheckBox>
+	<stylesheets>
+		<URL value="@LauncherStyle.css"/>
+	</stylesheets>
 </VBox>
 

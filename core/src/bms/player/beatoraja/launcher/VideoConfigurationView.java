@@ -1,17 +1,24 @@
 package bms.player.beatoraja.launcher;
 
+import atlantafx.base.controls.Tile;
+import atlantafx.base.controls.ToggleSwitch;
+import atlantafx.base.theme.Styles;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainLoader;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.modmenu.FontAwesomeIcons;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.util.Pair;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material2.Material2MZ;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -28,7 +35,7 @@ public class VideoConfigurationView implements Initializable {
 	private ComboBox<String> bgaExpand;
 
 	@FXML
-	private CheckBox vSync;
+	private ToggleSwitch vSync;
 
 	@FXML
 	private Spinner<Integer> maxFps;

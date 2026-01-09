@@ -158,6 +158,9 @@ dependencies {
 
     implementation(libs.javawebsocket)
     implementation(libs.bundles.slf4j)
+    implementation("io.github.mkpaz:atlantafx-base:2.0.0")
+    implementation("org.kordamp.ikonli:ikonli-javafx:12.4.0")
+    implementation("org.kordamp.ikonli:ikonli-material2-pack:12.4.0")
 
     // non-gradle managed file dependencies. jportaudio not on maven. "custom" scares me.
     implementation(":jportaudio")

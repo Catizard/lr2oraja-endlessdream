@@ -8,6 +8,9 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
+import atlantafx.base.theme.PrimerDark;
+import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.theme.Styles;
 import com.badlogic.gdx.scenes.scene2d.utils.UIUtils;
 import de.damios.guacamole.gdx.log.LoggerService;
 import javafx.application.Platform;
@@ -329,6 +332,8 @@ public class MainLoader extends Application {
 
 	@Override
 	public void start(javafx.stage.Stage primaryStage) throws Exception {
+		Application.setUserAgentStylesheet((new PrimerLight()).getUserAgentStylesheet());
+
         Config config;
         try {
             config = Config.read();
