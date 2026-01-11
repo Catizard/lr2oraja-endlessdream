@@ -80,7 +80,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	protected abstract T getKeySound(Path p);
 
-	protected abstract T getKeySound(SevenZArchiveContext ctx);
+	protected abstract T getKeySound(SevenZArchiveContext ctx, String fileName);
 
 	/**
 	 * PCMオブジェクトで指定されたキー音の音源データを取得する
@@ -264,10 +264,11 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		Path dpath = Paths.get(model.getPath()).getParent();
 		// Load all wav files from 'resource.7z' file
 		Path resourcePath = dpath.resolve("resource.7z");
-		File resourcePackage = resourcePath.toFile();
 		try {
-			SevenZFile sevenZFile = SevenZFile.builder().setFile(resourcePackage).get();
-			cache.setSevenZFile(resourcePath, sevenZFile);
+			SevenZArchiveContext ctx = SevenZArchiveContext.create(resourcePath);
+			if (ctx != null) {
+				cache.setCtx(ctx);
+			}
 		} catch (Exception e) {
 			logger.error("Failed to load resource package: ", e);
 		}
@@ -605,20 +606,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * Loading resource from archive file
 	 */
 	class ArchiveSourceAudioCache extends ResourcePool<AudioKey, T> {
-		private SevenZFile sevenZFile;
-		private List<SevenZArchiveEntry> entries;
-		private Path resourcePath;
+		private SevenZArchiveContext ctx;
 
 		public ArchiveSourceAudioCache(int maxgen) {
 			super(maxgen);
 		}
 
-		public void setSevenZFile(Path resourcePath, SevenZFile sevenZFile) {
-			this.sevenZFile = sevenZFile;
-			this.resourcePath = resourcePath;
-
-			entries = new ArrayList<>();
-			sevenZFile.getEntries().forEach(entries::add);
+		public void setCtx(SevenZArchiveContext ctx) {
+			this.ctx = ctx;
 		}
 
 		private ObjectMap<String, PCM> pcmMap = new ObjectMap<String, PCM>();
@@ -656,11 +651,11 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		protected T load(AudioKey key) {
 			logger.trace("音源ファイルを読み込む中：{}", key.path);
 
-			String fileName = FilenameUtils.removeExtension(new File(key.path).getName());
-			SevenZArchiveEntry entry = entries != null ? entries.stream().filter(e -> e.getName().startsWith(fileName)).findAny().orElse(null) : null;
+			String fileName = new File(key.path).getName();
+			boolean loadFromArchive = ctx != null && ctx.hasEntry(fileName);
 
 			T sound = key.start == 0 && key.duration == 0
-					? (entry != null ? getKeySound(new SevenZArchiveContext(resourcePath, sevenZFile, entry)) : getKeySound(Paths.get(key.path))) // 音切りなしのケース
+					? (loadFromArchive ? getKeySound(ctx, fileName) : getKeySound(Paths.get(key.path))) // 音切りなしのケース
 					: loadSlice(key);
 
 			if (sound == null) {

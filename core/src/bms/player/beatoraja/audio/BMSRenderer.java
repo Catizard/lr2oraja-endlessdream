@@ -281,8 +281,8 @@ public class BMSRenderer {
 		}
 
 		@Override
-		protected PCM getKeySound(SevenZArchiveContext ctx) {
-			return PCM.load(ctx, this);
+		protected PCM getKeySound(SevenZArchiveContext ctx, String fileName) {
+			return PCM.load(ctx, fileName, this);
 		}
 
 		@Override

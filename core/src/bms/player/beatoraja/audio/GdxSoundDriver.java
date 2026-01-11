@@ -1,24 +1,21 @@
 package bms.player.beatoraja.audio;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.file.*;
-import java.util.Locale;
-
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import bms.player.beatoraja.Config;
+import bms.tool.util.Pair;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
 
 /**
  * libGDX Sound(OpenAL)サウンドドライバ
@@ -63,8 +60,8 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	@Override
-	protected Sound getKeySound(SevenZArchiveContext ctx) {
-		return getKeySound(new ArchiveHandleStream(ctx));
+	protected Sound getKeySound(SevenZArchiveContext ctx, String fileName) {
+		return getKeySound(ArchiveHandleStream.create(ctx, fileName));
 	}
 
 	private Sound getKeySound(String name, String ext) {
@@ -294,36 +291,21 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	private static class ArchiveHandleStream extends FileHandleStream {
-		private SevenZArchiveContext ctx;
+		private final InputStream inputStream;
 
-		public ArchiveHandleStream(SevenZArchiveContext ctx) {
-			super(ctx.sevenZArchiveEntry().getName());
-			this.ctx = ctx;
+		private ArchiveHandleStream(String fileName, InputStream inputStream) {
+			super(fileName);
+			this.inputStream = inputStream;
+		}
+
+		public static ArchiveHandleStream create(SevenZArchiveContext ctx, String resourceName) {
+			Pair<String, InputStream> _p = ctx.getInputStream(resourceName);
+			return new ArchiveHandleStream(_p.getFirst(), _p.getSecond());
 		}
 
 		@Override
 		public InputStream read() {
-			// TODO: We cannot use sevenZArchiveEntry directly here because it's only a "snapshot" thing
-			//  Zip format supports random access (maybe)
-
-			// TODO: This synchronized is CRUCIAL. Reading a 7z file parallelly could cause the data read corrupted
-			//  and eventually Gdx.audio package would throw a checksum exception. However, such a giant lock is
-			//  causing extremely disastrous efficiency issue
-			synchronized (GdxSoundDriver.class) {
-				try {
-					SevenZFile sevenZFile = SevenZFile.builder().setFile(ctx.path().toFile()).get();
-					SevenZArchiveEntry entry;
-					while ((entry = sevenZFile.getNextEntry()) != null) {
-						if (entry.getName().equals(ctx.sevenZArchiveEntry().getName())) {
-							return sevenZFile.getInputStream(entry);
-						}
-					}
-					sevenZFile.close();
-				} catch (IOException e) {
-					logger.error("cannot open input stream inside archive: ", e);
-				}
-			}
-			return null;
+			return inputStream;
 		}
 	}
 	

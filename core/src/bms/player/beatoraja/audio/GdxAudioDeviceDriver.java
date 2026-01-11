@@ -19,7 +19,7 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 	}
 
 	@Override
-	protected Object getKeySound(SevenZArchiveContext ctx) {
+	protected Object getKeySound(SevenZArchiveContext ctx, String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

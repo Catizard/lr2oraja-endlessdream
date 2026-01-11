@@ -6,6 +6,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import bms.tool.util.Pair;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.slf4j.Logger;
@@ -76,10 +77,10 @@ public abstract class PCM<T> {
 		return null;
 	}
 
-	public static PCM load(SevenZArchiveContext ctx, AudioDriver driver) {
+	public static PCM load(SevenZArchiveContext ctx, String fileName, AudioDriver driver) {
 		try {
 			PCMLoader loader = new PCMLoader(driver);
-			loader.loadPCM(ctx);
+			loader.loadPCM(ctx, fileName);
 			return doLoad(loader, driver);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -200,20 +201,10 @@ public abstract class PCM<T> {
 			}
 		}
 
-		public void loadPCM(SevenZArchiveContext ctx) throws IOException {
-			// TODO: Reload file is a heavy cost
-			try (SevenZFile sevenZFile = SevenZFile.builder().setFile(ctx.path().toFile()).get()) {
-				SevenZArchiveEntry entry = null;
-				boolean find = false;
-				while ((entry = sevenZFile.getNextEntry()) != null) {
-					if (entry.getName().equals(ctx.sevenZArchiveEntry().getName())) {
-						find = true;
-						break;
-					}
-				}
-				if (find) {
-					loadPCM(sevenZFile.getInputStream(entry), entry.getName(), entry.getName());
-				}
+		public void loadPCM(SevenZArchiveContext ctx, String fileName) throws IOException {
+			if (ctx.hasEntry(fileName)) {
+				Pair<String, InputStream> _p = ctx.getInputStream(fileName);
+				loadPCM(_p.getSecond(), _p.getFirst(), _p.getFirst());
 			}
 		}
 
