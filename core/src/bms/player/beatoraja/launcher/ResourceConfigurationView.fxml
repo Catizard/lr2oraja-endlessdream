@@ -35,7 +35,7 @@
 		</Label>
 		<ListView fx:id="bmsroot"
 			onDragDropped="#songPathDragDropped" onDragOver="#onSongPathDragOver"
-			prefHeight="100.0" prefWidth="500.0" HBox.hgrow="ALWAYS" >
+			prefHeight="100.0" prefWidth="500.0" HBox.hgrow="ALWAYS" styleClass="striped">
 			<HBox.margin>
 				<Insets top="10.0" />
 			</HBox.margin>
@@ -86,7 +86,7 @@
 			</HBox>
 			<HBox VBox.vgrow="ALWAYS">
 				<EditableTableView fx:id="tableurl" prefHeight="167.0"
-					prefWidth="200.0" HBox.hgrow="ALWAYS" style="-fx-cell-size: -1px">
+					prefWidth="200.0" HBox.hgrow="ALWAYS" style="-fx-cell-size: -1px" styleClass="striped">
 					<HBox.margin>
 						<Insets top="5.0" />
 					</HBox.margin>
@@ -124,7 +124,7 @@
 					</Button>
 				</VBox>
                 <EditableTableView fx:id="available_tables" prefHeight="167.0"
-                                   prefWidth="200.0" HBox.hgrow="ALWAYS" style="-fx-cell-size: -1px">
+                                   prefWidth="200.0" HBox.hgrow="ALWAYS" style="-fx-cell-size: -1px" styleClass="striped">
                     <HBox.margin>
                         <Insets top="5.0" right="10.0" />
                     </HBox.margin>

@@ -2,6 +2,7 @@ package bms.player.beatoraja.launcher;
 
 import java.util.Arrays;
 
+import atlantafx.base.theme.Styles;
 import javafx.scene.control.TableView;
 
 /**

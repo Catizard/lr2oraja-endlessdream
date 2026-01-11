@@ -8,6 +8,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import bms.player.beatoraja.launcher.NumericSpinner?>
+<?import java.net.URL?>
 <VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.InputConfigurationView">
     <HBox prefHeight="23.0" prefWidth="740.0">
         <VBox.margin>
@@ -41,7 +42,7 @@
         <VBox.margin>
             <Insets left="10.0" top="10.0" />
         </VBox.margin>
-	    <TableView fx:id="controller_tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+	    <TableView fx:id="controller_tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" styleClass="striped, dense">
 			<columns>
 				<TableColumn fx:id="playsideCol" prefWidth="40.0" text="" />
 				<TableColumn fx:id="nameCol" prefWidth="185.0" text="" />
@@ -92,4 +93,7 @@
             </valueFactory>
         </NumericSpinner>
     </HBox>
+    <stylesheets>
+        <URL value="@LauncherStyle.css"/>
+    </stylesheets>
 </VBox>
