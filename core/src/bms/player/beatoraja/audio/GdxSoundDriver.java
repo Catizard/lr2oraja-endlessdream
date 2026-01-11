@@ -1,10 +1,15 @@
 package bms.player.beatoraja.audio;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.*;
 import java.util.Locale;
+
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +62,11 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		return null;		
 	}
 
+	@Override
+	protected Sound getKeySound(SevenZArchiveContext ctx) {
+		return getKeySound(new ArchiveHandleStream(ctx));
+	}
+
 	private Sound getKeySound(String name, String ext) {
 		switch (ext.toLowerCase(Locale.ROOT)) {
 			case ".wav":
@@ -74,7 +84,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		try {
 			return Gdx.audio.newSound(handle);
 		} catch (GdxRuntimeException e) {
-			logger.warn("音源ファイル読み込み失敗" + e.getMessage());
+			logger.error("音源ファイル読み込み失敗: ", e);
 		}
 		return null;
 	}
@@ -279,6 +289,40 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 		@Override
 		public OutputStream write(boolean overwrite) {
+			return null;
+		}
+	}
+
+	private static class ArchiveHandleStream extends FileHandleStream {
+		private SevenZArchiveContext ctx;
+
+		public ArchiveHandleStream(SevenZArchiveContext ctx) {
+			super(ctx.sevenZArchiveEntry().getName());
+			this.ctx = ctx;
+		}
+
+		@Override
+		public InputStream read() {
+			// TODO: We cannot use sevenZArchiveEntry directly here because it's only a "snapshot" thing
+			//  Zip format supports random access (maybe)
+
+			// TODO: This synchronized is CRUCIAL. Reading a 7z file parallelly could cause the data read corrupted
+			//  and eventually Gdx.audio package would throw a checksum exception. However, such a giant lock is
+			//  causing extremely disastrous efficiency issue
+			synchronized (GdxSoundDriver.class) {
+				try {
+					SevenZFile sevenZFile = SevenZFile.builder().setFile(ctx.path().toFile()).get();
+					SevenZArchiveEntry entry;
+					while ((entry = sevenZFile.getNextEntry()) != null) {
+						if (entry.getName().equals(ctx.sevenZArchiveEntry().getName())) {
+							return sevenZFile.getInputStream(entry);
+						}
+					}
+					sevenZFile.close();
+				} catch (IOException e) {
+					logger.error("cannot open input stream inside archive: ", e);
+				}
+			}
 			return null;
 		}
 	}

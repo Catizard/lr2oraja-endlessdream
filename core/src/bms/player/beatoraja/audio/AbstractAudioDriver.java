@@ -3,11 +3,16 @@ package bms.player.beatoraja.audio;
 import bms.model.*;
 import bms.player.beatoraja.ResourcePool;
 
+import java.io.File;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,14 +62,15 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * オーディオキャッシュデータ
 	 */
-	private final AudioCache cache;
+	private final ArchiveSourceAudioCache cache;
 	
 	private int sampleRate;
 	int channels;
 
 	public AbstractAudioDriver(int maxgen) {
-		cache = new AudioCache(Math.max(maxgen, 1));
+		cache = new ArchiveSourceAudioCache(Math.max(maxgen, 1));
 	}
+
 	/**
 	 * パスで指定された効果音ファイルの音源データを取得する
 	 * 
@@ -73,6 +79,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @return 音源データ
 	 */
 	protected abstract T getKeySound(Path p);
+
+	protected abstract T getKeySound(SevenZArchiveContext ctx);
 
 	/**
 	 * PCMオブジェクトで指定されたキー音の音源データを取得する
@@ -254,6 +262,15 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		noteMapSize = 0;
 		// BMS格納ディレクトリ
 		Path dpath = Paths.get(model.getPath()).getParent();
+		// Load all wav files from 'resource.7z' file
+		Path resourcePath = dpath.resolve("resource.7z");
+		File resourcePackage = resourcePath.toFile();
+		try {
+			SevenZFile sevenZFile = SevenZFile.builder().setFile(resourcePackage).get();
+			cache.setSevenZFile(resourcePath, sevenZFile);
+		} catch (Exception e) {
+			logger.error("Failed to load resource package: ", e);
+		}
 
 		if (model.getVolwav() > 0 && model.getVolwav() < 100) {
 			volume = model.getVolwav() / 100f;
@@ -584,58 +601,75 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 	}
 
-	class AudioCache extends ResourcePool<AudioKey, T> {
+	/**
+	 * Loading resource from archive file
+	 */
+	class ArchiveSourceAudioCache extends ResourcePool<AudioKey, T> {
+		private SevenZFile sevenZFile;
+		private List<SevenZArchiveEntry> entries;
+		private Path resourcePath;
 
-		public AudioCache(int maxgen) {
+		public ArchiveSourceAudioCache(int maxgen) {
 			super(maxgen);
+		}
+
+		public void setSevenZFile(Path resourcePath, SevenZFile sevenZFile) {
+			this.sevenZFile = sevenZFile;
+			this.resourcePath = resourcePath;
+
+			entries = new ArrayList<>();
+			sevenZFile.getEntries().forEach(entries::add);
 		}
 
 		private ObjectMap<String, PCM> pcmMap = new ObjectMap<String, PCM>();
 
 		private T loadSlice(AudioKey key) {
-            PCM wav = null;
-            synchronized(pcmMap) {
-                wav = pcmMap.get(key.path);
-                if (wav == null) {
-                    wav = PCM.load(key.path, AbstractAudioDriver.this);
-                    if(wav != null) {
-                        pcmMap.put(key.path, wav);
-                    }
-                }
-            }
+			PCM wav = null;
+			synchronized(pcmMap) {
+				wav = pcmMap.get(key.path);
+				if (wav == null) {
+					wav = PCM.load(key.path, AbstractAudioDriver.this);
+					if(wav != null) {
+						pcmMap.put(key.path, wav);
+					}
+				}
+			}
 
-            if (wav != null) {
-                try {
-                    final PCM slicewav = wav.slice(key.start, key.duration);
-                    return slicewav != null ? getKeySound(slicewav) : null;
-                    // System.out.println("WAV slicing - Name:"
-                    // + name + " ID:" + note.getWav() +
-                    // " start:" + note.getStarttime() +
-                    // " duration:" + note.getDuration());
-                } catch (Throwable e) {
+			if (wav != null) {
+				try {
+					final PCM slicewav = wav.slice(key.start, key.duration);
+					return slicewav != null ? getKeySound(slicewav) : null;
+					// System.out.println("WAV slicing - Name:"
+					// + name + " ID:" + note.getWav() +
+					// " start:" + note.getStarttime() +
+					// " duration:" + note.getDuration());
+				} catch (Throwable e) {
 					logger.warn("音源(wav)ファイルスライシング失敗。{}", e.getMessage());
-                    e.printStackTrace();
-                }
-            }
+					e.printStackTrace();
+				}
+			}
 
-            return null;
-        }
+			return null;
+		}
 
 		@Override
 		protected T load(AudioKey key) {
 			logger.trace("音源ファイルを読み込む中：{}", key.path);
 
-		    T sound = key.start == 0 && key.duration == 0
-                    ? getKeySound(Paths.get(key.path)) // 音切りなしのケース
-                    : loadSlice(key);
+			String fileName = FilenameUtils.removeExtension(new File(key.path).getName());
+			SevenZArchiveEntry entry = entries != null ? entries.stream().filter(e -> e.getName().startsWith(fileName)).findAny().orElse(null) : null;
 
-		    if (sound == null) {
+			T sound = key.start == 0 && key.duration == 0
+					? (entry != null ? getKeySound(new SevenZArchiveContext(resourcePath, sevenZFile, entry)) : getKeySound(Paths.get(key.path))) // 音切りなしのケース
+					: loadSlice(key);
+
+			if (sound == null) {
 				logger.warn("音源ファイル読み込み失敗：{}", key.path);
-            }
+			}
 			return sound;
 		}
 
-		
+
 		@Override
 		public synchronized void disposeOld() {
 			pcmMap.clear();

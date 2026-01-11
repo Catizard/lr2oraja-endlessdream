@@ -1,6 +1,8 @@
 package bms.player.beatoraja.audio;
 
 import bms.player.beatoraja.Config;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 
 import java.nio.file.Path;
 
@@ -12,6 +14,12 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 
 	@Override
 	protected Object getKeySound(Path p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected Object getKeySound(SevenZArchiveContext ctx) {
 		// TODO Auto-generated method stub
 		return null;
 	}
