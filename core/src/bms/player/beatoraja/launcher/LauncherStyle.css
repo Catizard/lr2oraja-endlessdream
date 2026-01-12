@@ -14,10 +14,11 @@
 
 .optionHeader {
     -fx-graphic-text-gap: 8px;
+    -fx-font-size: 16px;
 }
 
 .optionLabel {
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
 }
 
 .list-view .list-cell {

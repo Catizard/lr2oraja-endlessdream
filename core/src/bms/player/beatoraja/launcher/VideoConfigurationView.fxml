@@ -14,7 +14,7 @@
     <!--    <GridPane styleClass="optionGrid">-->
     <VBox minWidth="500" styleClass="optionOuterBox" spacing="2">
 
-        <Label styleClass="optionHeader, accent, title-1" text="%DISPLAY">
+        <Label styleClass="accent, title-1, optionHeader" text="%DISPLAY">
             <graphic>
                 <FontIcon iconLiteral="mdal-computer"/>
             </graphic>
@@ -55,7 +55,7 @@
             </action>
         </Tile>
 
-        <Label styleClass="optionHeader, accent, title-1" text="%BGA">
+        <Label styleClass="accent, title-1, optionHeader" text="%BGA">
             <graphic>
                 <FontIcon iconLiteral="mdmz-video_settings"/>
             </graphic>
