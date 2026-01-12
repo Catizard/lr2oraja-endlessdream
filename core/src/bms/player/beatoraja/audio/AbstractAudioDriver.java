@@ -9,10 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,13 +58,13 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * オーディオキャッシュデータ
 	 */
-	private final ArchiveSourceAudioCache cache;
+	private final AudioCache cache;
 	
 	private int sampleRate;
 	int channels;
 
 	public AbstractAudioDriver(int maxgen) {
-		cache = new ArchiveSourceAudioCache(Math.max(maxgen, 1));
+		cache = new AudioCache(Math.max(maxgen, 1));
 	}
 
 	/**
@@ -80,6 +76,12 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	protected abstract T getKeySound(Path p);
 
+	/**
+	 * Load a specified sound file from a 7z archive file
+	 *
+	 * @param ctx 7z file context
+	 * @param fileName sound file name (can have arbitrary extension name)
+	 */
 	protected abstract T getKeySound(SevenZArchiveContext ctx, String fileName);
 
 	/**
@@ -262,7 +264,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		noteMapSize = 0;
 		// BMS格納ディレクトリ
 		Path dpath = Paths.get(model.getPath()).getParent();
-		// Load all wav files from 'resource.7z' file
+		// NOTE: Load all files from 'resource.7z' file. The file name is forced to be hard-coded, apparently we don't
+		//  want to load any archive files from disk :)
 		Path resourcePath = dpath.resolve("resource.7z");
 		try {
 			SevenZArchiveContext ctx = SevenZArchiveContext.create(resourcePath);
@@ -602,13 +605,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 	}
 
-	/**
-	 * Loading resource from archive file
-	 */
-	class ArchiveSourceAudioCache extends ResourcePool<AudioKey, T> {
+	class AudioCache extends ResourcePool<AudioKey, T> {
 		private SevenZArchiveContext ctx;
 
-		public ArchiveSourceAudioCache(int maxgen) {
+		public AudioCache(int maxgen) {
 			super(maxgen);
 		}
 
@@ -663,7 +663,6 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			}
 			return sound;
 		}
-
 
 		@Override
 		public synchronized void disposeOld() {

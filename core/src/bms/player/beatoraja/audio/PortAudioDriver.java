@@ -5,8 +5,6 @@ import java.nio.file.*;
 
 import com.portaudio.*;
 import bms.player.beatoraja.Config;
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 
 /**
  * PortAudioドライバ

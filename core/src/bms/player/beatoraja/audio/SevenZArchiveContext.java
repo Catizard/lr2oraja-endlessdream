@@ -3,7 +3,6 @@ package bms.player.beatoraja.audio;
 import bms.tool.util.Pair;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.ByteArrayInputStream;
@@ -16,10 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * SevenZArchiveContext loads a 7z archive file eagerly because 7z file is forcing to be read sequentially.
+ *
+ * @implNote All the query functions must match the filename without extension. This is because the parameter passed
+ *  to here are normally ends with '.wav', while the actual file provided in archive file can be .wav, .ogg, .walc so
+ *  we have to compare then without extension name.
  */
 public class SevenZArchiveContext {
-	private Path path;
-	private String name;
 	/**
 	 * file name(with extension name) => input stream
 	 */
@@ -52,13 +53,5 @@ public class SevenZArchiveContext {
 
 	public boolean hasEntry(String fileName) {
 		return data.entrySet().stream().anyMatch(entry -> FilenameUtils.removeExtension(entry.getKey()).equals(FilenameUtils.removeExtension(fileName)));
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public Path getPath() {
-		return path;
 	}
 }
