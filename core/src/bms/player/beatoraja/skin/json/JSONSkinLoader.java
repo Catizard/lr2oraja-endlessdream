@@ -33,8 +33,8 @@ public class JSONSkinLoader extends SkinLoader {
 
 	protected JsonSkin.Skin sk;
 
-	Map<String, SourceData> sourceMap;
-	Map<String, SkinTextBitmap.SkinTextBitmapSource> bitmapSourceMap;
+	protected Map<String, SourceData> sourceMap;
+	protected Map<String, SkinTextBitmap.SkinTextBitmapSource> bitmapSourceMap;
 
 	protected final SkinLuaAccessor lua;
 
@@ -44,7 +44,7 @@ public class JSONSkinLoader extends SkinLoader {
 
 	private JsonSkinObjectLoader<?> objectLoader;
 	
-	protected static class SourceData {
+	public static class SourceData {
 		public final String path;
 		public boolean loaded = false;
 		public Object data;
@@ -513,5 +513,9 @@ public class JSONSkinLoader extends SkinLoader {
 
 	private Texture getTexture(String path) {
 		return getTexture(path, usecim);
+	}
+
+	public Map<String, SourceData> getSourceMap() {
+		return sourceMap;
 	}
 }

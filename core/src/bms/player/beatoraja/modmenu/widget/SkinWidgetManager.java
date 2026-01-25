@@ -5,7 +5,9 @@ import bms.player.beatoraja.modmenu.widget.SkinWidgetDestination.MovingState;
 import bms.player.beatoraja.modmenu.widget.form.AddSkinWidgetForm;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.json.JsonSkin;
+import bms.tool.util.Pair;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Clipboard;
 import com.badlogic.gdx.math.Rectangle;
@@ -22,10 +24,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -356,7 +355,7 @@ public class SkinWidgetManager {
             return ;
         }
         if (ImGui.treeNodeEx("Font##SkinResources", ImGuiTreeNodeFlags.DefaultOpen)) {
-            if (ImGui.beginTable("FontTable##SkinResources", 1, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY)) {
+            if (ImGui.beginTable("FontTable##SkinResources", 1, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, 0F, 120F)) {
                 ImGui.tableSetupColumn("Name");
                 ImGui.tableHeadersRow();
                 for (JsonSkin.Font font : currentSkinResources.skinFonts()) {
@@ -364,6 +363,27 @@ public class SkinWidgetManager {
                     ImGui.tableSetColumnIndex(0);
                     ImGui.text(font.id);
                 }
+                ImGui.endTable();
+            }
+            ImGui.treePop();
+        }
+        if (ImGui.treeNodeEx("Image Source##SkinResources", ImGuiTreeNodeFlags.DefaultOpen)) {
+            if (ImGui.beginTable("ImageSourceTable##SkinResources", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, 0F, 240F)) {
+                ImGui.tableSetupColumn("Id");
+                ImGui.tableSetupColumn("Path");
+                ImGui.tableHeadersRow();
+                Map<String, JSONSkinLoader.SourceData> sourceMap = currentSkinResources.skinLoader().getSourceMap();
+                List<Pair<String, JSONSkinLoader.SourceData>> sources = sourceMap.entrySet().stream()
+                        .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
+                        .sorted(Comparator.comparing(Pair::getFirst))
+                        .toList();
+                sources.forEach(imageSource -> {
+                    ImGui.tableNextRow();
+                    ImGui.tableSetColumnIndex(0);
+                    ImGui.text(imageSource.getFirst());
+                    ImGui.tableSetColumnIndex(1);
+                    ImGui.text(imageSource.getSecond().path);
+                });
                 ImGui.endTable();
             }
             ImGui.treePop();
