@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 public class AddSkinWidgetForm {
 	public enum SkinWidgetType {
 		Text(false),
-		Image(true),
+		Image(false),
 		Float(true),
 		Number(false);
 

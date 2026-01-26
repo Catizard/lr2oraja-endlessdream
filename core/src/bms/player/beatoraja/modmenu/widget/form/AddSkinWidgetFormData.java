@@ -19,6 +19,7 @@ public abstract class AddSkinWidgetFormData {
 	public static AddSkinWidgetFormData createFormData(AddSkinWidgetForm.SkinWidgetType widgetType, SkinResources resources) {
 		return switch (widgetType) {
 			case Text -> new TextSkinWidgetFormData(resources);
+			case Image -> new ImageSkinWidgetFormData(resources);
 			default -> null;
 		};
 	}

@@ -372,12 +372,7 @@ public class SkinWidgetManager {
                 ImGui.tableSetupColumn("Id");
                 ImGui.tableSetupColumn("Path");
                 ImGui.tableHeadersRow();
-                Map<String, JSONSkinLoader.SourceData> sourceMap = currentSkinResources.skinLoader().getSourceMap();
-                List<Pair<String, JSONSkinLoader.SourceData>> sources = sourceMap.entrySet().stream()
-                        .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
-                        .sorted(Comparator.comparing(Pair::getFirst))
-                        .toList();
-                sources.forEach(imageSource -> {
+                currentSkinResources.imageSources().forEach(imageSource -> {
                     ImGui.tableNextRow();
                     ImGui.tableSetColumnIndex(0);
                     ImGui.text(imageSource.getFirst());

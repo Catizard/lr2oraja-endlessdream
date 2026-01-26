@@ -619,7 +619,7 @@ public abstract class JsonSkinObjectLoader<S extends Skin> {
 		return noteimages;
 	}
 
-	protected TextureRegion[] getSourceImage(Texture image, int x, int y, int w, int h, int divx, int divy) {
+	public TextureRegion[] getSourceImage(Texture image, int x, int y, int w, int h, int divx, int divy) {
 		if (w == -1) {
 			w = image.getWidth();
 		}
