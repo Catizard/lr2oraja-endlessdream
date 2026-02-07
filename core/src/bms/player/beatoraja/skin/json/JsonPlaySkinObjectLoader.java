@@ -90,6 +90,8 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 				region[i] = new Rectangle(dest.x * dx, dest.y * dy, dest.w * dx, dest.h * dy);
 				if(i < sk.note.size.length) {
 					scale[i] = sk.note.size[i] * dy;
+				} else if (sk.note.heightScale != 1.0F) {
+					scale[i] = ((SkinSourceImage)notes[i]).getImages()[0].getRegionHeight() * sk.note.heightScale;
 				} else {
 					scale[i] = ((SkinSourceImage)notes[i]).getImages()[0].getRegionHeight() * dy;
 				}
@@ -232,6 +234,12 @@ public class JsonPlaySkinObjectLoader extends JsonSkinObjectLoader<PlaySkin> {
 								images[i] = new SkinImage(
 										getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle);
+								if (judge.images[i].dst[0].w == -1) {
+									judge.images[i].dst[0].w = tex.getWidth() / 2;
+								}
+								if (judge.images[i].dst[0].h == -1) {
+									judge.images[i].dst[0].h = tex.getHeight() / 2;
+								}
 								setDestination(skin, images[i], judge.images[i]);											
 							}
 							break;

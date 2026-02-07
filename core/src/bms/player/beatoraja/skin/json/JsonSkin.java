@@ -350,6 +350,7 @@ public class JsonSkin {
 		public int dst2 = Integer.MIN_VALUE;
 		public int[] expansionrate = {100,100};
 		public float[] size = new float[0];
+		public float heightScale = 1.0F;
 		public Destination[] group = new Destination[0];
 		public Destination[] bpm = new Destination[0];
 		public Destination[] stop = new Destination[0];

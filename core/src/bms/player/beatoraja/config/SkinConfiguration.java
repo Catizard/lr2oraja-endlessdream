@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Locale;
 import java.util.stream.Stream;
 
 /**
@@ -496,7 +498,8 @@ public class SkinConfiguration extends MainState {
 			}
 		} else if (path.getFileName().toString().toLowerCase().endsWith(".lr2skin")
 				|| path.getFileName().toString().toLowerCase().endsWith(".luaskin")
-				|| path.getFileName().toString().toLowerCase().endsWith(".json")) {
+				|| path.getFileName().toString().toLowerCase().endsWith(".json")
+				|| path.getFileName().toString().endsWith("skin.ini")) {
 			paths.add(path);
 		}
 	}

@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;
+import bms.player.beatoraja.skin.osu.OSUSkinLoader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.utils.Array;
@@ -59,6 +60,11 @@ public abstract class SkinLoader {
                 return skin;
             } else if (sc.getPath().endsWith(".luaskin")) {
                 LuaSkinLoader loader = new LuaSkinLoader(state, resource.getConfig());
+                Skin skin = loader.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
+                SkinLoader.resource.disposeOld();
+                return skin;
+            } else if (sc.getPath().endsWith("skin.ini")) {
+                OSUSkinLoader loader = new OSUSkinLoader(state, resource.getConfig());
                 Skin skin = loader.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
                 SkinLoader.resource.disposeOld();
                 return skin;

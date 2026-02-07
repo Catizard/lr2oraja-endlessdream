@@ -14,6 +14,7 @@ import bms.player.beatoraja.skin.SkinHeader.*;
 import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;
+import bms.player.beatoraja.skin.osu.OSUSkinLoader;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -189,6 +190,12 @@ public class SkinConfigurationView implements Initializable {
 				if (header != null) {
 					skinheader.add(header);
 				}
+			} else if (pathString.endsWith("skin.ini")) {
+				OSUSkinLoader loader = new OSUSkinLoader();
+				SkinHeader header = loader.loadHeader(path);
+				if (header != null) {
+					skinheader.add(header);
+				}
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader(config);
 				try {
@@ -228,7 +235,8 @@ public class SkinConfigurationView implements Initializable {
 			}
 		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")
 				|| p.getFileName().toString().toLowerCase().endsWith(".luaskin")
-				|| p.getFileName().toString().toLowerCase().endsWith(".json")) {
+				|| p.getFileName().toString().toLowerCase().endsWith(".json")
+				|| p.getFileName().toString().endsWith("skin.ini")) {
 			paths.add(p);
 		}
 	}
@@ -488,7 +496,17 @@ public class SkinConfigurationView implements Initializable {
 		@Override
 		protected void updateItem(SkinHeader arg0, boolean arg1) {
 			super.updateItem(arg0, arg1);
-			setText(arg0 != null ? arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)") : "");
+			if (arg0 == null) {
+				setText("");
+				return ;
+			}
+
+			String ext = switch(arg0.getType()) {
+				case SkinHeader.TYPE_LR2SKIN -> "(LR2 Skin)";
+				case SkinHeader.TYPE_OSU ->  "(OSU Skin)";
+				default -> "";
+			};
+			setText(arg0.getName() + ext);
 		}
 	}
 }

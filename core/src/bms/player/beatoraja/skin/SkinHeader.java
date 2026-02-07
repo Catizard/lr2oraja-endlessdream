@@ -29,6 +29,10 @@ public class SkinHeader {
 	 */
 	public static final int TYPE_BEATORJASKIN = 1;
 	/**
+	 * Skin Type: Osu
+	 */
+	public static final int TYPE_OSU = 2;
+	/**
 	 * スキンファイルのパス
 	 */
 	private Path path;
