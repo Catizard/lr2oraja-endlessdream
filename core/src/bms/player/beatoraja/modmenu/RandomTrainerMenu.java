@@ -22,11 +22,7 @@ public class RandomTrainerMenu {
 
 
     public static void show(ImBoolean showRandomTrainer) {
-        float relativeX = windowWidth * 0.455f;
-        float relativeY = windowHeight * 0.04f;
-        ImGui.setNextWindowPos(relativeX, relativeY, ImGuiCond.FirstUseEver);
-
-        if(ImGui.begin("Random Trainer", showRandomTrainer, ImGuiWindowFlags.AlwaysAutoResize)) {
+//        if(ImGui.begin("Random Trainer", showRandomTrainer, ImGuiWindowFlags.AlwaysAutoResize)) {
             // Update key display when tracking random
             if (TRACK_RAN_WHEN_DISABLED.get() && !RandomTrainer.getRandomHistory().isEmpty()) {
                 String lastRan = RandomTrainer.getRandomHistory().getFirst().getRandom();
@@ -80,8 +76,8 @@ public class RandomTrainerMenu {
                     RandomTrainer.setLaneOrder(currentUILaneOrder);
                 }
             }
-        }
-        ImGui.end();
+//        }
+//        ImGui.end();
     }
 
     private static void randomHistory() {

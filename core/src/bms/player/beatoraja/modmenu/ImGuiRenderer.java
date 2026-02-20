@@ -3,6 +3,7 @@ package bms.player.beatoraja.modmenu;
 import bms.player.beatoraja.Version;
 import bms.player.beatoraja.controller.Lwjgl3ControllerManager;
 
+import bms.player.beatoraja.modmenu.setting.ModMenuOverlay;
 import bms.player.beatoraja.modmenu.setting.SettingMenu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -123,60 +124,64 @@ public class ImGuiRenderer {
         }
 
         if (SHOW_MOD_MENU.get()) {
-            ImGui.begin("Endless Dream", ImGuiWindowFlags.AlwaysAutoResize);
-
-            ImGui.checkbox("Show Rate Modifier Window", SHOW_FREQ_PLUS);
-            ImGui.checkbox("Show Random Trainer Window", SHOW_RANDOM_TRAINER);
-            ImGui.checkbox("Show Judge Trainer Window", SHOW_JUDGE_TRAINER);
-            if (ImGui.checkbox("Show Skin Configuration Window", SHOW_SKIN_MENU)) { SkinMenu.invalidate(); }
-            ImGui.checkbox("Show Skin Widget Manager Window", SHOW_SKIN_WIDGET_MANAGER);
-            ImGui.checkbox("Show Download Tasks Window", SHOW_DOWNLOAD_MENU);
-            if (ImGui.checkbox("Show Performance Monitor Window", SHOW_PERFORMANCE_MONITOR) &&
-                SHOW_PERFORMANCE_MONITOR.get()) {
-                PerformanceMonitor.reloadEventTree();
-            }
-            ImGui.checkbox("Show Misc Setting Window", SHOW_MISC_SETTING);
-
-            if (SHOW_FREQ_PLUS.get()) {
-                FreqTrainerMenu.show(SHOW_FREQ_PLUS);
-            }
-            if (SHOW_RANDOM_TRAINER.get()) {
-                RandomTrainerMenu.show(SHOW_RANDOM_TRAINER);
-            }
-            if (SHOW_JUDGE_TRAINER.get()) {
-                JudgeTrainerMenu.show(SHOW_JUDGE_TRAINER);
-            }
-            // TODO: This menu should based on config. Should not be rendered if user doesn't flag the http download feature
-            if (SHOW_DOWNLOAD_MENU.get()) {
-                DownloadTaskMenu.show(SHOW_DOWNLOAD_MENU);
-            }
-            if (SHOW_SKIN_WIDGET_MANAGER.get()) {
-                SkinWidgetManager.focus = true;
-                SkinWidgetManager.show(SHOW_SKIN_WIDGET_MANAGER);
-            } else {
-                SkinWidgetManager.focus = false;
-            }
-            if (SHOW_PERFORMANCE_MONITOR.get()) {
-                PerformanceMonitor.show(SHOW_PERFORMANCE_MONITOR);
-            }
-            if (SHOW_SKIN_MENU.get()) {
-                SkinMenu.show(SHOW_SKIN_MENU);
-            }
-            if (SHOW_MISC_SETTING.get()) {
-                MiscSettingMenu.show(SHOW_MISC_SETTING);
-            }
-
-            if (ImGui.treeNode("Endless Dream Debug Information")) {
-                float axis;
-
-                for (Controller con : manager.getControllers()) {
-                    ImGui.text("Controller Name: " + con.getName());
-                    ImGui.text("Axis: " + con.getAxis(0));
-                }
-                ImGui.treePop();
-            }
-            ImGui.end();
+            ModMenuOverlay.show(SHOW_MOD_MENU);
         }
+
+//        if (SHOW_MOD_MENU.get()) {
+//            ImGui.begin("Endless Dream", ImGuiWindowFlags.AlwaysAutoResize);
+//
+//            ImGui.checkbox("Show Rate Modifier Window", SHOW_FREQ_PLUS);
+//            ImGui.checkbox("Show Random Trainer Window", SHOW_RANDOM_TRAINER);
+//            ImGui.checkbox("Show Judge Trainer Window", SHOW_JUDGE_TRAINER);
+//            if (ImGui.checkbox("Show Skin Configuration Window", SHOW_SKIN_MENU)) { SkinMenu.invalidate(); }
+//            ImGui.checkbox("Show Skin Widget Manager Window", SHOW_SKIN_WIDGET_MANAGER);
+//            ImGui.checkbox("Show Download Tasks Window", SHOW_DOWNLOAD_MENU);
+//            if (ImGui.checkbox("Show Performance Monitor Window", SHOW_PERFORMANCE_MONITOR) &&
+//                SHOW_PERFORMANCE_MONITOR.get()) {
+//                PerformanceMonitor.reloadEventTree();
+//            }
+//            ImGui.checkbox("Show Misc Setting Window", SHOW_MISC_SETTING);
+//
+//            if (SHOW_FREQ_PLUS.get()) {
+//                FreqTrainerMenu.show(SHOW_FREQ_PLUS);
+//            }
+//            if (SHOW_RANDOM_TRAINER.get()) {
+//                RandomTrainerMenu.show(SHOW_RANDOM_TRAINER);
+//            }
+//            if (SHOW_JUDGE_TRAINER.get()) {
+//                JudgeTrainerMenu.show(SHOW_JUDGE_TRAINER);
+//            }
+//            // TODO: This menu should based on config. Should not be rendered if user doesn't flag the http download feature
+//            if (SHOW_DOWNLOAD_MENU.get()) {
+//                DownloadTaskMenu.show(SHOW_DOWNLOAD_MENU);
+//            }
+//            if (SHOW_SKIN_WIDGET_MANAGER.get()) {
+//                SkinWidgetManager.focus = true;
+//                SkinWidgetManager.show(SHOW_SKIN_WIDGET_MANAGER);
+//            } else {
+//                SkinWidgetManager.focus = false;
+//            }
+//            if (SHOW_PERFORMANCE_MONITOR.get()) {
+//                PerformanceMonitor.show(SHOW_PERFORMANCE_MONITOR);
+//            }
+//            if (SHOW_SKIN_MENU.get()) {
+//                SkinMenu.show(SHOW_SKIN_MENU);
+//            }
+//            if (SHOW_MISC_SETTING.get()) {
+//                MiscSettingMenu.show(SHOW_MISC_SETTING);
+//            }
+//
+//            if (ImGui.treeNode("Endless Dream Debug Information")) {
+//                float axis;
+//
+//                for (Controller con : manager.getControllers()) {
+//                    ImGui.text("Controller Name: " + con.getName());
+//                    ImGui.text("Axis: " + con.getAxis(0));
+//                }
+//                ImGui.treePop();
+//            }
+//            ImGui.end();
+//        }
 
         ImGuiNotify.renderNotifications();
     }

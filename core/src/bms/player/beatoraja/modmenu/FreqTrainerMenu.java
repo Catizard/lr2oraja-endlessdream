@@ -19,11 +19,7 @@ public class FreqTrainerMenu {
     private static List<Integer> buttonVals = Arrays.asList(-10, -5, -1, 100, 1, 5, 10);
 
     public static void show(ImBoolean showFreqTrainer) {
-        float relativeX = windowWidth * 0.47f;
-        float relativeY = windowHeight * 0.06f;
-        ImGui.setNextWindowPos(relativeX, relativeY, ImGuiCond.FirstUseEver);
-
-        if(ImGui.begin("Rate Modifier", showFreqTrainer, ImGuiWindowFlags.AlwaysAutoResize)) {
+//        if(ImGui.begin("Rate Modifier", showFreqTrainer, ImGuiWindowFlags.AlwaysAutoResize)) {
             ImGui.text("Modifies the chart playback rate to be faster or");
             ImGui.text("slower by a given percent.");
 
@@ -52,8 +48,9 @@ public class FreqTrainerMenu {
             helpMarker("When enabled positive rate scores will save locally, however scores will not submit to IR and result lamp will always be NO PLAY.");
 
             freq[0] = clamp(freq[0]);
-        }
-        ImGui.end();
+            ImGui.unindent();
+//        }
+//        ImGui.end();
     }
 
     private static int clamp(int result) {
