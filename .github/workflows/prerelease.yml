@@ -3,7 +3,7 @@ name: "pre-release"
 on:
   push:
     branches:
-      - "main"
+      - "prerelease/lr2_skin_loader"
 
 permissions:
   id-token: "write"
