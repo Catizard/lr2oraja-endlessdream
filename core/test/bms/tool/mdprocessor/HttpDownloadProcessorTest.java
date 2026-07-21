@@ -26,8 +26,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @WireMockTest(httpPort = 11177)
-public class HttpDownloadProcessorTest {
+public abstract class HttpDownloadProcessorTest {
 	private static String apiPrefix = "http://127.0.0.1:11177/";
+	private static String apiPattern = "http://127.0.0.1:11177/%s";
 	private final Logger logger = LoggerFactory.getLogger(HttpDownloadProcessorTest.class);
 	private static Consumer<String> emptyHook = (dir) -> {
 	};
@@ -137,6 +138,52 @@ public class HttpDownloadProcessorTest {
 			assertEquals(DownloadTask.DownloadTaskStatus.Error, any.get().getDownloadTaskStatus(), "Task status is not error");
 		}
 	}
+
+	@Nested
+	@DisplayName("Custom download source | No switch")
+	class CustomDownloadSourceTest {
+		private HttpDownloadProcessor downloadProcessor;
+
+		@BeforeEach
+		void setUp() throws IOException {
+			stubFor(get(urlPathEqualTo("/existed"))
+					.willReturn(aResponse()
+							.withStatus(200)
+							.withHeader("Content-Type", "application/octet-stream")
+							.withBody(loadTestArchieves("foo.7z"))));
+			stubFor(get(urlPathEqualTo("/notExisted"))
+					.willReturn(aResponse()
+							.withStatus(404)
+							.withBody("Not Found")));
+
+			CustomDownloadSource downloadSource = new CustomDownloadSource(apiPattern);
+
+			Map<String, HttpDownloadSource> downloadSources = new HashMap<>();
+			downloadSources.put(downloadSource.getName(), downloadSource);
+			downloadProcessor = new HttpDownloadProcessor(
+					emptyHook,
+					tempDir.toString(),
+					downloadSource,
+					downloadSources,
+					DummyHandler
+			);
+		}
+
+		@Test
+		void override() throws InterruptedException {
+			downloadProcessor.submitMD5Task("existed", "task name");
+			Map<Integer, DownloadTask> tasksSnapshotAfterSubmitting = downloadProcessor.getAllTasks();
+			assertEquals(1, tasksSnapshotAfterSubmitting.size(), "tasks size is not 1 after submitting");
+			loopUntilEveryTaskEnded(downloadProcessor);
+
+			Collection<DownloadTask> snapshots = downloadProcessor.getAllTasks().values();
+			Optional<DownloadTask> any = snapshots.stream().findAny();
+			assertTrue(any.isPresent());
+			assertEquals(DownloadTask.DownloadTaskStatus.Extracted, any.get().getDownloadTaskStatus(), "Task status is not extracted");
+			assertTrue(Files.exists(tempDir.resolve("foo/foo.bms")));
+		}
+	}
+
 
 	private static byte[] loadTestArchieves(String fileName) throws IOException {
 		try (InputStream in = HttpDownloadProcessorTest.class.getClassLoader().getResourceAsStream(fileName)) {

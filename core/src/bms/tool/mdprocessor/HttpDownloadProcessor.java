@@ -48,12 +48,12 @@ public class HttpDownloadProcessor {
         // Ginger
         HttpDownloadSourceMeta gingerDownloadSourceMeta = GingerDownloadSource.META;
         DOWNLOAD_SOURCES.put(gingerDownloadSourceMeta.getName(), gingerDownloadSourceMeta);
-        // Wriggle
-        HttpDownloadSourceMeta wriggleDownloadSourceMeta = WriggleDownloadSource.META;
-        DOWNLOAD_SOURCES.put(wriggleDownloadSourceMeta.getName(), wriggleDownloadSourceMeta);
         // Konmai
         HttpDownloadSourceMeta konmaiDownloadSourceMeta = KonmaiDownloadSource.META;
         DOWNLOAD_SOURCES.put(konmaiDownloadSourceMeta.getName(), konmaiDownloadSourceMeta);
+        // Custom
+        HttpDownloadSourceMeta customDownloadSourceMeta = CustomDownloadSource.META;
+        DOWNLOAD_SOURCES.put(customDownloadSourceMeta.getName(), customDownloadSourceMeta);
     }
 
     // id => task
